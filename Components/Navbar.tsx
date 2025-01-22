@@ -1,7 +1,7 @@
 'use client'
 import { Icon } from "@iconify/react";
 
-const Navbar: React.FC<> = () => {
+export default function Navbar() {
     return(
         <>
             <div className="flex justify-around bg-white w-screen h-20 rounded-b-xl drop-shadow-lg">
@@ -28,4 +28,3 @@ const Navbar: React.FC<> = () => {
         </>
     )
 }
-export default Navbar

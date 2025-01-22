@@ -3,7 +3,11 @@ import {Chart ,ArcElement, Legend} from "chart.js";
 
 Chart.register(ArcElement);
 
-const DonutGraph: React.FC<> = () =>  {
+interface Donut {
+    waitforback:any
+}
+
+const DonutGraph: React.FC<{donut:Donut}> = () =>  {
 
     const data = {
         labels: ["โปรตีน", "คาร์โบไฮเดรต", "วิตามิน", "ไขมัน", "โซเดียม", "ฟอสฟอรัส", "โพแทสเซียม", "น้ำ"],

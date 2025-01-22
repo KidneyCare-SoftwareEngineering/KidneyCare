@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 
-const FoodDetail2: React.FC<> = ({setStatePage}) =>{
+const FoodDetail2: React.FC<{information:any, setStatePage:any}> = ({setStatePage}) =>{
     return(
         <>
             <div className="flex w-11/12 min-h-16 rounded-xl bg-sec mt-4 ">

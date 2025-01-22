@@ -1,6 +1,7 @@
 import { Icon } from "@iconify/react/dist/iconify.js"
 
-const SearchBox: React.FC<> = () => {
+
+export default function SearchBox() {
     return(
         <>
             <div className="flex justify-center items-center w-full gap-4 px-5">
@@ -24,4 +25,3 @@ const SearchBox: React.FC<> = () => {
         </>
     )
 }
-export default SearchBox
