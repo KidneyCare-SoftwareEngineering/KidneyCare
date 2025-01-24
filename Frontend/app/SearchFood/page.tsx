@@ -15,11 +15,14 @@ const foodData = [
     sodium: 4,
     phosphorus: 4,
     potassium: 4,
-    imageUrl: "https://picsum.photos/200"
+    ingredient:{
+      
+    },
+    imageUrl: "https://i.ibb.co/7XbLcFh/IMG.png"
   },
   {
     id: 2,
-    name: "ข้าวมันไก่",
+    name: "ผัดผัก",
     calories: 200,
     protein: 20,
     carbs: 25,
@@ -27,11 +30,11 @@ const foodData = [
     sodium: 10,
     phosphorus: 5,
     potassium: 5,
-    imageUrl: "https://picsum.photos/201"
+    imageUrl: "https://i.ibb.co/K2T8yKy/IMG2.png"
   },
   {
     id: 3,
-    name: "ข้าวมันไก่",
+    name: "ข้าวซอยไก่",
     calories: 200,
     protein: 20,
     carbs: 25,
@@ -39,19 +42,7 @@ const foodData = [
     sodium: 10,
     phosphorus: 5,
     potassium: 5,
-    imageUrl: "https://picsum.photos/201"
-  },
-  {
-    id: 4,
-    name: "ข้าวมันไก่",
-    calories: 200,
-    protein: 20,
-    carbs: 25,
-    fat: 6,
-    sodium: 10,
-    phosphorus: 5,
-    potassium: 5,
-    imageUrl: "https://picsum.photos/201"
+    imageUrl: "https://i.ibb.co/FwJJN0W/IMG3.png"
   },
 ]
 
