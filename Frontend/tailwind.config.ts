@@ -33,6 +33,11 @@ export default {
         orange400: "#CD6525",
         grey300: "#999999"
       },
+      
+      fontFamily: {
+        sans: ['Sarabun', 'sans-serif'], // เพิ่มฟอนต์ Sarabun
+      },
+      
     },
   },
   plugins: [],
