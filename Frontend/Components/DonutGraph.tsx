@@ -1,4 +1,4 @@
-import { Doughnut } from "react-chartjs-2";
+// import { Doughnut } from "react-chartjs-2";
 import {Chart ,ArcElement, Legend} from "chart.js";
 
 Chart.register(ArcElement);
@@ -39,7 +39,7 @@ const DonutGraph: React.FC<{donut:Donut}> = () =>  {
 
         <div className="flex w-full h-fit bg-white mt-2 px-3 justify-center items-center">
             <div className="relative w-44 h-44">
-                <Doughnut data={data} options={options} />
+                {/* <Doughnut data={data} options={options} /> */}
                 <div className="absolute top-1/2 left-1/2  transform -translate-x-1/2 -translate-y-1/2 text-center animate-fadeIn ">
                     <p className="m-0 text-body1 font-bold">354</p>
                     <p className="m-0 text-body1">แคลอรี่</p>
