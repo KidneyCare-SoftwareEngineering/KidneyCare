@@ -90,9 +90,9 @@ export default function FoodDetail() {
                 }}
             /> 
 
-            <DonutGraph/> 
+            {/* <DonutGraph/> 
             {statePage === 0 && <FoodDetail1 setStatePage={setStatePage}/>}
-            {statePage === 1 && <FoodDetail2 setStatePage={setStatePage}/>}
+            {statePage === 1 && <FoodDetail2 setStatePage={setStatePage}/>} */}
             
 
         </div>
