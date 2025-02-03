@@ -1,7 +1,8 @@
+import FoodInterface from "@/Interfaces/FoodInterface"
 import { Icon } from "@iconify/react/dist/iconify.js"
 
 
-export default function SearchBox() {
+const SearchBox: React.FC<FoodInterface> = () => {
     return(
         <>
             <div className="flex justify-center items-center w-full gap-4 px-5">
@@ -26,3 +27,5 @@ export default function SearchBox() {
         </>
     )
 }
+
+export default SearchBox
