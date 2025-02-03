@@ -1,20 +1,8 @@
 'use client'
 import Link from "next/link"
+import FoodInterface from "@/Interfaces/FoodInterface"
 
-interface Food {
-    id: number
-    name: string
-    calories: number
-    protein: number
-    carbs: number
-    fat: number
-    sodium: number
-    phosphorus: number
-    potassium: number
-    imageUrl: string
-  }
-
-const SearchFoodBox: React.FC <{food:Food}> = ({food}) => {
+const SearchFoodBox: React.FC<FoodInterface> = ({food}) => {
     return(
         <>
             <Link 

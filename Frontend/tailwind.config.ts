@@ -31,7 +31,7 @@ export default {
         searchcalories: "#BD4B04",
         orange300: "#FF7E2E",
         orange400: "#CD6525",
-        grey300: "#999999"
+        grey300: "#7A7A7A"
       },
     },
   },

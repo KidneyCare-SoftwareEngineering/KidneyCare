@@ -7,6 +7,7 @@ import FoodDetail1 from "./FoodDetail1"
 import FoodDetail2 from "./FoodDetail2"
 import { useParams } from "next/navigation"
 import Link from "next/link"
+import TitleBar from "@/Components/TitleBar"
 
 const foodData = [
     {
@@ -71,15 +72,7 @@ export default function FoodDetail() {
 
     return(
         <div className="flex justify-center flex-col items-center">
-            <div className="relative flex justify-center items-center bg-white w-screen h-20 rounded-b-xl drop-shadow-lg text-heading4 font-extrabold ">
-                <Link className="absolute left-4" href={`/SearchFood`}>
-                    <Icon
-                        icon="majesticons:arrow-left"
-                        height="28"
-                    />
-                </Link>
-                {food.name}
-            </div>
+          <TitleBar title={food.name}/>
             <div 
                 className="flex w-full min-h-64 mt-1"
                 style={{
