@@ -69,6 +69,9 @@ struct FoodCard {
     phosphorus: Option<f64>,
     potassium: Option<f64>,
     image_url: Option<Vec<String>>,
+    food_category: Option<Vec<String>>,
+    dish_type: Option<Vec<String>>,
+    ingredients: Option<JsonValue>,
 }
 
 async fn get_food_details(
@@ -136,7 +139,15 @@ async fn get_food_cards(
     COALESCE(rn_sodium.quantity, 0) AS sodium,
     COALESCE(rn_phosphorus.quantity, 0) AS phosphorus,
     COALESCE(rn_potassium.quantity, 0) AS potassium,
-    r.recipe_img_link AS image_url
+    r.recipe_img_link AS image_url,
+    r.food_category,
+    r.dish_type,
+    (
+        SELECT json_agg(i.ingredient_name)
+        FROM recipes_ingredients ri
+        JOIN ingredients i ON ri.ingredient_id = i.ingredient_id
+        WHERE ri.recipe_id = r.recipe_id
+    ) AS ingredients 
 FROM recipes r
 LEFT JOIN recipe_nutrients rn_protein ON r.recipe_id = rn_protein.recipe_id AND rn_protein.nutrient_id = 1
 LEFT JOIN recipe_nutrients rn_carbs ON r.recipe_id = rn_carbs.recipe_id AND rn_carbs.nutrient_id = 2
