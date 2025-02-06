@@ -1,4 +1,6 @@
 use std::time::Duration;
+use std::fs::File;
+use std::io::BufReader;
 
 use axum::{
     extract::{Path, State},
@@ -34,6 +36,7 @@ async fn main() {
         .route("/", get(|| async { "Hello, World!" }))
         .route("/food_details", get(get_food_details))
         .route("/food_cards", get(get_food_cards))
+        .route("/get_limit", get(get_limit))
         .with_state(db_pool);
 
     axum::serve(listener, app)
@@ -109,8 +112,6 @@ LEFT JOIN recipe_nutrients rn_fat ON r.recipe_id = rn_fat.recipe_id AND rn_fat.n
 LEFT JOIN recipe_nutrients rn_sodium ON r.recipe_id = rn_sodium.recipe_id AND rn_sodium.nutrient_id = 5
 LEFT JOIN recipe_nutrients rn_phosphorus ON r.recipe_id = rn_phosphorus.recipe_id AND rn_phosphorus.nutrient_id = 7
 LEFT JOIN recipe_nutrients rn_potassium ON r.recipe_id = rn_potassium.recipe_id AND rn_potassium.nutrient_id = 8;
-
-
 ").fetch_all(&pg_pool)
     .await
     .map_err(|e|{
@@ -167,5 +168,26 @@ LEFT JOIN recipe_nutrients rn_potassium ON r.recipe_id = rn_potassium.recipe_id 
     Ok((
         StatusCode::OK,
         json!({"success": true, "data": rows}).to_string(),
+    ))
+}
+
+async fn get_limit() -> Result<(StatusCode, String), (StatusCode, String)> {
+    let file = File::open("src/mockup_data/data_to_ai.json").map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            json!({"success": false, "message": "Failed to open data file"}).to_string(),
+        )
+    })?;
+    let reader = BufReader::new(file);
+    let data: serde_json::Value = serde_json::from_reader(reader).map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            json!({"success": false, "message": "Failed to read data file"}).to_string(),
+        )
+    })?;
+
+    Ok((
+        StatusCode::OK,
+        json!({"success": true, "data": data}).to_string(),
     ))
 }
