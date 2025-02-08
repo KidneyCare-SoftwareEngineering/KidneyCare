@@ -8,5 +8,5 @@ export default interface FoodInterface {
     sodium: number
     phosphorus: number
     potassium: number
-    imageUrl: string
+    image_url: string
 }
