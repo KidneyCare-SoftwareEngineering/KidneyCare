@@ -17,6 +17,7 @@ export default function SearchFood() {
   const [lineImagesrc, setLineImagesrc] = useState("");
   const [userName, setUserName] = useState("");
   const [userUid, setUserUid] = useState("");
+  const [foodData, setFoodData] = useState([]);
 
   // useEffect(() => {
   // const initLiff = async () => {
@@ -49,7 +50,8 @@ useEffect(() => {
     fetch(`http://127.0.0.1:7878/food_cards`)
       .then(response => response.json())
       .then(data => {
-        console.log(data)
+        console.log(data.data)
+        setFoodData(data.data)
 
       })
       .catch(error => {
@@ -64,9 +66,9 @@ useEffect(() => {
       <div className="flex h-full max-w-3/6 justify-start gap-5 items-center flex-col bg-background min-h-screen pb-8">
         <Navbar />
         {/* <SearchBox /> */}
-        {/* {foodData.map((food) => (
-          <SearchFoodBox key={id} food={food} />
-        ))} */}
+        {foodData.map((food) => (
+          <SearchFoodBox key={food.id} food={food} />
+        ))}
       </div>
     </>
 

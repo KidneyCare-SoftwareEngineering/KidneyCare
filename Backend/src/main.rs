@@ -2,10 +2,11 @@ use std::time::Duration;
 
 use axum::{
     extract::{Path, State},
-    http::StatusCode,
+    http::{header::HeaderValue, Method, StatusCode},
     routing::{get, patch},
     Json, Router,
 };
+use tower_http::cors::{Any, CorsLayer};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::types::JsonValue;
@@ -25,6 +26,13 @@ async fn main() {
         .await
         .expect("Failed to connect to database");
 
+        let cors = CorsLayer::new()
+        .allow_origin([
+            "http://localhost:3000".parse::<HeaderValue>().unwrap(),
+        ])
+        .allow_methods([Method::GET, Method::POST, Method::PATCH])
+        .allow_headers(Any);
+
     let listener = TcpListener::bind(server_address)
         .await
         .expect("Failed to bind to address");
@@ -34,6 +42,7 @@ async fn main() {
         .route("/", get(|| async { "Hello, World!" }))
         .route("/food_details", get(get_food_details))
         .route("/food_cards", get(get_food_cards))
+        .layer(cors)
         .with_state(db_pool);
 
     axum::serve(listener, app)
