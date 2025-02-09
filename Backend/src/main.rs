@@ -1,4 +1,6 @@
 use std::time::Duration;
+use std::fs::File;
+use std::io::BufReader;
 
 use axum::{
     extract::{Path, State},
@@ -34,6 +36,7 @@ async fn main() {
         .route("/", get(|| async { "Hello, World!" }))
         .route("/food_details", get(get_food_details))
         .route("/food_cards", get(get_food_cards))
+        .route("/get_limit", get(get_limit))
         .with_state(db_pool);
 
     axum::serve(listener, app)
@@ -69,6 +72,9 @@ struct FoodCard {
     phosphorus: Option<f64>,
     potassium: Option<f64>,
     image_url: Option<Vec<String>>,
+    food_category: Option<Vec<String>>,
+    dish_type: Option<Vec<String>>,
+    ingredients: Option<JsonValue>,
 }
 
 async fn get_food_details(
@@ -106,8 +112,6 @@ LEFT JOIN recipe_nutrients rn_fat ON r.recipe_id = rn_fat.recipe_id AND rn_fat.n
 LEFT JOIN recipe_nutrients rn_sodium ON r.recipe_id = rn_sodium.recipe_id AND rn_sodium.nutrient_id = 5
 LEFT JOIN recipe_nutrients rn_phosphorus ON r.recipe_id = rn_phosphorus.recipe_id AND rn_phosphorus.nutrient_id = 7
 LEFT JOIN recipe_nutrients rn_potassium ON r.recipe_id = rn_potassium.recipe_id AND rn_potassium.nutrient_id = 8;
-
-
 ").fetch_all(&pg_pool)
     .await
     .map_err(|e|{
@@ -136,7 +140,15 @@ async fn get_food_cards(
     COALESCE(rn_sodium.quantity, 0) AS sodium,
     COALESCE(rn_phosphorus.quantity, 0) AS phosphorus,
     COALESCE(rn_potassium.quantity, 0) AS potassium,
-    r.recipe_img_link AS image_url
+    r.recipe_img_link AS image_url,
+    r.food_category,
+    r.dish_type,
+    (
+        SELECT json_agg(i.ingredient_name)
+        FROM recipes_ingredients ri
+        JOIN ingredients i ON ri.ingredient_id = i.ingredient_id
+        WHERE ri.recipe_id = r.recipe_id
+    ) AS ingredients 
 FROM recipes r
 LEFT JOIN recipe_nutrients rn_protein ON r.recipe_id = rn_protein.recipe_id AND rn_protein.nutrient_id = 1
 LEFT JOIN recipe_nutrients rn_carbs ON r.recipe_id = rn_carbs.recipe_id AND rn_carbs.nutrient_id = 2
@@ -156,5 +168,26 @@ LEFT JOIN recipe_nutrients rn_potassium ON r.recipe_id = rn_potassium.recipe_id 
     Ok((
         StatusCode::OK,
         json!({"success": true, "data": rows}).to_string(),
+    ))
+}
+
+async fn get_limit() -> Result<(StatusCode, String), (StatusCode, String)> {
+    let file = File::open("src/mockup_data/data_to_ai.json").map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            json!({"success": false, "message": "Failed to open data file"}).to_string(),
+        )
+    })?;
+    let reader = BufReader::new(file);
+    let data: serde_json::Value = serde_json::from_reader(reader).map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            json!({"success": false, "message": "Failed to read data file"}).to_string(),
+        )
+    })?;
+
+    Ok((
+        StatusCode::OK,
+        json!({"success": true, "data": data}).to_string(),
     ))
 }
