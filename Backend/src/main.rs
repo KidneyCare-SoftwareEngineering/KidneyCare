@@ -91,8 +91,7 @@ async fn get_food_details(
     r.method,
     r.recipe_img_link AS image_url,
     (
-        SELECT json_object_agg(
-            i.ingredient_id, 
+        SELECT json_agg(
             json_build_object(
                 'ingredient_name', i.ingredient_name,
                 'ingredient_amount', ri.amount,
@@ -121,6 +120,7 @@ LEFT JOIN recipe_nutrients rn_potassium ON r.recipe_id = rn_potassium.recipe_id 
 
     Ok(Json(rows))
 }
+
 
 async fn get_food_cards(
     State(pg_pool): State<PgPool>,
@@ -198,8 +198,7 @@ async fn get_food_detail_by_id(
     r.method,
     r.recipe_img_link AS image_url,
     (
-        SELECT json_object_agg(
-            i.ingredient_id, 
+        SELECT json_agg(
             json_build_object(
                 'ingredient_name', i.ingredient_name,
                 'ingredient_amount', ri.amount,
