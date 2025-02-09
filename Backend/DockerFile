@@ -1,0 +1,38 @@
+# ใช้ Rust 1.81 เป็น base image
+FROM rust:1.81 AS builder
+
+# ตั้งค่าตำแหน่งทำงาน
+WORKDIR /app
+
+# คัดลอกไฟล์ Cargo.toml และ Cargo.lock ก่อนเพื่อแคช dependencies
+COPY Cargo.toml Cargo.lock ./
+
+# ติดตั้ง dependencies ล่วงหน้า (เพื่อลดเวลาคอมไพล์)
+RUN cargo fetch
+
+# คัดลอกโค้ดทั้งหมด
+COPY . .
+
+# คอมไพล์โค้ดแบบ release
+RUN cargo build --release
+
+# ใช้ Debian ที่มีขนาดเล็กสำหรับ runtime
+FROM debian:bullseye-slim
+
+# ติดตั้ง dependencies ที่จำเป็น
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+
+# คัดลอก binary จาก builder มา
+COPY --from=builder /app/target/release/my-api /usr/local/bin/my-api
+COPY .env /app/.env  # คัดลอก .env ไปใน container
+
+# กำหนดให้ใช้ environment variables จาก .env
+ENV RUST_LOG=info
+ENV DATABASE_URL=${DATABASE_URL}
+ENV SERVER_ADDRESS=${SERVER_ADDRESS}
+
+# เปิดพอร์ตที่ API ใช้
+EXPOSE 7878
+
+# กำหนด entrypoint ให้ container เริ่มรัน API
+CMD ["sh", "-c", "/usr/local/bin/my-api"]
