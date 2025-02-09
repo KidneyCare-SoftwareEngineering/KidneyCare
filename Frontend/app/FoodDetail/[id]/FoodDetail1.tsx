@@ -2,7 +2,7 @@
 import React from 'react'
 
 
-const FoodDetail1: React.FC<{information:any, setStatePage:any}> = ({setStatePage}) =>{
+const FoodDetail1: React.FC<{information:string, setStatePage: (page: number) => void }> = ({information, setStatePage}) =>{
     return(
         <>
             <div className="flex w-11/12 min-h-16 rounded-xl bg-sec mt-4 ">
@@ -16,7 +16,7 @@ const FoodDetail1: React.FC<{information:any, setStatePage:any}> = ({setStatePag
                 </div>
             </div>
             <div className="flex w-11/12 min-h-16 rounded-xl bg-sec">
-                วัตถุดิบ
+                {information}
             </div>
         </>
     )

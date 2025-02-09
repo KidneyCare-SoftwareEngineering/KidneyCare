@@ -44,10 +44,10 @@ async fn main() {
         .route("/", get(|| async { "Hello, World!" }))
         .route("/food_details", get(get_food_details))
         .route("/food_cards", get(get_food_cards))
-        .layer(cors)
         .route("/get_limit", get(get_limit))
         .route("/food_details/:recipe_id", get(get_food_detail_by_id))
-        .with_state(db_pool);
+        .with_state(db_pool)
+        .layer(cors);
 
     axum::serve(listener, app)
         .await

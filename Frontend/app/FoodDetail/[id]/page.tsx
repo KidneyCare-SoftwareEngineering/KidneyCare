@@ -8,32 +8,45 @@ import FoodDetail2 from "./FoodDetail2"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import TitleBar from "@/Components/TitleBar"
+import Food from "@/Interfaces/FoodInterface"
 
 export default function FoodDetail() {
-
+    const [food, setFood] = useState<Food | null>(null); 
     const { id } = useParams();
-    const food = foodData.find((item) => Number(id) === item.id);
-    if (!food) {
-        return <div>ไม่พบข้อมูลอาหาร</div>;
-    }
     const [statePage, setStatePage] = useState(0)
+
+    useEffect(() => {
+        if (!id) return; 
+        fetch(`http://127.0.0.1:7878/food_details/${id}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.data)
+                setFood(data.data)
+            })
+            .catch(error => {
+                console.error('Error fetching user data:', error)
+    
+            })
+    }, [id]);
+
+    if (!food) return <div>ไม่มีฟู้ด</div>
 
     return(
         <div className="flex justify-center flex-col items-center">
-          <TitleBar title={food.name}/>
+          <TitleBar title={food.name} href="/searchfood"/>
             <div 
                 className="flex w-full min-h-64 mt-1"
                 style={{
-                    backgroundImage: `url(${food.imageUrl})`,
+                    backgroundImage: `url(${food.image_url})`,
                     backgroundSize: "cover", 
                     backgroundRepeat: "no-repeat", 
                     backgroundPosition: "center", 
                 }}
             /> 
 
-            {/* <DonutGraph/> 
-            {statePage === 0 && <FoodDetail1 setStatePage={setStatePage}/>}
-            {statePage === 1 && <FoodDetail2 setStatePage={setStatePage}/>} */}
+            <DonutGraph food={food} /> 
+            {/* {statePage === 0 && <FoodDetail1 information={food.method} setStatePage={setStatePage}/>}
+            {statePage === 1 && <FoodDetail2 information={food.ingredient} setStatePage={setStatePage}/>} */}
             
 
         </div>

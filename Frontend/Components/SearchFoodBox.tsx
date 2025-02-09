@@ -6,7 +6,7 @@ const SearchFoodBox: React.FC<{food: FoodInterface}> = ({food}) => {
     return(
         <>
             <Link 
-            href={`/FoodDetail/${food.id}`}
+            href={`/fooddetail/${food.id}`}
             className="flex justify-center rounded-xl bg-white w-11/12 h-full drop-shadow-lg  p-2">
                 <div 
                     className="flex w-2/5 rounded-xl"

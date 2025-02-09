@@ -1,7 +1,9 @@
 'use client'
+import FoodInterface from '@/Interfaces/FoodInterface'
 import React from 'react'
 
-const FoodDetail2: React.FC<{information:any, setStatePage:any}> = ({setStatePage}) =>{
+const FoodDetail2:  React.FC<{information:FoodInterface, setStatePage: (page: number) => void }> = ({information, setStatePage})  =>{
+    console.log("fooddetail",information)
     return(
         <>
             <div className="flex w-11/12 min-h-16 rounded-xl bg-sec mt-4 ">
@@ -15,7 +17,7 @@ const FoodDetail2: React.FC<{information:any, setStatePage:any}> = ({setStatePag
                 </div>
             </div>
             <div className="flex w-11/12 min-h-16 rounded-xl bg-sec">
-                ขั้นตอนการทำ
+               
             </div>
         </>
     )

@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Calendar } from "lucide-react";
 import { Icon } from "@iconify/react/dist/iconify.js";
-import { StatePage1 } from "@/app/MealPlan/CreatePlan/StatePage1";
+import { StatePage1 } from "@/app/mealplan/CreatePlan/StatePage1";
 
 const Dropdown = () => {
   const [isOpen, setIsOpen] = useState(false);

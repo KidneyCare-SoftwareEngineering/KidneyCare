@@ -9,4 +9,10 @@ export default interface FoodInterface {
     phosphorus: number
     potassium: number
     image_url: string
+    method: []
+    ingredients: { 
+        ingredient_amount: number
+        ingredient_name: string
+        ingredient_unit: string
+    }[]
 }
