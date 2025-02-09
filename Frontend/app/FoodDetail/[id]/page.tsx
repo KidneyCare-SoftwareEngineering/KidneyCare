@@ -20,8 +20,8 @@ export default function FoodDetail() {
         fetch(`http://127.0.0.1:7878/food_details/${id}`)
             .then(response => response.json())
             .then(data => {
-                console.log(data.data)
-                setFood(data.data)
+                console.log(data)
+                setFood(data)
             })
             .catch(error => {
                 console.error('Error fetching user data:', error)
@@ -45,8 +45,8 @@ export default function FoodDetail() {
             /> 
 
             <DonutGraph food={food} /> 
-            {/* {statePage === 0 && <FoodDetail1 information={food.method} setStatePage={setStatePage}/>}
-            {statePage === 1 && <FoodDetail2 information={food.ingredient} setStatePage={setStatePage}/>} */}
+            {statePage === 0 && <FoodDetail1 information={food.method} setStatePage={setStatePage}/>}
+            {statePage === 1 && <FoodDetail2 information={food.ingredient} setStatePage={setStatePage}/>}
             
 
         </div>

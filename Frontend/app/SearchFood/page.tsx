@@ -6,13 +6,6 @@ import SearchBox from '@/Components/SearchBox'
 import liff from '@line/liff'
 import Food from '@/Interfaces/FoodInterface'
 
-
-  
-
-  
-  
-
-
 export default function SearchFood() {
 
   const [lineImagesrc, setLineImagesrc] = useState("");
@@ -51,9 +44,8 @@ useEffect(() => {
     fetch(`http://127.0.0.1:7878/food_cards`)
       .then(response => response.json())
       .then(data => {
-        console.log(data.data)
-        setFoodData(data.data)
-
+        console.log(data)
+        setFoodData(data)
       })
       .catch(error => {
         console.error('Error fetching user data:', error)
