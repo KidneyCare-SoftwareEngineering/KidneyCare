@@ -2,13 +2,13 @@ use std::{fs::File, io::BufReader};
 
 use axum::{
     extract::{Path, State},
-    http::{header::HeaderValue, Method, StatusCode},
-    routing::{get, patch},
+    http::StatusCode,
+    routing::{get, post},
     Json, Router,
 };
 use tower_http::cors::{Any, CorsLayer};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
+use serde_json::{json, Value};
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use tokio::net::TcpListener;
 
@@ -42,6 +42,8 @@ async fn main() {
         .route("/get_limit", get(get_limit))
         .route("/food_details/:recipe_id", get(get_food_detail_by_id))
         .with_state(db_pool)
+        .route("/meal_plan", post(get_meal_plan))
+        .with_state(db_pool);
         .layer(cors);
 
     axum::serve(listener, app)
@@ -82,6 +84,38 @@ struct FoodCard {
     ingredients: Option<serde_json::Value>,
 }
 
+#[derive(Deserialize)]
+struct MealPlanRequest {
+    data: UserMealRequest,
+}
+
+#[derive(Deserialize)]
+struct UserMealRequest {
+    u_id: String,
+    days: u32,
+}
+
+async fn get_meal_plan(
+    Json(payload): Json<MealPlanRequest>,
+) -> Result<Json<Value>, (StatusCode, String)> {
+    let file = File::open("src/mockup_data/meal_plan.json").map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to open meal plan file".to_string(),
+        )
+    })?;
+
+    let reader = BufReader::new(file);
+
+    let data: Value = serde_json::from_reader(reader).map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to read meal plan file".to_string(),
+        )
+    })?;
+
+    Ok(Json(data))
+}
 async fn get_food_details(
     State(pg_pool): State<PgPool>,
 ) -> Result<Json<Vec<FoodDetail>>, (StatusCode, String)> {
@@ -127,7 +161,6 @@ LEFT JOIN recipe_nutrients rn_potassium ON r.recipe_id = rn_potassium.recipe_id 
 
     Ok(Json(rows))
 }
-
 
 async fn get_food_cards(
     State(pg_pool): State<PgPool>,
