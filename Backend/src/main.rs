@@ -1,6 +1,4 @@
-use std::time::Duration;
-use std::fs::File;
-use std::io::BufReader;
+use std::{fs::File, io::BufReader};
 
 use axum::{
     extract::{Path, State},
@@ -10,8 +8,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sqlx::types::JsonValue;
-use sqlx::{database, postgres::PgPoolOptions, PgPool};
+use sqlx::{postgres::PgPoolOptions, PgPool};
 use tokio::net::TcpListener;
 
 #[tokio::main]
@@ -56,7 +53,7 @@ struct FoodDetail {
     sodium: Option<f64>,
     phosphorus: Option<f64>,
     potassium: Option<f64>,
-    ingredient: Option<JsonValue>,
+    ingredient: Option<serde_json::Value>,
     method: Option<String>,
     image_url: Option<Vec<String>>,
 }
@@ -75,12 +72,12 @@ struct FoodCard {
     image_url: Option<Vec<String>>,
     food_category: Option<Vec<String>>,
     dish_type: Option<Vec<String>>,
-    ingredients: Option<JsonValue>,
+    ingredients: Option<serde_json::Value>,
 }
 
 async fn get_food_details(
     State(pg_pool): State<PgPool>,
-) -> Result<(StatusCode, String), (StatusCode, String)> {
+) -> Result<Json<Vec<FoodDetail>>, (StatusCode, String)> {
     let rows = sqlx::query_as!(FoodDetail, "SELECT 
     r.recipe_id AS id,
     r.name,
@@ -115,22 +112,19 @@ LEFT JOIN recipe_nutrients rn_phosphorus ON r.recipe_id = rn_phosphorus.recipe_i
 LEFT JOIN recipe_nutrients rn_potassium ON r.recipe_id = rn_potassium.recipe_id AND rn_potassium.nutrient_id = 8;
 ").fetch_all(&pg_pool)
     .await
-    .map_err(|_e|{
+    .map_err(|_e| {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
-            json!({"success": false, "message": "Failed to fetch food details"}).to_string(),
+            "Failed to fetch food details".to_string(),
         )
     })?;
 
-    Ok((
-        StatusCode::OK,
-        json!({"success": true, "data": rows}).to_string(),
-    ))
+    Ok(Json(rows))
 }
 
 async fn get_food_cards(
     State(pg_pool): State<PgPool>,
-) -> Result<(StatusCode, String), (StatusCode, String)> {
+) -> Result<Json<Vec<FoodCard>>, (StatusCode, String)> {
     let rows = sqlx::query_as!(FoodCard, "SELECT 
     r.recipe_id AS id,
     r.name,
@@ -159,44 +153,38 @@ LEFT JOIN recipe_nutrients rn_phosphorus ON r.recipe_id = rn_phosphorus.recipe_i
 LEFT JOIN recipe_nutrients rn_potassium ON r.recipe_id = rn_potassium.recipe_id AND rn_potassium.nutrient_id = 8;
 ").fetch_all(&pg_pool)
     .await
-    .map_err(|_e|{
+    .map_err(|_e| {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
-            json!({"success": false, "message": "Failed to fetch food details"}).to_string(),
+            "Failed to fetch food cards".to_string(),
         )
     })?;
 
-    Ok((
-        StatusCode::OK,
-        json!({"success": true, "data": rows}).to_string(),
-    ))
+    Ok(Json(rows))
 }
 
-async fn get_limit() -> Result<(StatusCode, String), (StatusCode, String)> {
+async fn get_limit() -> Result<Json<serde_json::Value>, (StatusCode, String)> {
     let file = File::open("src/mockup_data/data_to_ai.json").map_err(|_| {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
-            json!({"success": false, "message": "Failed to open data file"}).to_string(),
+            "Failed to open data file".to_string(),
         )
     })?;
     let reader = BufReader::new(file);
     let data: serde_json::Value = serde_json::from_reader(reader).map_err(|_| {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
-            json!({"success": false, "message": "Failed to read data file"}).to_string(),
+            "Failed to read data file".to_string(),
         )
     })?;
 
-    Ok((
-        StatusCode::OK,
-        json!({"success": true, "data": data}).to_string(),
-    ))
+    Ok(Json(data))
 }
 
 async fn get_food_detail_by_id(
     State(pg_pool): State<PgPool>,
     Path(recipe_id): Path<i32>,
-) -> Result<(StatusCode, String), (StatusCode, String)> {
+) -> Result<Json<FoodDetail>, (StatusCode, String)> {
     let row = sqlx::query_as!(FoodDetail, "SELECT 
     r.recipe_id AS id,
     r.name,
@@ -235,18 +223,12 @@ WHERE r.recipe_id = $1;", recipe_id)
     .map_err(|_e| {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
-            json!({"success": false, "message": "Failed to fetch food detail"}).to_string(),
+            "Failed to fetch food detail".to_string(),
         )
     })?;
 
     match row {
-        Some(recipe) => Ok((
-            StatusCode::OK,
-            json!({"success": true, "data": recipe}).to_string(),
-        )),
-        None => Err((
-            StatusCode::NOT_FOUND,
-            json!({"success": false, "message": "Recipe not found"}).to_string(),
-        )),
+        Some(recipe) => Ok(Json(recipe)),
+        None => Err((StatusCode::NOT_FOUND, "Recipe not found".to_string())),
     }
 }
