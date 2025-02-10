@@ -3,11 +3,11 @@ use std::{fs::File, io::BufReader};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
-    routing::{get, patch},
+    routing::{get, post},
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
-use serde_json::json;
+use serde_json::{json, Value};
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use tokio::net::TcpListener;
 
@@ -35,6 +35,7 @@ async fn main() {
         .route("/food_cards", get(get_food_cards))
         .route("/get_limit", get(get_limit))
         .route("/food_details/:recipe_id", get(get_food_detail_by_id))
+        .route("/meal_plan", post(get_meal_plan))
         .with_state(db_pool);
 
     axum::serve(listener, app)
@@ -75,6 +76,38 @@ struct FoodCard {
     ingredients: Option<serde_json::Value>,
 }
 
+#[derive(Deserialize)]
+struct MealPlanRequest {
+    data: UserMealRequest,
+}
+
+#[derive(Deserialize)]
+struct UserMealRequest {
+    u_id: String,
+    days: u32,
+}
+
+async fn get_meal_plan(
+    Json(payload): Json<MealPlanRequest>,
+) -> Result<Json<Value>, (StatusCode, String)> {
+    let file = File::open("src/mockup_data/meal_plan.json").map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to open meal plan file".to_string(),
+        )
+    })?;
+
+    let reader = BufReader::new(file);
+
+    let data: Value = serde_json::from_reader(reader).map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to read meal plan file".to_string(),
+        )
+    })?;
+
+    Ok(Json(data))
+}
 async fn get_food_details(
     State(pg_pool): State<PgPool>,
 ) -> Result<Json<Vec<FoodDetail>>, (StatusCode, String)> {
@@ -91,8 +124,7 @@ async fn get_food_details(
     r.method,
     r.recipe_img_link AS image_url,
     (
-        SELECT json_object_agg(
-            i.ingredient_id, 
+        SELECT json_agg(
             json_build_object(
                 'ingredient_name', i.ingredient_name,
                 'ingredient_amount', ri.amount,
@@ -198,8 +230,7 @@ async fn get_food_detail_by_id(
     r.method,
     r.recipe_img_link AS image_url,
     (
-        SELECT json_object_agg(
-            i.ingredient_id, 
+        SELECT json_agg(
             json_build_object(
                 'ingredient_name', i.ingredient_name,
                 'ingredient_amount', ri.amount,
