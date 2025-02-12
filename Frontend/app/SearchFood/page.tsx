@@ -4,7 +4,15 @@ import Navbar from '@/Components/Navbar'
 import SearchFoodBox from '@/Components/SearchFoodBox'
 import SearchBox from '@/Components/SearchBox'
 import liff from '@line/liff'
-import Food from '@/Interfaces/FoodInterface'
+import Food from '@/Interfaces/handleSearch'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/Components/ui/sheet"
 
 export default function SearchFood() {
 
@@ -12,6 +20,7 @@ export default function SearchFood() {
   const [userName, setUserName] = useState("");
   const [userUid, setUserUid] = useState("");
   const [foodData, setFoodData] = useState<Food[]>([]);
+  const [filteredFoodData, setFilteredFoodData] = useState<Food[]>([]);
 
   // useEffect(() => {
   // const initLiff = async () => {
@@ -52,16 +61,46 @@ useEffect(() => {
 
       })
     }, [])
+
+
+    const handleSearch = (searchTerm: string) => {
+      if (searchTerm.trim() === '') {
+        setFilteredFoodData(foodData);
+      } else {
+        const filtered = foodData.filter(food => 
+          // เผื่อเมนูeng
+          food.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setFilteredFoodData(filtered);
+      }
+    };
   
 
   return (
     <>
       <div className="flex h-full max-w-3/6 justify-start gap-5 items-center flex-col bg-background min-h-screen pb-8">
+
+    
         <Navbar />
-        {/* <SearchBox /> */}
-        {foodData.map((food) => (
-          <SearchFoodBox key={food.id} food={food} />
-        ))}
+        <SearchBox onSearch={handleSearch} />
+        {
+          !filteredFoodData.length ? (
+          <>
+            {foodData.map((food) => (
+              <SearchFoodBox key={food.id} food={food} />
+            ))}
+          </>
+          ) : (
+          <>
+            {filteredFoodData.map((food) => (
+              <SearchFoodBox key={food.id} food={food} />
+            ))}
+          </>
+          )
+        }
+
+
+        
       </div>
     </>
 

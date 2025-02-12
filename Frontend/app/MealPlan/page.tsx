@@ -16,7 +16,7 @@ export default function MealPlan() {
                 ยังไม่มีการวางแผนมื้ออาหาร
             </div>
             <Link 
-            href="/MealPlan/CreatePlan"
+            href="/mealplan/createplan"
             className="flex absolute size-12 bg-orange300 rounded-full right-3 bottom-6 justify-center items-center cursor-pointer"
             >
                 <Icon icon="ic:baseline-plus" height="32" className="text-white"/>

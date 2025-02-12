@@ -2,8 +2,8 @@ use std::{fs::File, io::BufReader};
 
 use axum::{
     extract::{Path, State},
-    http::StatusCode,
-    routing::{get, post},
+    http::{header::HeaderValue, Method, StatusCode},
+    routing::{get, patch, post,},
     Json, Router,
 };
 use tower_http::cors::{Any, CorsLayer};
@@ -26,7 +26,7 @@ async fn main() {
         .expect("Failed to connect to database");
 
         let cors = CorsLayer::new()
-        .allow_origin(any)
+        .allow_origin(Any)
         .allow_methods([Method::GET, Method::POST, Method::PATCH])
         .allow_headers(Any);
 
@@ -41,9 +41,8 @@ async fn main() {
         .route("/food_cards", get(get_food_cards))
         .route("/get_limit", get(get_limit))
         .route("/food_details/:recipe_id", get(get_food_detail_by_id))
-        .with_state(db_pool)
         .route("/meal_plan", post(get_meal_plan))
-        .with_state(db_pool);
+        .with_state(db_pool)
         .layer(cors);
 
     axum::serve(listener, app)

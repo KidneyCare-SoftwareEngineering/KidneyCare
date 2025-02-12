@@ -1,5 +1,5 @@
 'use client'
-import FoodInterface from '@/Interfaces/FoodInterface'
+import FoodInterface from '@/Interfaces/handleSearch'
 import React from 'react'
 
 const FoodDetail2:  React.FC<{information:FoodInterface, setStatePage: (page: number) => void }> = ({information, setStatePage})  =>{

@@ -1,22 +1,22 @@
 'use client'
 import { Icon } from "@iconify/react";
-import Link from "next/link";
-import TitleBarInterface from "@/Interfaces/TitleBarInterface";
+import TitleBar from "@/Interfaces/TitleBarInterface";
 
-const TitleBar:React.FC<TitleBarInterface> = ({title, href}) => {
+const TitleBarStatePage:React.FC<TitleBar> = ({title, statePage, setStatePage}) => {
+
     return(
         <>
            <div className="relative flex justify-center items-center bg-white w-screen h-20 rounded-b-xl drop-shadow-lg text-heading4 font-extrabold ">
-                <Link className="absolute left-4" href={href}>
+                <div className="absolute left-4" onClick={() => setStatePage(statePage - 1)}>
                     <Icon
                         icon="majesticons:arrow-left"
                         height="28"
                     />
-                </Link>
+                </div>
                 {title}
             </div>
         </>
     )
 }
 
-export default TitleBar
+export default TitleBarStatePage

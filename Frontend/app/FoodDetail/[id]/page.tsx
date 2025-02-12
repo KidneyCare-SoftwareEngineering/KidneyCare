@@ -8,7 +8,7 @@ import FoodDetail2 from "./FoodDetail2"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import TitleBar from "@/Components/TitleBar"
-import Food from "@/Interfaces/FoodInterface"
+import Food from "@/Interfaces/handleSearch"
 
 export default function FoodDetail() {
     const [food, setFood] = useState<Food | null>(null); 
@@ -32,7 +32,7 @@ export default function FoodDetail() {
     if (!food) return <div>ไม่มีฟู้ด</div>
 
     return(
-        <div className="flex justify-center flex-col items-center">
+        <div className="flex justify-center flex-col items-center pb-10">
           <TitleBar title={food.name} href="/searchfood"/>
             <div 
                 className="flex w-full min-h-64 mt-1"
@@ -45,8 +45,8 @@ export default function FoodDetail() {
             /> 
 
             <DonutGraph food={food} /> 
-            {statePage === 0 && <FoodDetail1 information={food.method} setStatePage={setStatePage}/>}
-            {statePage === 1 && <FoodDetail2 information={food.ingredient} setStatePage={setStatePage}/>}
+            {statePage === 0 && <FoodDetail1 information={food.ingredient} setStatePage={setStatePage}/>}
+            {/* {statePage === 1 && <FoodDetail2 information={food?.method} setStatePage={setStatePage}/>} */}
             
 
         </div>
