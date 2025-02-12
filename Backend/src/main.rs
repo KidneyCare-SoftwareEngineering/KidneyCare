@@ -53,7 +53,7 @@ async fn main() {
 #[derive(Serialize)]
 struct FoodDetail {
     id: Option<i32>,
-    name: Option<String>,
+    recipe_name: Option<String>,
     calories: Option<f64>,
     protein: Option<f64>,
     carbs: Option<f64>,
@@ -62,14 +62,14 @@ struct FoodDetail {
     phosphorus: Option<f64>,
     potassium: Option<f64>,
     ingredient: Option<serde_json::Value>,
-    method: Option<String>,
+    recipe_method: Option<Vec<String>>,
     image_url: Option<Vec<String>>,
 }
 
 #[derive(Serialize)]
 struct FoodCard {
     id: Option<i32>,
-    name: Option<String>,
+    recipe_name: Option<String>,
     calories: Option<f64>,
     protein: Option<f64>,
     carbs: Option<f64>,
@@ -80,7 +80,7 @@ struct FoodCard {
     image_url: Option<Vec<String>>,
     food_category: Option<Vec<String>>,
     dish_type: Option<Vec<String>>,
-    ingredients: Option<serde_json::Value>,
+    ingredients: Option<Vec<String>>,
 }
 
 #[derive(Deserialize)]
@@ -120,35 +120,63 @@ async fn get_food_details(
 ) -> Result<Json<Vec<FoodDetail>>, (StatusCode, String)> {
     let rows = sqlx::query_as!(FoodDetail, "SELECT 
     r.recipe_id AS id,
-    r.name,
+    r.recipe_name,
     r.calories,
-    COALESCE(rn_protein.quantity, 0) AS protein,
-    COALESCE(rn_carbs.quantity, 0) AS carbs,
-    COALESCE(rn_fat.quantity, 0) AS fat,
-    COALESCE(rn_sodium.quantity, 0) AS sodium,
-    COALESCE(rn_phosphorus.quantity, 0) AS phosphorus,
-    COALESCE(rn_potassium.quantity, 0) AS potassium,
-    r.method,
     r.recipe_img_link AS image_url,
-    (
-        SELECT json_agg(
+    COALESCE(
+        json_agg(
             json_build_object(
-                'ingredient_name', i.ingredient_name,
                 'ingredient_amount', ri.amount,
+                'ingredient_name', i.ingredient_name,
                 'ingredient_unit', ri.ingredient_unit
             )
-        )
-        FROM recipes_ingredients ri
-        JOIN ingredients i ON ri.ingredient_id = i.ingredient_id
-        WHERE ri.recipe_id = r.recipe_id
-    ) AS ingredient
-FROM recipes r
-LEFT JOIN recipe_nutrients rn_protein ON r.recipe_id = rn_protein.recipe_id AND rn_protein.nutrient_id = 1
-LEFT JOIN recipe_nutrients rn_carbs ON r.recipe_id = rn_carbs.recipe_id AND rn_carbs.nutrient_id = 2
-LEFT JOIN recipe_nutrients rn_fat ON r.recipe_id = rn_fat.recipe_id AND rn_fat.nutrient_id = 3
-LEFT JOIN recipe_nutrients rn_sodium ON r.recipe_id = rn_sodium.recipe_id AND rn_sodium.nutrient_id = 5
-LEFT JOIN recipe_nutrients rn_phosphorus ON r.recipe_id = rn_phosphorus.recipe_id AND rn_phosphorus.nutrient_id = 7
-LEFT JOIN recipe_nutrients rn_potassium ON r.recipe_id = rn_potassium.recipe_id AND rn_potassium.nutrient_id = 8;
+        ) FILTER (WHERE i.ingredient_id IS NOT NULL), '[]'::json
+    ) AS ingredient,
+    r.recipe_method, -- Assuming recipe_method is stored as TEXT[]
+    COALESCE((
+        SELECT SUM(rn.quantity) 
+        FROM recipes_nutrients rn
+        JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
+        WHERE rn.recipe_id = r.recipe_id AND n.name = 'protein'
+    ), 0) AS protein,
+    COALESCE((
+        SELECT SUM(rn.quantity) 
+        FROM recipes_nutrients rn
+        JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
+        WHERE rn.recipe_id = r.recipe_id AND n.name = 'carbs'
+    ), 0) AS carbs,
+    COALESCE((
+        SELECT SUM(rn.quantity) 
+        FROM recipes_nutrients rn
+        JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
+        WHERE rn.recipe_id = r.recipe_id AND n.name = 'fat'
+    ), 0) AS fat,
+    COALESCE((
+        SELECT SUM(rn.quantity) 
+        FROM recipes_nutrients rn
+        JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
+        WHERE rn.recipe_id = r.recipe_id AND n.name = 'sodium'
+    ), 0) AS sodium,
+    COALESCE((
+        SELECT SUM(rn.quantity) 
+        FROM recipes_nutrients rn
+        JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
+        WHERE rn.recipe_id = r.recipe_id AND n.name = 'phosphorus'
+    ), 0) AS phosphorus,
+    COALESCE((
+        SELECT SUM(rn.quantity) 
+        FROM recipes_nutrients rn
+        JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
+        WHERE rn.recipe_id = r.recipe_id AND n.name = 'potassium'
+    ), 0) AS potassium
+FROM 
+    recipes r
+LEFT JOIN 
+    recipes_ingredients ri ON r.recipe_id = ri.recipe_id
+LEFT JOIN 
+    ingredients i ON ri.ingredient_id = i.ingredient_id
+GROUP BY
+    r.recipe_id;
 ").fetch_all(&pg_pool)
     .await
     .map_err(|_e| {
@@ -166,30 +194,56 @@ async fn get_food_cards(
 ) -> Result<Json<Vec<FoodCard>>, (StatusCode, String)> {
     let rows = sqlx::query_as!(FoodCard, "SELECT 
     r.recipe_id AS id,
-    r.name,
+    r.recipe_name,
     r.calories,
-    COALESCE(rn_protein.quantity, 0) AS protein,
-    COALESCE(rn_carbs.quantity, 0) AS carbs,
-    COALESCE(rn_fat.quantity, 0) AS fat,
-    COALESCE(rn_sodium.quantity, 0) AS sodium,
-    COALESCE(rn_phosphorus.quantity, 0) AS phosphorus,
-    COALESCE(rn_potassium.quantity, 0) AS potassium,
     r.recipe_img_link AS image_url,
     r.food_category,
     r.dish_type,
-    (
-        SELECT json_agg(i.ingredient_name)
-        FROM recipes_ingredients ri
-        JOIN ingredients i ON ri.ingredient_id = i.ingredient_id
-        WHERE ri.recipe_id = r.recipe_id
-    ) AS ingredients 
-FROM recipes r
-LEFT JOIN recipe_nutrients rn_protein ON r.recipe_id = rn_protein.recipe_id AND rn_protein.nutrient_id = 1
-LEFT JOIN recipe_nutrients rn_carbs ON r.recipe_id = rn_carbs.recipe_id AND rn_carbs.nutrient_id = 2
-LEFT JOIN recipe_nutrients rn_fat ON r.recipe_id = rn_fat.recipe_id AND rn_fat.nutrient_id = 3
-LEFT JOIN recipe_nutrients rn_sodium ON r.recipe_id = rn_sodium.recipe_id AND rn_sodium.nutrient_id = 5
-LEFT JOIN recipe_nutrients rn_phosphorus ON r.recipe_id = rn_phosphorus.recipe_id AND rn_phosphorus.nutrient_id = 7
-LEFT JOIN recipe_nutrients rn_potassium ON r.recipe_id = rn_potassium.recipe_id AND rn_potassium.nutrient_id = 8;
+    COALESCE(array_agg(i.ingredient_name), ARRAY[]::VARCHAR[]) AS ingredients,
+    COALESCE((
+        SELECT SUM(rn.quantity) 
+        FROM recipes_nutrients rn
+        JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
+        WHERE rn.recipe_id = r.recipe_id AND n.name = 'protein'
+    ), 0) AS protein,
+    COALESCE((
+        SELECT SUM(rn.quantity) 
+        FROM recipes_nutrients rn
+        JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
+        WHERE rn.recipe_id = r.recipe_id AND n.name = 'carbs'
+    ), 0) AS carbs,
+    COALESCE((
+        SELECT SUM(rn.quantity) 
+        FROM recipes_nutrients rn
+        JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
+        WHERE rn.recipe_id = r.recipe_id AND n.name = 'fat'
+    ), 0) AS fat,
+    COALESCE((
+        SELECT SUM(rn.quantity) 
+        FROM recipes_nutrients rn
+        JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
+        WHERE rn.recipe_id = r.recipe_id AND n.name = 'sodium'
+    ), 0) AS sodium,
+    COALESCE((
+        SELECT SUM(rn.quantity) 
+        FROM recipes_nutrients rn
+        JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
+        WHERE rn.recipe_id = r.recipe_id AND n.name = 'phosphorus'
+    ), 0) AS phosphorus,
+    COALESCE((
+        SELECT SUM(rn.quantity) 
+        FROM recipes_nutrients rn
+        JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
+        WHERE rn.recipe_id = r.recipe_id AND n.name = 'potassium'
+    ), 0) AS potassium
+FROM 
+    recipes r
+LEFT JOIN 
+    recipes_ingredients ri ON r.recipe_id = ri.recipe_id
+LEFT JOIN 
+    ingredients i ON ri.ingredient_id = i.ingredient_id
+GROUP BY
+    r.recipe_id;
 ").fetch_all(&pg_pool)
     .await
     .map_err(|_e| {
@@ -226,36 +280,59 @@ async fn get_food_detail_by_id(
 ) -> Result<Json<FoodDetail>, (StatusCode, String)> {
     let row = sqlx::query_as!(FoodDetail, "SELECT 
     r.recipe_id AS id,
-    r.name,
+    r.recipe_name,
     r.calories,
-    COALESCE(rn_protein.quantity, 0) AS protein,
-    COALESCE(rn_carbs.quantity, 0) AS carbs,
-    COALESCE(rn_fat.quantity, 0) AS fat,
-    COALESCE(rn_sodium.quantity, 0) AS sodium,
-    COALESCE(rn_phosphorus.quantity, 0) AS phosphorus,
-    COALESCE(rn_potassium.quantity, 0) AS potassium,
-    r.method,
     r.recipe_img_link AS image_url,
-    (
-        SELECT json_agg(
+    COALESCE(
+        json_agg(
             json_build_object(
-                'ingredient_name', i.ingredient_name,
                 'ingredient_amount', ri.amount,
+                'ingredient_name', i.ingredient_name,
                 'ingredient_unit', ri.ingredient_unit
             )
-        )
-        FROM recipes_ingredients ri
-        JOIN ingredients i ON ri.ingredient_id = i.ingredient_id
-        WHERE ri.recipe_id = r.recipe_id
-    ) AS ingredient
-FROM recipes r
-LEFT JOIN recipe_nutrients rn_protein ON r.recipe_id = rn_protein.recipe_id AND rn_protein.nutrient_id = 1
-LEFT JOIN recipe_nutrients rn_carbs ON r.recipe_id = rn_carbs.recipe_id AND rn_carbs.nutrient_id = 2
-LEFT JOIN recipe_nutrients rn_fat ON r.recipe_id = rn_fat.recipe_id AND rn_fat.nutrient_id = 3
-LEFT JOIN recipe_nutrients rn_sodium ON r.recipe_id = rn_sodium.recipe_id AND rn_sodium.nutrient_id = 5
-LEFT JOIN recipe_nutrients rn_phosphorus ON r.recipe_id = rn_phosphorus.recipe_id AND rn_phosphorus.nutrient_id = 7
-LEFT JOIN recipe_nutrients rn_potassium ON r.recipe_id = rn_potassium.recipe_id AND rn_potassium.nutrient_id = 8
-WHERE r.recipe_id = $1;", recipe_id)
+        ) FILTER (WHERE i.ingredient_id IS NOT NULL), '[]'::json
+    ) AS ingredient,
+    r.recipe_method, -- Assuming recipe_method is stored as TEXT[]
+    COALESCE((SELECT SUM(rn.quantity) 
+        FROM recipes_nutrients rn
+        JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
+        WHERE rn.recipe_id = r.recipe_id AND n.name = 'protein'
+    ), 0) AS protein,
+    COALESCE((SELECT SUM(rn.quantity) 
+        FROM recipes_nutrients rn
+        JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
+        WHERE rn.recipe_id = r.recipe_id AND n.name = 'carbs'
+    ), 0) AS carbs,
+    COALESCE((SELECT SUM(rn.quantity) 
+        FROM recipes_nutrients rn
+        JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
+        WHERE rn.recipe_id = r.recipe_id AND n.name = 'fat'
+    ), 0) AS fat,
+    COALESCE((SELECT SUM(rn.quantity) 
+        FROM recipes_nutrients rn
+        JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
+        WHERE rn.recipe_id = r.recipe_id AND n.name = 'sodium'
+    ), 0) AS sodium,
+    COALESCE((SELECT SUM(rn.quantity) 
+        FROM recipes_nutrients rn
+        JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
+        WHERE rn.recipe_id = r.recipe_id AND n.name = 'phosphorus'
+    ), 0) AS phosphorus,
+    COALESCE((SELECT SUM(rn.quantity) 
+        FROM recipes_nutrients rn
+        JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
+        WHERE rn.recipe_id = r.recipe_id AND n.name = 'potassium'
+    ), 0) AS potassium
+FROM 
+    recipes r
+LEFT JOIN 
+    recipes_ingredients ri ON r.recipe_id = ri.recipe_id
+LEFT JOIN 
+    ingredients i ON ri.ingredient_id = i.ingredient_id
+WHERE 
+    r.recipe_id = $1
+GROUP BY
+    r.recipe_id;", recipe_id)
     .fetch_optional(&pg_pool)
     .await
     .map_err(|_e| {
