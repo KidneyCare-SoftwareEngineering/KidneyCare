@@ -26,9 +26,7 @@ export default function CalendarSide({ onDateSelect }) {
     return date.getFullYear() + 543;
   };
 
-  useEffect(() => {
-    // Optionally update other things when selectDate changes
-  }, [selectDate]);
+  useEffect(() => {}, [selectDate]);
 
   const handleDateClick = (date) => {
     if (isAnimating) return;
@@ -67,7 +65,7 @@ export default function CalendarSide({ onDateSelect }) {
       {/* ปฏิทิน */}
       <div className="flex items-center py-4">
         {/* ปุ่มย้อนกลับ */}
-        <button onClick={handlePrev} className="mx-12">
+        <button onClick={handlePrev} className="mx-4">
           <Icon icon="ep:arrow-left" className="h-6 w-6 text-black" />
         </button>
 
@@ -80,7 +78,7 @@ export default function CalendarSide({ onDateSelect }) {
         </div>
 
         {/* ปุ่มเลื่อนขวา */}
-        <button onClick={handleNext} className="mx-12">
+        <button onClick={handleNext} className="mx-4">
           <Icon icon="ep:arrow-right" className="h-6 w-6 text-black" />
         </button>
       </div>

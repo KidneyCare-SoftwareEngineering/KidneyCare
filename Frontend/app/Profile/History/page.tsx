@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "@/Components/Navbar";
 import ProfileHistory from "@/Components/ProfileHistory";
-import CalendarSide from "@/Components/CalendarSide";
+import SumCalorie from "@/Components/SumCalorie";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import Profile from "../page";
 
@@ -11,7 +11,7 @@ export default function History() {
     <section>
       <Navbar />
       <ProfileHistory />
-      <CalendarSide />
+      <SumCalorie />
     </section>
   );
 }
