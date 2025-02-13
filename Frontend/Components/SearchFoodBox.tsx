@@ -1,8 +1,8 @@
 'use client'
 import Link from "next/link"
-import FoodInterface from "@/Interfaces/handleSearch"
+import {FoodInterface} from "@/Interfaces/FoodInterface"
 
-const SearchFoodBox: React.FC<{food: FoodInterface}> = ({food}) => {
+const SearchFoodBox: React.FC<{food:FoodInterface}> = ({food}) => {
     return(
         <>
             <Link 

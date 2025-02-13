@@ -23,6 +23,7 @@ export default {
   			}
   		},
   		fontSize: {
+  			heading1: '36px',
   			heading3: '24px',
   			heading4: '20px',
   			body1: '16px',
@@ -34,6 +35,7 @@ export default {
   			foreground: 'hsl(var(--foreground))',
   			sec: '#FAF5EF',
   			searchcalories: '#BD4B04',
+  			fillstrock: '#FFE6D7',
   			orange300: '#FF7E2E',
   			orange400: '#CD6525',
   			grey300: '#7A7A7A',

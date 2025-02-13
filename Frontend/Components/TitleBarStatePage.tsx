@@ -2,7 +2,7 @@
 import { Icon } from "@iconify/react";
 import TitleBar from "@/Interfaces/TitleBarInterface";
 
-const TitleBarStatePage:React.FC<TitleBar> = ({title, statePage, setStatePage}) => {
+const TitleBarStatePage:React.FC<Pick<TitleBar, 'title' | 'statePage' | 'setStatePage'>> = ({title, statePage, setStatePage}) => {
 
     return(
         <>

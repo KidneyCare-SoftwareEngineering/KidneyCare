@@ -8,10 +8,10 @@ import FoodDetail2 from "./FoodDetail2"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import TitleBar from "@/Components/TitleBar"
-import Food from "@/Interfaces/FoodInterface"
+import {FoodInterface} from "@/Interfaces/FoodInterface"
 
 export default function FoodDetail() {
-    const [food, setFood] = useState<Food | null>(null); 
+    const [food, setFood] = useState<FoodInterface | null>(null); 
     const { id } = useParams();
     const [statePage, setStatePage] = useState(0)
 

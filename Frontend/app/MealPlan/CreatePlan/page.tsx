@@ -4,6 +4,7 @@ import { useState } from 'react'
 import StatePage1 from './StatePage1'
 import TitleBar from '@/Components/TitleBar'
 import Dropdown from '@/Components/Dropdown'
+import StatePage2 from './StatePage2'
 
 
 
@@ -12,6 +13,7 @@ export default function CreatePlan() {
   const [selectedValue, setSelectedValue] = useState(0);
   const [statePage, setStatePage] = useState(0);
   const [mealPlan, setMealPlan] = useState([]);
+  const [dayIndex, setDayIndex] = useState(0);
 
   const u_id ="mfkidsmomwlknwe"
 
@@ -66,7 +68,14 @@ export default function CreatePlan() {
       {statePage === 1 && <StatePage1 
                             setStatePage={setStatePage} 
                             statePage={statePage} 
-                            mealPlan={mealPlan}/>}
+                            mealPlan={mealPlan}
+                            setDayIndex={setDayIndex}/>}
+
+      {statePage === 2 && <StatePage2
+                            setStatePage={setStatePage} 
+                            statePage={statePage} 
+                            mealPlan={mealPlan}
+                            dayIndex={dayIndex}/>}
     </>
   )
 }

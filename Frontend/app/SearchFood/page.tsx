@@ -4,7 +4,7 @@ import Navbar from '@/Components/Navbar'
 import SearchFoodBox from '@/Components/SearchFoodBox'
 import SearchBox from '@/Components/SearchBox'
 import liff from '@line/liff'
-import Food from '@/Interfaces/FoodInterface'
+import {FoodInterface} from '@/Interfaces/FoodInterface'
 import {
   Sheet,
   SheetContent,
@@ -19,8 +19,8 @@ export default function SearchFood() {
   const [lineImagesrc, setLineImagesrc] = useState("");
   const [userName, setUserName] = useState("");
   const [userUid, setUserUid] = useState("");
-  const [foodData, setFoodData] = useState<Food[]>([]);
-  const [filteredFoodData, setFilteredFoodData] = useState<Food[]>([]);
+  const [foodData, setFoodData] = useState<FoodInterface[]>([]);
+  const [filteredFoodData, setFilteredFoodData] = useState<FoodInterface[]>([]);
 
   // useEffect(() => {
   // const initLiff = async () => {

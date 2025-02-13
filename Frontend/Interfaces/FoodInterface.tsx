@@ -1,4 +1,4 @@
-export default interface FoodInterface {
+export interface FoodInterface {
     id: number
     recipe_name: string
     calories: number
@@ -15,4 +15,34 @@ export default interface FoodInterface {
         ingredient_name: string
         ingredient_unit: string
     }[]
+}
+
+
+export interface MealplanInterface {
+    mealPlan: {
+        mealplans: {
+            meals: {
+                name: string;
+                nutrition: {
+                    calories: number;
+                    carbs: number;
+                    fat: number;
+                    phosphorus: number;
+                    potassium: number;
+                    protein: number;
+                    sodium: number;
+                };
+                recipe_id: string;
+            }[];
+            total_nutrition: {
+                calories: number;
+                carbs: number;
+                fat: number;
+                phosphorus: number;
+                potassium: number;
+                protein: number;
+                sodium: number;
+            };
+        }[];
+    }[];
 }

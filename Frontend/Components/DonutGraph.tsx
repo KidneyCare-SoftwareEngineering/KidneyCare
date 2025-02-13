@@ -1,6 +1,6 @@
 import { Doughnut } from "react-chartjs-2";
 import {Chart ,ArcElement, Legend} from "chart.js";
-import FoodInterface from "@/Interfaces/FoodInterface";
+import {FoodInterface} from "@/Interfaces/FoodInterface";
 
 Chart.register(ArcElement);
 

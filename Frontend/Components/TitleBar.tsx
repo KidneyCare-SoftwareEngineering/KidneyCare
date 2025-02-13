@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react";
 import Link from "next/link";
 import TitleBarInterface from "@/Interfaces/TitleBarInterface";
 
-const TitleBar:React.FC<TitleBarInterface> = ({title, href}) => {
+const TitleBar:React.FC<Pick<TitleBarInterface, 'title' | 'href'>> = ({title, href}) => {
     return(
         <>
            <div className="relative flex justify-center items-center bg-white w-screen h-20 rounded-b-xl drop-shadow-lg text-heading4 font-extrabold ">
