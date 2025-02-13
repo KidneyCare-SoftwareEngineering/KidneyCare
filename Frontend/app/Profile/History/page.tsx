@@ -12,6 +12,9 @@ export default function History() {
       <Navbar />
       <ProfileHistory />
       <SumCalorie />
+      <div className="flex justify-center items-center rounded-lg border border-gray-300 bg-white drop-shadow-lg p-2 mx-4 my-6">
+        <p className="font-semibold text-gray-800">ประวัติการกิน</p>
+      </div>
     </section>
   );
 }
