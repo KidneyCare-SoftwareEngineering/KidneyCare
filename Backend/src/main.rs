@@ -80,6 +80,7 @@ struct FoodCard {
     food_category: Option<Vec<String>>,
     dish_type: Option<Vec<String>>,
     ingredients: Option<Vec<String>>,
+    ingredients_eng: Option<Vec<String>>,
 }
 
 #[derive(Deserialize)]
@@ -224,7 +225,8 @@ async fn get_food_cards(
     r.recipe_img_link AS image_url,
     r.food_category,
     r.dish_type,
-    COALESCE(array_agg(i.ingredient_name), ARRAY[]::VARCHAR[]) AS ingredients,
+    COALESCE(array_agg(i.ingredient_name) FILTER (WHERE i.ingredient_name IS NOT NULL), ARRAY[]::VARCHAR[]) AS ingredients,
+    COALESCE(array_agg(i.ingredient_name_eng) FILTER (WHERE i.ingredient_name_eng IS NOT NULL), ARRAY[]::VARCHAR[]) AS ingredients_eng,
     COALESCE((
         SELECT SUM(rn.quantity) 
         FROM recipes_nutrients rn
@@ -271,7 +273,8 @@ GROUP BY
     r.recipe_id;
 ").fetch_all(&pg_pool)
     .await
-    .map_err(|_e| {
+    .map_err(|e| {
+        eprintln!("Failed to fetch food cards: {}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             "Failed to fetch food cards".to_string(),
@@ -280,6 +283,7 @@ GROUP BY
 
     Ok(Json(rows))
 }
+
 
 async fn get_limit() -> Result<Json<serde_json::Value>, (StatusCode, String)> {
     let file = File::open("src/mockup_data/data_to_ai.json").map_err(|_| {
