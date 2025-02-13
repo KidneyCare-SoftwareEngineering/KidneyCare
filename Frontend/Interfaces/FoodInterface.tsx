@@ -1,6 +1,6 @@
 export default interface FoodInterface {
     id: number
-    name: string
+    recipe_name: string
     calories: number
     protein: number
     carbs: number
@@ -9,7 +9,7 @@ export default interface FoodInterface {
     phosphorus: number
     potassium: number
     image_url: string
-    method: []
+    recipe_method: []
     ingredient: { 
         ingredient_amount: number
         ingredient_name: string

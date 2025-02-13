@@ -4,7 +4,7 @@ import Navbar from '@/Components/Navbar'
 import SearchFoodBox from '@/Components/SearchFoodBox'
 import SearchBox from '@/Components/SearchBox'
 import liff from '@line/liff'
-import Food from '@/Interfaces/handleSearch'
+import Food from '@/Interfaces/FoodInterface'
 import {
   Sheet,
   SheetContent,
@@ -69,7 +69,7 @@ useEffect(() => {
       } else {
         const filtered = foodData.filter(food => 
           // เผื่อเมนูeng
-          food.name.toLowerCase().includes(searchTerm.toLowerCase())
+          food.recipe_name.toLowerCase().includes(searchTerm.toLowerCase())
         );
         setFilteredFoodData(filtered);
       }
