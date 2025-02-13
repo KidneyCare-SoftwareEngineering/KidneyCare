@@ -18,8 +18,6 @@ serde_json = {version = "1.0.111"}
 #env
 dotenvy = "0.15.7"
 
-# chrono = { version = "0.4", features = ["serde"] }
 time = { version = "0.3", features = ["serde", "formatting", "parsing", "macros"] }
 
 chrono = { version = "0.4", features = ["serde", "clock", "std"] }
-# sqlx = { version = "0.7", features = ["postgres", "chrono"] }
