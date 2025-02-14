@@ -5,11 +5,9 @@ use axum::{
 };
 use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
-use std::sync::Arc;
-use tokio::sync::Mutex;
-use Backend::routes::food::*;
-use Backend::routes::mealplan::*;
-use Backend::routes::user::*;
+use backend::routes::food::*;
+use backend::routes::mealplan::*;
+use backend::routes::user::*;
 
 
 #[tokio::main]

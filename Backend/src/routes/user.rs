@@ -1,9 +1,9 @@
 use axum::Extension;
 // routes/user.rs
-use axum::{extract::State, http::StatusCode, Json};
+use axum::{http::StatusCode, Json};
 use chrono::{Datelike, NaiveDate, Utc};
 use serde_json::{json, Value};
-use sqlx::{PgPool, Transaction};
+use sqlx::PgPool;
 
 use crate::models::user::CreateUser;
 use crate::db::queries::{insert_user, insert_nutrient_limits, insert_user_relations};

@@ -1,8 +1,6 @@
 use axum::extract::Path;
 use axum::Extension;
-use axum::{
-    extract::State, http::StatusCode, Json
-};
+use axum::{http::StatusCode, Json};
 use sqlx::PgPool;
 use crate::models::food::{FoodDetail, FoodCard};
 use crate::db::queries::{fetch_food_cards, fetch_food_details, get_food_detail_by_id};

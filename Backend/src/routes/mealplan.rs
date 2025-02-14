@@ -1,5 +1,3 @@
-use std::{fs::File, io::BufReader};
-
 use axum::{http::StatusCode, Json, Extension};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
