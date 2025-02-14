@@ -1,25 +1,13 @@
-use axum::{http::StatusCode, Json, Extension};
+use crate::models::mealplan::MealPlanRequest;
+use axum::{http::StatusCode, Extension, Json};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-use crate::models::mealplan::MealPlanRequest;
 
 #[derive(Deserialize)]
 pub struct UserData {
     pub u_id: String,
     pub days: i32,
 }
-
-// #[derive(Serialize)]
-// pub struct Response {
-//     pub data: ResponseData,
-// }
-
-// #[derive(Serialize)]
-// pub struct ResponseData {
-//     pub days: i32,
-//     pub food_menus: Vec<FoodMenu>,
-//     pub nutrition_limit_per_day: NutritionLimit,
-// }
 
 #[derive(Serialize)]
 pub struct FoodMenu {
@@ -57,7 +45,7 @@ pub struct Response {
 
 #[derive(Serialize)]
 pub struct ResponseData {
-    pub user_line_id: String,  // Add this field
+    pub user_line_id: String, // Add this field
     pub days: i32,
     pub food_menus: Vec<FoodMenu>,
     pub nutrition_limit_per_day: NutritionLimit,
@@ -67,7 +55,8 @@ pub struct ResponseData {
 pub async fn create_meal_plan(
     Extension(pg_pool): Extension<PgPool>,
     Json(payload): Json<MealPlanRequest>,
-) -> Result<Json<ResponseData>, (StatusCode, String)> { // Change the return type to ResponseData
+) -> Result<Json<ResponseData>, (StatusCode, String)> {
+    // Change the return type to ResponseData
     // Step 1: Get user_id from user_line_id (u_id)
     let user_id = sqlx::query!(
         "SELECT user_id, user_line_id FROM users WHERE user_line_id = $1",
@@ -75,7 +64,12 @@ pub async fn create_meal_plan(
     )
     .fetch_optional(&pg_pool)
     .await
-    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Error fetching user".to_string()))?
+    .map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Error fetching user".to_string(),
+        )
+    })?
     .ok_or((StatusCode::NOT_FOUND, "User not found".to_string()))?;
 
     // Step 2: Filter out recipes based on allergies
@@ -113,7 +107,12 @@ pub async fn create_meal_plan(
     )
     .fetch_all(&pg_pool)
     .await
-    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Error fetching nutrition limits".to_string()))?;
+    .map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Error fetching nutrition limits".to_string(),
+        )
+    })?;
 
     let mut nutrition_map = NutritionLimit {
         calories: 0.0,

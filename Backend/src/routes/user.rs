@@ -1,12 +1,11 @@
 use axum::Extension;
-// routes/user.rs
 use axum::{http::StatusCode, Json};
 use chrono::{Datelike, NaiveDate, Utc};
 use serde_json::{json, Value};
 use sqlx::PgPool;
 
+use crate::db::queries::{insert_nutrient_limits, insert_user, insert_user_relations};
 use crate::models::user::CreateUser;
-use crate::db::queries::{insert_user, insert_nutrient_limits, insert_user_relations};
 
 pub async fn create_user(
     Extension(pg_pool): Extension<PgPool>,
@@ -28,12 +27,26 @@ pub async fn create_user(
     })?;
     let age = Utc::now().naive_utc().year() - birthdate.year();
 
-    let kidney_level = payload.kidney_level.ok_or((StatusCode::BAD_REQUEST, "kidney_level is required".to_string()))?;
-    let kidney_dialysis = payload.kidney_dialysis.ok_or((StatusCode::BAD_REQUEST, "kidney_dialysis is required".to_string()))?;
+    let kidney_level = payload.kidney_level.ok_or((
+        StatusCode::BAD_REQUEST,
+        "kidney_level is required".to_string(),
+    ))?;
+    let kidney_dialysis = payload.kidney_dialysis.ok_or((
+        StatusCode::BAD_REQUEST,
+        "kidney_dialysis is required".to_string(),
+    ))?;
 
     // Insert user into the database
     let user_id = insert_user(&payload, &mut tx).await?;
-    insert_nutrient_limits(user_id, payload.weight as f32, age, kidney_level, kidney_dialysis, &mut tx).await?;
+    insert_nutrient_limits(
+        user_id,
+        payload.weight as f32,
+        age,
+        kidney_level,
+        kidney_dialysis,
+        &mut tx,
+    )
+    .await?;
     insert_user_relations(user_id, &payload, &mut tx).await?;
 
     tx.commit().await.map_err(|_| {
