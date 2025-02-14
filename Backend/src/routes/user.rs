@@ -32,11 +32,7 @@ pub async fn create_user(
 
     // Insert user into the database
     let user_id = insert_user(&payload, &mut tx).await?;
-
-    // Insert nutrient limits for the user
     insert_nutrient_limits(user_id, payload.weight as f32, age, kidney_level, kidney_dialysis, &mut tx).await?;
-
-    // Insert user relations (food conditions, diseases, allergies)
     insert_user_relations(user_id, &payload, &mut tx).await?;
 
     tx.commit().await.map_err(|_| {

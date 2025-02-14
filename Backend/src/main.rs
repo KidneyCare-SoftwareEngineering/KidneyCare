@@ -1,9 +1,12 @@
 use axum::{
     routing::{get, post},
     Router,
+    Extension,
 };
 use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 use Backend::routes::food::*;
 use Backend::routes::mealplan::*;
 use Backend::routes::user::*;
@@ -12,7 +15,7 @@ use Backend::routes::user::*;
 async fn main() {
     dotenvy::dotenv().expect("Failed to load .env file");
 
-    let server_address = std::env::var("SERVER_ADDRESS").unwrap_or("127.0.0.1:3000".to_owned());
+    let server_address = std::env::var("SERVER_ADDRESS").unwrap_or_else(|_| "127.0.0.1:3000".to_owned());
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL is not set");
 
     let db_pool = PgPoolOptions::new()
@@ -21,22 +24,26 @@ async fn main() {
         .await
         .expect("Failed to connect to database");
 
-    let listener = TcpListener::bind(server_address)
-        .await
-        .expect("Failed to bind to address");
+    let listener = TcpListener::bind(&server_address).await.unwrap_or_else(|_| {
+        tokio::runtime::Handle::current().block_on(TcpListener::bind("127.0.0.1:3000"))
+            .expect("Failed to bind to default address")
+    });
     println!("Listening on {}", listener.local_addr().unwrap());
+
+    // Wrap the db_pool in Arc<Mutex> to safely share it between handlers
+    let db_pool = Arc::new(Mutex::new(db_pool));
 
     let app = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
         .route("/food_details", get(get_food_details))
         .route("/food_cards", get(get_food_cards))
         .route("/get_limit", get(get_limit))
-        .route("/food_details/:recipe_id", get(get_food_detail))
-        .route("/meal_plan", post(get_meal_plan))
+        .route("/food_details/{recipe_id}", get(get_food_detail))
+        .route("/meal_plan", post(create_meal_plan))
         .route("/users", post(create_user))
-        .with_state(db_pool);
+        .layer(Extension(db_pool.clone())); // Use Extension middleware to inject db_pool
 
-    axum::serve(listener, app)
+    axum::serve(listener, app)  
         .await
         .expect("Failed to start server");
 }
