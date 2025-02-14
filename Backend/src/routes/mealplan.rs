@@ -1,5 +1,6 @@
 use crate::models::mealplan::MealPlanRequest;
 use axum::{http::StatusCode, Extension, Json};
+use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
@@ -39,13 +40,8 @@ pub struct NutritionLimit {
 }
 
 #[derive(Serialize)]
-pub struct Response {
-    pub data: ResponseData,
-}
-
-#[derive(Serialize)]
 pub struct ResponseData {
-    pub user_line_id: String, // Add this field
+    pub user_line_id: String,
     pub days: i32,
     pub food_menus: Vec<FoodMenu>,
     pub nutrition_limit_per_day: NutritionLimit,
@@ -55,24 +51,16 @@ pub struct ResponseData {
 pub async fn create_meal_plan(
     Extension(pg_pool): Extension<PgPool>,
     Json(payload): Json<MealPlanRequest>,
-) -> Result<Json<ResponseData>, (StatusCode, String)> {
-    // Change the return type to ResponseData
-    // Step 1: Get user_id from user_line_id (u_id)
+) -> Result<Json<serde_json::Value>, (StatusCode, String)> {
     let user_id = sqlx::query!(
         "SELECT user_id, user_line_id FROM users WHERE user_line_id = $1",
         payload.data.u_id
     )
     .fetch_optional(&pg_pool)
     .await
-    .map_err(|_| {
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "Error fetching user".to_string(),
-        )
-    })?
+    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Error fetching user".to_string()))?
     .ok_or((StatusCode::NOT_FOUND, "User not found".to_string()))?;
 
-    // Step 2: Filter out recipes based on allergies
     let filtered_recipes = sqlx::query!(
         r#"
         SELECT r.recipe_id, r.recipe_name, 
@@ -100,19 +88,13 @@ pub async fn create_meal_plan(
     .await
     .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Error fetching filtered recipes".to_string()))?;
 
-    // Step 3: Get nutrition limit per day
     let nutrition_limit = sqlx::query!(
         "SELECT nutrient_id, nutrient_limit FROM users_nutrients_limit_per_day WHERE user_id = $1",
         user_id.user_id
     )
     .fetch_all(&pg_pool)
     .await
-    .map_err(|_| {
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "Error fetching nutrition limits".to_string(),
-        )
-    })?;
+    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Error fetching nutrition limits".to_string()))?;
 
     let mut nutrition_map = NutritionLimit {
         calories: 0.0,
@@ -137,7 +119,6 @@ pub async fn create_meal_plan(
         }
     }
 
-    // Step 4: Format and return response
     let food_menus: Vec<FoodMenu> = filtered_recipes
         .into_iter()
         .map(|recipe| FoodMenu {
@@ -155,10 +136,27 @@ pub async fn create_meal_plan(
         })
         .collect();
 
-    Ok(Json(ResponseData {
-        user_line_id: user_id.user_line_id.unwrap_or_default(), // Add user_line_id to the response
+    let response_data = ResponseData {
+        user_line_id: user_id.user_line_id.unwrap_or_default(),
         days: payload.data.days as i32,
         food_menus,
         nutrition_limit_per_day: nutrition_map,
-    }))
+    };
+
+    // Convert response_data to JSON and send a POST request
+    let client = Client::new();
+    let api_url = "https://kidneycare.loca.lt/ai";
+
+    let response = client
+        .post(api_url)
+        .json(&response_data)
+        .send()
+        .await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Failed to send request".to_string()))?
+        .json::<serde_json::Value>()
+        .await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Failed to parse response".to_string()))?;
+
+    // Return the response from the external API
+    Ok(Json(response))
 }
