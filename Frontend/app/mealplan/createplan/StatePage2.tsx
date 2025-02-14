@@ -95,17 +95,17 @@ const StatePage2 : React.FC<Pick<statePage, 'setStatePage' | 'statePage' | 'dayI
         }
 
         {selectedMenu.length > 0 && (
-          <div className="flex w-screen justify-center">
+          <div className="flex flex-col w-screen justify-center items-center my-8 gap-3">
             <button
               onClick={handleSubmit}
-              className="fixed bottom-24 w-10/12 bg-orange300 text-white py-4 rounded-xl text-body1 font-bold"
+              className="flex bottom-24 w-10/12 justify-center items-center bg-orange300 text-white py-4 rounded-xl text-body1 font-bold"
             >
               สร้างใหม่
             </button>
 
             <button
               onClick={handleSubmit}
-              className="fixed bottom-6 w-10/12 bg-sec border border-orange300 text-orange300 py-4 rounded-xl text-body1 font-bold"
+              className="flex bottom-6 w-10/12 justify-center items-center bg-sec border border-orange300 text-orange300 py-4 rounded-xl text-body1 font-bold"
             >
               ยกเลิก
             </button>

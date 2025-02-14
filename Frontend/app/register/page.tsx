@@ -3,26 +3,27 @@ import React, { useEffect, useState } from "react";
 import TitleBarStatePage from "@/Components/TitleBarStatePage";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import StatePage1 from "./Register1";
+import StatePage2 from "./Register2";
+// import RegisterInterface from "@/Interfaces/RegisterInterface";
 
 export default function Register() {
 
     const [name, setName] = useState("")
-    const [gender, setGender] = useState("Male");
-    const [kidneyLevel, setKidneyLevel] = useState(0);
+    const [gender, setGender] = useState("Male")
+    const [kidneyLevel, setKidneyLevel] = useState(0)
     const [birthdate, setBirthdate] = useState(() => {
-        const initialDate = new Date("2025-02-14T17:00:00.000Z");
-        return initialDate.toISOString();
+        const initialDate = new Date("2025-02-14T17:00:00.000")
+        return initialDate.toISOString()
     });
-
     const [dialysis, setDialysis] = useState(false)
-    const [age, setAge] = useState("");
-    const [height, setHeight] = useState<number>(0);
-    const [weight, setWeight] = useState<number>(0);
+    const [age, setAge] = useState("")
+    const [height, setHeight] = useState<number>(0)
+    const [weight, setWeight] = useState<number>(0)
     const [statePage, setStatePage] = useState(0)
+    const [selectCondition, setSelectCondition] = useState<number[]>([])
 
-    useEffect(() => {
-        console.log(kidneyLevel)
-    })
+
+
 
     const handleBirthdateChange = (e) => {
         const inputDate = new Date(e.target.value);
@@ -41,7 +42,7 @@ export default function Register() {
 
     const handleBirthdatetoISO = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedDate = event.target.value; 
-        const newDate = new Date(`${selectedDate}T17:00:00.000Z`).toISOString();
+        const newDate = new Date(`${selectedDate}T17:00:00.000`).toISOString();
         setBirthdate(newDate);
     };
 
@@ -63,9 +64,6 @@ export default function Register() {
                             ข้อมูลนี้จะถูกนำไปใช้เพื่อวัตถุประสงค์ในการคำนวณสารอาหารเท่านั้น โดยไม่มีการเปิดเผยหรือแบ่งปันข้อมูลส่วนตัวใดๆ เพื่อความปลอดภัยและความเป็นส่วนตัวสูงสุดของคุณ
                         </p>
                     </header>
-
-                    <form>
-
                         {/* ชื่อเล่น */}
                         <div className="mb-4">
                             <label htmlFor="nickname" className="block text- font-bold text-body1 mb-1">
@@ -233,18 +231,36 @@ export default function Register() {
 
                         {/* ปุ่มถัดไป */}
                         <button
-                            type="submit"
-                            className="w-full bg-[#FF7E2E] text-white font-bold py-2 rounded-lg hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                            onClick={() => setStatePage(1)}
+                            disabled={name === "" || birthdate === "" || kidneyLevel === 0 || height === 0 || weight === 0}
+                            className="flex w-full bg-[#FF7E2E] text-white justify-center items-center font-bold py-2 rounded-lg hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-400"
                         >
                             ถัดไป
                         </button>
-                    </form>
+
                 </main>
             </div>
         </div>
         }
 
-        {statePage === 1 && <StatePage1/>}
+        {statePage === 1 && <StatePage1 statePage={statePage}
+                                        setStatePage={setStatePage}
+                                        setSelectCondition={setSelectCondition}
+                                        selectCondition={selectCondition}
+                                        />}
+
+        {statePage === 2 && <StatePage2 statePage={statePage}
+                                        setStatePage={setStatePage}
+                                        selectCondition={selectCondition}
+                                        setSelectCondition={setSelectCondition}
+                                        name={name}
+                                        birthdate={birthdate}
+                                        weight={weight}
+                                        height={height}
+                                        gender={gender}
+                                        kidneyLevel={kidneyLevel}
+                                        dialysis={dialysis}
+                                        />}
     </>
     );
     }

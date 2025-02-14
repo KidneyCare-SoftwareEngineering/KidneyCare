@@ -46,7 +46,7 @@ export default function CreatePlan() {
         <div className="flex relative flex-col w-full h-full min-h-screen bg-sec items-center">
             <TitleBar title="ระยะเวลาในการวางแผน" href="/mealplan"/>
 
-              <p className='text-body1 font-bold pt-20'>เลือกระยะเวลาที่ท่านต้องการวางแผนมื้ออาหาร</p>
+              <p className='text-body1 font-bold pt-16'>เลือกระยะเวลาที่ท่านต้องการวางแผนมื้ออาหาร</p>
 
               <Dropdown 
                 selectedOption={selectedOption}
@@ -58,7 +58,7 @@ export default function CreatePlan() {
                 :
                 <div 
                   onClick={() =>  handleGenMealPlan() }
-                  className="flex absolute w-10/12 h-16 bottom-8 bg-orange300 font-bold text-body1 text-white rounded-xl justify-center items-center">
+                  className="flex absolute w-10/12  h-14 bottom-24 bg-orange300 font-bold text-body1 text-white rounded-xl justify-center items-center">
                     สร้างแผนมื้ออาหาร
                 </div>
               }
@@ -69,6 +69,7 @@ export default function CreatePlan() {
                             setStatePage={setStatePage} 
                             statePage={statePage} 
                             mealPlan={mealPlan}
+                            dayIndex={dayIndex}
                             setDayIndex={setDayIndex}/>}
 
       {statePage === 2 && <StatePage2

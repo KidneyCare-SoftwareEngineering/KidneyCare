@@ -20,7 +20,7 @@ const Dropdown : React.FC<SendData> = ({selectedOption, setSelectedOption, setSe
   };
 
   return (
-    <div className="relative w-10/12 mt-8">
+    <div className="relative w-10/12 mt-4">
 
       <button
         onClick={() => setIsOpen(!isOpen)}

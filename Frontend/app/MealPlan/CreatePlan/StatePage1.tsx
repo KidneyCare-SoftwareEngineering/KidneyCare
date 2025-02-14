@@ -5,13 +5,19 @@ import statePage from '@/Interfaces/StatePage'
 import { MealplanInterface }  from '@/Interfaces/FoodInterface'
 
 
-const StatePage1 : React.FC<statePage & MealplanInterface > = ({setStatePage, statePage, mealPlan, setDayIndex}) => {
+const StatePage1 : React.FC<statePage & MealplanInterface > = ({setStatePage, statePage, mealPlan, setDayIndex, dayIndex}) => {
     
     return (
     <>
-        <div className="flex w-full h-screen flex-col items-center  bg-sec">
+        <div className="flex w-full h-screen flex-col items-center pb-10  bg-sec">
             <TitleBarStatePage title="รายการอาหารของคุณ" statePage={statePage} setStatePage={setStatePage}/>
+            <img
+                src="/Untitled-3.jpg"
+                className="flex w-full"
+              />
             
+            <div className="flex w-full px-6 pt-6 text-heading4 font-bold">แผนอาหารทั้งหมด 3 วัน</div>
+            <div className="flex w-full px-6 pt-2 text-body2 text-grey300">สามารถดูและปรับแต่งเมนูในแต่ละวันได้</div>
             {mealPlan.mealplans.map((data,index) => (
                 <div 
                     key={index} 
