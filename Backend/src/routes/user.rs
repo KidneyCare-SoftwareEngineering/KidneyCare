@@ -1,3 +1,4 @@
+use axum::Extension;
 // routes/user.rs
 use axum::{extract::State, http::StatusCode, Json};
 use chrono::{Datelike, NaiveDate, Utc};
@@ -8,7 +9,7 @@ use crate::models::user::CreateUser;
 use crate::db::queries::{insert_user, insert_nutrient_limits, insert_user_relations};
 
 pub async fn create_user(
-    State(pg_pool): State<PgPool>,
+    Extension(pg_pool): Extension<PgPool>,
     Json(payload): Json<CreateUser>,
 ) -> Result<(StatusCode, Json<Value>), (StatusCode, String)> {
     let mut tx = pg_pool.begin().await.map_err(|_| {

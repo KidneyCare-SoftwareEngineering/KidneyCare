@@ -11,17 +11,17 @@ pub struct UserData {
     pub days: i32,
 }
 
-#[derive(Serialize)]
-pub struct Response {
-    pub data: ResponseData,
-}
+// #[derive(Serialize)]
+// pub struct Response {
+//     pub data: ResponseData,
+// }
 
-#[derive(Serialize)]
-pub struct ResponseData {
-    pub days: i32,
-    pub food_menus: Vec<FoodMenu>,
-    pub nutrition_limit_per_day: NutritionLimit,
-}
+// #[derive(Serialize)]
+// pub struct ResponseData {
+//     pub days: i32,
+//     pub food_menus: Vec<FoodMenu>,
+//     pub nutrition_limit_per_day: NutritionLimit,
+// }
 
 #[derive(Serialize)]
 pub struct FoodMenu {
@@ -52,21 +52,33 @@ pub struct NutritionLimit {
     pub sodium: f32,
 }
 
+#[derive(Serialize)]
+pub struct Response {
+    pub data: ResponseData,
+}
+
+#[derive(Serialize)]
+pub struct ResponseData {
+    pub user_line_id: String,  // Add this field
+    pub days: i32,
+    pub food_menus: Vec<FoodMenu>,
+    pub nutrition_limit_per_day: NutritionLimit,
+}
+
 #[axum::debug_handler]
 pub async fn create_meal_plan(
     Extension(pg_pool): Extension<PgPool>,
     Json(payload): Json<MealPlanRequest>,
-) -> Result<Json<Response>, (StatusCode, String)> {
+) -> Result<Json<ResponseData>, (StatusCode, String)> { // Change the return type to ResponseData
     // Step 1: Get user_id from user_line_id (u_id)
     let user_id = sqlx::query!(
-        "SELECT user_id FROM users WHERE user_line_id = $1",
+        "SELECT user_id, user_line_id FROM users WHERE user_line_id = $1",
         payload.data.u_id
     )
     .fetch_optional(&pg_pool)
     .await
     .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Error fetching user".to_string()))?
-    .ok_or((StatusCode::NOT_FOUND, "User not found".to_string()))?
-    .user_id;
+    .ok_or((StatusCode::NOT_FOUND, "User not found".to_string()))?;
 
     // Step 2: Filter out recipes based on allergies
     let filtered_recipes = sqlx::query!(
@@ -80,14 +92,17 @@ pub async fn create_meal_plan(
             COALESCE(SUM(rn.quantity), 0) as potassium,
             COALESCE(SUM(rn.quantity), 0) as calories
         FROM recipes r
-        LEFT JOIN recipes_ingredient_allergies ria ON r.recipe_id = ria.recipe_id
-        LEFT JOIN users_ingredient_allergies uia ON ria.ingredient_allergy_id = uia.ingredient_allergy_id
-        LEFT JOIN users u ON u.user_id = uia.user_id
         LEFT JOIN recipes_nutrients rn ON r.recipe_id = rn.recipe_id
-        WHERE u.user_id = $1
+        WHERE NOT EXISTS (
+            SELECT 1 
+            FROM recipes_ingredient_allergies ria
+            JOIN users_ingredient_allergies uia ON ria.ingredient_allergy_id = uia.ingredient_allergy_id
+            JOIN users u ON u.user_id = uia.user_id
+            WHERE u.user_id = $1 AND ria.recipe_id = r.recipe_id
+        )
         GROUP BY r.recipe_id
         "#,
-        user_id
+        user_id.user_id
     )
     .fetch_all(&pg_pool)
     .await
@@ -96,7 +111,7 @@ pub async fn create_meal_plan(
     // Step 3: Get nutrition limit per day
     let nutrition_limit = sqlx::query!(
         "SELECT nutrient_id, nutrient_limit FROM users_nutrients_limit_per_day WHERE user_id = $1",
-        user_id
+        user_id.user_id
     )
     .fetch_all(&pg_pool)
     .await
@@ -143,29 +158,10 @@ pub async fn create_meal_plan(
         })
         .collect();
 
-    Ok(Json(Response {
-        data: ResponseData {
-            days: payload.data.days as i32,
-            food_menus,
-            nutrition_limit_per_day: nutrition_map,
-        },
+    Ok(Json(ResponseData {
+        user_line_id: user_id.user_line_id.unwrap_or_default(), // Add user_line_id to the response
+        days: payload.data.days as i32,
+        food_menus,
+        nutrition_limit_per_day: nutrition_map,
     }))
-}
-
-pub async fn get_limit() -> Result<Json<serde_json::Value>, (StatusCode, String)> {
-    let file = File::open("src/mockup_data/data_to_ai.json").map_err(|_| {
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "Failed to open data file".to_string(),
-        )
-    })?;
-    let reader = BufReader::new(file);
-    let data: serde_json::Value = serde_json::from_reader(reader).map_err(|_| {
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "Failed to read data file".to_string(),
-        )
-    })?;
-
-    Ok(Json(data))
 }
