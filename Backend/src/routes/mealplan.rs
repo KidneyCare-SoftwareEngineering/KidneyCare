@@ -5,6 +5,8 @@ use axum::{
 };
 use serde_json::Value;
 use crate::models::mealplan::MealPlanRequest;
+
+#[axum::debug_handler]
 pub async fn get_meal_plan(
     Json(payload): Json<MealPlanRequest>,
 ) -> Result<Json<Value>, (StatusCode, String)> {
