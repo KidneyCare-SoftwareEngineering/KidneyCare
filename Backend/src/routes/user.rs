@@ -1,3 +1,4 @@
+use axum::Extension;
 // routes/user.rs
 use axum::{extract::State, http::StatusCode, Json};
 use chrono::{Datelike, NaiveDate, Utc};
@@ -8,7 +9,7 @@ use crate::models::user::CreateUser;
 use crate::db::queries::{insert_user, insert_nutrient_limits, insert_user_relations};
 
 pub async fn create_user(
-    State(pg_pool): State<PgPool>,
+    Extension(pg_pool): Extension<PgPool>,
     Json(payload): Json<CreateUser>,
 ) -> Result<(StatusCode, Json<Value>), (StatusCode, String)> {
     let mut tx = pg_pool.begin().await.map_err(|_| {
@@ -32,11 +33,7 @@ pub async fn create_user(
 
     // Insert user into the database
     let user_id = insert_user(&payload, &mut tx).await?;
-
-    // Insert nutrient limits for the user
     insert_nutrient_limits(user_id, payload.weight as f32, age, kidney_level, kidney_dialysis, &mut tx).await?;
-
-    // Insert user relations (food conditions, diseases, allergies)
     insert_user_relations(user_id, &payload, &mut tx).await?;
 
     tx.commit().await.map_err(|_| {

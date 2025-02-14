@@ -216,11 +216,12 @@ pub async fn insert_nutrient_limits(
 
     let nutrient_limits = vec![
         (1, protein),
-        (2, energy),
+        (2, -1.0),
         (3, -1.0),
         (4, 2000.0),
         (5, 900.0),
         (6, 2500.0),
+        (7, energy)
     ];
 
     for (nutrient_id, limit) in nutrient_limits {
