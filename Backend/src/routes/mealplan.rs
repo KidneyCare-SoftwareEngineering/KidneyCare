@@ -62,7 +62,7 @@ pub struct UpdateMealPlanRequestWithoutDays {
 
 #[derive(Serialize)]
 pub struct UpdateMealPlanResponse {
-    pub user_id: String,
+    pub user_line_id: String,
     pub days: i32,
     pub nutrition_limit_per_day: NutritionLimit,
     pub food_menus: Vec<FoodMenu>,
@@ -189,13 +189,15 @@ pub async fn update_meal_plan(
 ) -> Result<Json<serde_json::Value>, (StatusCode, String)> {
     // Fetch user information
     let user = sqlx::query!(
-        "SELECT user_id FROM users WHERE user_line_id = $1",
+        "SELECT user_id, user_line_id FROM users WHERE user_line_id = $1",
         payload.user_id
     )
     .fetch_optional(&pg_pool)
     .await
     .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Error fetching user".to_string()))?
     .ok_or((StatusCode::NOT_FOUND, "User not found".to_string()))?;
+
+    let user_line_id = user.user_line_id.ok_or((StatusCode::NOT_FOUND, "User LINE ID not found".to_string()))?;
 
     // Fetch food menus that the user is not allergic to
     let filtered_recipes = sqlx::query!(
@@ -278,12 +280,12 @@ pub async fn update_meal_plan(
 
     // Construct the response to send to the external API
     let response_data = UpdateMealPlanResponse {
-        user_id: payload.user_id.clone(),
+        user_line_id: user_line_id.clone(),
         days: payload.days,
         nutrition_limit_per_day: nutrition_map,
         food_menus,
         mealplan: UpdateMealPlanRequestWithoutDays {
-            user_id: payload.user_id.clone(),
+            user_id: user_line_id.clone(),
             mealplans: payload.mealplans.clone(),
         },
     };
@@ -292,7 +294,7 @@ pub async fn update_meal_plan(
     let client = Client::new();
     let api_url = "https://ai-rec-1025044834972.asia-southeast1.run.app/ai_update";
 
-    let ai_response = client
+    let mut ai_response = client
         .post(api_url)
         .json(&response_data)
         .send()
@@ -302,6 +304,12 @@ pub async fn update_meal_plan(
         .await
         .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Failed to parse response".to_string()))?;
 
-    // Return the AI response
+    // Rename `user_id` to `user_line_id` in the AI response
+    if let Some(user_id) = ai_response.get("user_id").cloned() {
+        ai_response.as_object_mut().unwrap().remove("user_id");
+        ai_response.as_object_mut().unwrap().insert("user_line_id".to_string(), user_id);
+    }
+
+    // Return the modified AI response
     Ok(Json(ai_response))
 }
