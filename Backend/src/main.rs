@@ -38,6 +38,7 @@ async fn main() {
         // .route("/get_limit", get(get_limit))
         .route("/food_details/{recipe_id}", get(get_food_detail))
         .route("/meal_plan", post(create_meal_plan))
+        .route("/update_meal_plan", post(update_meal_plan))
         .route("/users", post(create_user))
         .layer(Extension(db_pool.clone())); // Use Extension middleware to inject db_pool
 
