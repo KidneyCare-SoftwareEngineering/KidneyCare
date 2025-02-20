@@ -52,14 +52,21 @@ pub async fn upload_image_to_supabase(image_data: Vec<u8>, file_name: &str) -> R
     })?;
     println!("Raw response body: {}", response_text);
 
-    let upload_response = serde_json::from_str::<UploadResponse>(&response_text).map_err(|e| {
+    let upload_response: serde_json::Value = serde_json::from_str(&response_text).map_err(|e| {
         let error_message = format!("Failed to parse response: {}", e);
         println!("{}", error_message);
         error_message
     })?;
 
+    let image_urls = upload_response["imageUrls"]
+        .as_array()
+        .ok_or_else(|| "Missing field `imageUrls` in response".to_string())?
+        .iter()
+        .map(|url| url.as_str().unwrap_or_default().to_string())
+        .collect();
+
     println!("Supabase Upload Time: {:?}", start.elapsed());
-    Ok(upload_response.image_urls)
+    Ok(image_urls)
 }
 
 #[axum::debug_handler]
@@ -95,6 +102,16 @@ pub async fn handle_image_upload(mut multipart: Multipart) -> Result<Json<Upload
                 ));
             }
 
+            // Check if the file is a valid image
+            if let Err(e) = ImageReader::new(Cursor::new(&data)).with_guessed_format() {
+                let error_message = format!("Invalid file type: {}", e);
+                println!("{}", error_message);
+                return Err((
+                    StatusCode::BAD_REQUEST,
+                    Json(ErrorResponse { error: error_message }),
+                ));
+            }
+
             let image_data = data.to_vec();
 
             match upload_image_to_supabase(image_data, &file_name).await {
@@ -109,6 +126,13 @@ pub async fn handle_image_upload(mut multipart: Multipart) -> Result<Json<Upload
                     ));
                 },
             }
+        } else {
+            let error_message = "No image uploaded".to_string();
+            println!("{}", error_message);
+            return Err((
+                StatusCode::BAD_REQUEST,
+                Json(ErrorResponse { error: error_message }),
+            ));
         }
     }
 
