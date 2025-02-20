@@ -1,73 +1,11 @@
-use crate::models::mealplan::MealPlanRequest;
 use axum::{http::StatusCode, Extension, Json};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
+// use crate::models::user::UserData;
+use crate::models::mealplan::*;
 
-#[derive(Deserialize)]
-pub struct UserData {
-    pub u_id: String,
-    pub days: i32,
-}
 
-#[derive(Serialize)]
-pub struct FoodMenu {
-    pub name: String,
-    pub nutrition: Nutrition,
-    pub recipe_id: String,
-}
-
-#[derive(Serialize)]
-pub struct Nutrition {
-    pub calories: f32,
-    pub carbs: f32,
-    pub fat: f32,
-    pub phosphorus: f32,
-    pub potassium: f32,
-    pub protein: f32,
-    pub sodium: f32,
-}
-
-#[derive(Serialize)]
-pub struct NutritionLimit {
-    pub calories: f32,
-    pub carbs: f32,
-    pub fat: f32,
-    pub phosphorus: f32,
-    pub potassium: f32,
-    pub protein: f32,
-    pub sodium: f32,
-}
-
-#[derive(Serialize)]
-pub struct ResponseData {
-    pub user_line_id: String,
-    pub days: i32,
-    pub food_menus: Vec<FoodMenu>,
-    pub nutrition_limit_per_day: NutritionLimit,
-}
-
-#[derive(Deserialize, Serialize)]
-pub struct UpdateMealPlanRequest {
-    pub user_id: String,
-    pub days: i32,
-    pub mealplans: Vec<Vec<serde_json::Value>>, // Keeping mealplans as generic JSON
-}
-
-#[derive(Deserialize, Serialize)]
-pub struct UpdateMealPlanRequestWithoutDays {
-    pub user_id: String,
-    pub mealplans: Vec<Vec<serde_json::Value>>, // Keeping mealplans as generic JSON
-}
-
-#[derive(Serialize)]
-pub struct UpdateMealPlanResponse {
-    pub user_line_id: String,
-    pub days: i32,
-    pub nutrition_limit_per_day: NutritionLimit,
-    pub food_menus: Vec<FoodMenu>,
-    pub mealplan: UpdateMealPlanRequestWithoutDays,
-}
 
 #[axum::debug_handler]
 pub async fn create_meal_plan(

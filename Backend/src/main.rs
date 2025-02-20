@@ -5,6 +5,7 @@ use axum::{
 use backend::routes::food::*;
 use backend::routes::mealplan::*;
 use backend::routes::user::*;
+use backend::routes::pill::*;
 use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
 
@@ -35,12 +36,12 @@ async fn main() {
         .route("/", get(|| async { "Hello, World!" }))
         .route("/food_details", get(get_food_details))
         .route("/food_cards", get(get_food_cards))
-        // .route("/get_limit", get(get_limit))
         .route("/food_details/{recipe_id}", get(get_food_detail))
         .route("/meal_plan", post(create_meal_plan))
         .route("/update_meal_plan", post(update_meal_plan))
         .route("/users", post(create_user))
-        .layer(Extension(db_pool.clone())); // Use Extension middleware to inject db_pool
+        .route("/add_pill_test", post(handle_image_upload))
+        .layer(Extension(db_pool.clone()));
 
     axum::serve(listener, app)
         .await

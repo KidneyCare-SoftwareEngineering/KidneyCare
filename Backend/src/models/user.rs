@@ -26,3 +26,9 @@ where
     let date_str: String = Deserialize::deserialize(deserializer)?;
     PrimitiveDateTime::parse(&date_str, &Iso8601::DEFAULT).map_err(D::Error::custom)
 }
+
+#[derive(Deserialize)]
+pub struct UserData {
+    pub u_id: String,
+    pub days: i32,
+}
