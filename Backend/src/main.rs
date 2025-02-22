@@ -40,7 +40,7 @@ async fn main() {
         .route("/meal_plan", post(create_meal_plan))
         .route("/update_meal_plan", post(update_meal_plan))
         .route("/users", post(create_user))
-        .route("/add_pill_test", post(handle_image_upload))
+        .route("/add_pill", post(handle_image_upload))
         .layer(Extension(db_pool.clone()));
 
     axum::serve(listener, app)
