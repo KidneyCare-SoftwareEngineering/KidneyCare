@@ -215,6 +215,7 @@ dependencies = [
  "dotenvy",
  "hyper 0.14.32",
  "image",
+ "md-5",
  "reqwest",
  "serde",
  "serde_json",
@@ -2367,6 +2368,7 @@ dependencies = [
  "tokio-stream",
  "tracing",
  "url",
+ "uuid",
 ]
 
 [[package]]
@@ -2449,6 +2451,7 @@ dependencies = [
  "thiserror 2.0.11",
  "time",
  "tracing",
+ "uuid",
  "whoami",
 ]
 
@@ -2488,6 +2491,7 @@ dependencies = [
  "thiserror 2.0.11",
  "time",
  "tracing",
+ "uuid",
  "whoami",
 ]
 
@@ -2514,6 +2518,7 @@ dependencies = [
  "time",
  "tracing",
  "url",
+ "uuid",
 ]
 
 [[package]]
@@ -2982,6 +2987,12 @@ name = "utf8_iter"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6c140620e7ffbb22c2dee59cafe6084a59b5ffc27a8859a5f0d494b5d52b6be"
+
+[[package]]
+name = "uuid"
+version = "1.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b3758f5e68192bb96cc8f9b7e2c2cfdabb435499a28499a42f8f984092adad4b"
 
 [[package]]
 name = "v_frame"

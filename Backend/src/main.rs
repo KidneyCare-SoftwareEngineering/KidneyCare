@@ -6,6 +6,7 @@ use backend::routes::food::*;
 use backend::routes::mealplan::*;
 use backend::routes::user::*;
 use backend::routes::pill::*;
+use backend::routes::admin::*;
 use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
 
@@ -42,6 +43,7 @@ async fn main() {
         .route("/users", post(create_user))
         .route("/add_pill", post(handle_image_upload))
         .route("/get_pill_by_id", get(get_pill_by_user_line_id))
+        .route("/admin_login", post(admin_login))
         // .route("/get_pills", get(get_pill_by_user_line_id)) // Change to GET and use query
         .layer(Extension(db_pool.clone()));
 
