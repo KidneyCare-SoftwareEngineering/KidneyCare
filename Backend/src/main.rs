@@ -41,6 +41,8 @@ async fn main() {
         .route("/update_meal_plan", post(update_meal_plan))
         .route("/users", post(create_user))
         .route("/add_pill", post(handle_image_upload))
+        .route("/get_pill_by_id", get(get_pill_by_user_line_id))
+        // .route("/get_pills", get(get_pill_by_user_line_id)) // Change to GET and use query
         .layer(Extension(db_pool.clone()));
 
     axum::serve(listener, app)

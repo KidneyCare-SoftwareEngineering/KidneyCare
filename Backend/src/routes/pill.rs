@@ -1,4 +1,4 @@
-use axum::{extract::Multipart, Extension, Json};
+use axum::{extract::Multipart, extract::Query, Extension, Json};
 use chrono::{NaiveDateTime, ParseError};
 use image::io::Reader as ImageReader;
 use reqwest::{Client, StatusCode};
@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPool;
 use std::io::Cursor;
 use std::time::Instant;
+use std::collections::HashMap;
+use sqlx::FromRow;
 
 #[derive(Deserialize, Serialize)]
 pub struct UploadResponse {
@@ -24,6 +26,28 @@ pub struct ErrorResponse {
     error: String,
 }
 
+#[derive(Serialize)]
+pub struct MedicineResponse {
+    medicines: Vec<MedicineEntry>,
+}
+
+#[derive(Deserialize)]
+pub struct UserQuery {
+    user_line_id: String,
+}
+
+#[derive(Serialize, FromRow)]
+pub struct MedicineEntry {
+    user_medicine_id: i32,
+    medicine_schedule: Vec<NaiveDateTime>,
+    medicine_amount: Option<i32>,
+    medicine_per_times: f64,
+    user_medicine_img_link: Vec<String>,
+    medicine_unit: Option<String>,
+    medicine_name: Option<String>,
+    medicine_note: Option<String>,
+}
+
 const MAX_IMAGE_SIZE: usize = 30 * 1024 * 1024;
 const UPLOAD_URL: &str = "http://localhost:3000/image";
 
@@ -31,9 +55,7 @@ fn parse_schedule_to_timestamps(schedule: Vec<String>) -> Result<Vec<NaiveDateTi
     schedule
         .into_iter()
         .map(|s| {
-            println!("Parsing schedule: {}", s);
             let parsed = NaiveDateTime::parse_from_str(&s, "%Y-%m-%dT%H:%M:%S")?;
-            println!("Parsed schedule: {}", parsed);
             Ok(parsed)
         })
         .collect()
@@ -82,7 +104,6 @@ pub async fn upload_image_to_supabase(
         .text()
         .await
         .map_err(|e| format!("Failed to read response text: {}", e))?;
-    println!("Raw response body: {}", response_text);
 
     let upload_response: serde_json::Value = serde_json::from_str(&response_text)
         .map_err(|e| format!("Failed to parse response: {}", e))?;
@@ -94,7 +115,6 @@ pub async fn upload_image_to_supabase(
         .map(|url| url.as_str().unwrap_or_default().to_string())
         .collect();
 
-    println!("Supabase Upload Time: {:?}", start.elapsed());
     Ok(image_urls)
 }
 
@@ -143,7 +163,6 @@ pub async fn handle_image_upload(
     Extension(db_pool): Extension<PgPool>,
     mut multipart: Multipart,
 ) -> Result<Json<UploadResponse>, (StatusCode, Json<ErrorResponse>)> {
-    // let start = Instant::now();
     let mut image_urls = Vec::new();
     let mut medicine_name = String::new();
     let mut medicine_amount = 0;
@@ -246,4 +265,36 @@ pub async fn handle_image_upload(
         medicine_note,
         medicine_unit,
     }))
+}
+
+pub async fn get_pill_by_user_line_id(
+    Extension(db_pool): Extension<PgPool>,
+    Query(params): Query<UserQuery>,
+) -> Result<Json<MedicineResponse>, (axum::http::StatusCode, Json<HashMap<&'static str, String>>)> {
+    let user_id = match get_user_id_by_line_id(&db_pool, &params.user_line_id).await {
+        Ok(id) => id,
+        Err(e) => {
+            let mut error_response = HashMap::new();
+            error_response.insert("error", e);
+            return Err((axum::http::StatusCode::BAD_REQUEST, Json(error_response)));
+        }
+    };
+
+    let query = r#"
+        SELECT user_medicine_id, medicine_schedule, medicine_amount, medicine_per_times, 
+               user_medicine_img_link, medicine_unit, medicine_name, medicine_note
+        FROM user_medicines WHERE user_id = $1
+    "#;
+
+    let medicines = sqlx::query_as::<_, MedicineEntry>(query)
+        .bind(user_id)
+        .fetch_all(&db_pool)
+        .await
+        .map_err(|e| {
+            let mut error_response = HashMap::new();
+            error_response.insert("error", format!("Error fetching medicines: {}", e));
+            (axum::http::StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+        })?;
+
+    Ok(Json(MedicineResponse { medicines }))
 }
