@@ -64,13 +64,13 @@ const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFood
   };
 
   const uploadImage = async (file: File) => {
-    setIsLoading(true); // เริ่มโหลด แสดง SpinLoader
+    setIsLoading(true); 
     const formData = new FormData();
     formData.append("file", file);
 
     try {
       const response = await fetch(
-        "https://detect.roboflow.com/se3-zhodg/1?api_key=CDt5EvLTSO3JyZJerIe2",
+        "https://detect.roboflow.com/se3-zhodg/1?xxx", //on edit
         { method: "POST", body: formData }
       );
       const result = await response.json();
@@ -82,7 +82,7 @@ const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFood
     } catch (error) {
       console.error("Error uploading image:", error);
     } finally {
-      setIsLoading(false); // โหลดเสร็จแล้ว ซ่อน SpinLoader
+      setIsLoading(false); 
     }
   };
 
@@ -111,7 +111,7 @@ const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFood
         <label className="flex border border-grey300 justify-center items-center w-12 h-12 bg-white rounded-lg cursor-pointer">
           <input type="file" className="hidden" onChange={handleImageUpload} />
           {isLoading ? (
-            <FaSpinner className="animate-spin text-gray-500" size={24} /> // แสดง SpinLoader
+            <FaSpinner className="animate-spin text-gray-500" size={24} /> 
           ) : (
             <Icon icon="mdi:camera" width="24" />
           )}
