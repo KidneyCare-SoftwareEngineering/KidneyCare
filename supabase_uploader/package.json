@@ -1,0 +1,21 @@
+{
+  "name": "elysia-supabase",
+  "version": "1.0.50",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "bun run --watch src/index.ts"
+  },
+  "dependencies": {
+    "@elysiajs/cookie": "^0.3.0-rc.3",
+    "@elysiajs/eden": "^1.2.0",
+    "@supabase/supabase-js": "^2.48.1",
+    "@types/uuid": "^10.0.0",
+    "elysia": "^1.2.14",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.2",
+    "bun-types": "latest"
+  },
+  "module": "src/index.js"
+}
