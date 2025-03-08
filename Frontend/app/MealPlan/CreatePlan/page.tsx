@@ -5,17 +5,20 @@ import StatePage1 from './StatePage1'
 import TitleBar from '@/Components/TitleBar'
 import Dropdown from '@/Components/Dropdown'
 import StatePage2 from './StatePage2'
-
+import { MealplanInterface } from '@/Interfaces/FoodInterface'
 
 
 export default function CreatePlan() {
   const [selectedOption, setSelectedOption] = useState("เลือกระยะเวลา");
-  const [selectedValue, setSelectedValue] = useState(0);
-  const [statePage, setStatePage] = useState(0);
-  const [mealPlan, setMealPlan] = useState([]);
+  const [selectedValue, setSelectedValue] = useState<number>(0);
+  const [statePage, setStatePage] = useState<number>(0);
+  const [mealPlan, setMealPlan] = useState<MealplanInterface>({
+    mealplans: [],
+    user_line_id: "",
+  });
   const [dayIndex, setDayIndex] = useState(0);
 
-  const u_id ="mfkidsmomwlknwe"
+  const u_id =  "U12345678901"
 
   const SendToMealPlan = {
     data: {
@@ -24,20 +27,21 @@ export default function CreatePlan() {
     }
   };
 
-  const handleGenMealPlan = async() => {
-    await fetch('http://127.0.0.1:7878/meal_plan', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(SendToMealPlan),
-    })
-    .then(response => response.json())
-    .then(data => {
-      setMealPlan(data)
-      setStatePage(1)
-    })
-    .catch(error => console.error('Error:', error));
+  const handleGenMealPlan = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:7878/meal_plan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(SendToMealPlan),
+      });
+      const data = await response.json();
+      setMealPlan(data);
+      setStatePage(1);
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
   
   return (
@@ -65,17 +69,18 @@ export default function CreatePlan() {
         </div>
       }
 
-      {statePage === 1 && <StatePage1 
+      {statePage === 1 &&  <StatePage1 
                             setStatePage={setStatePage} 
                             statePage={statePage} 
                             mealPlan={mealPlan}
-                            dayIndex={dayIndex}
                             setDayIndex={setDayIndex}/>}
 
       {statePage === 2 && <StatePage2
                             setStatePage={setStatePage} 
+                            selectedValue={selectedValue}
                             statePage={statePage} 
                             mealPlan={mealPlan}
+                            setMealPlan={setMealPlan}
                             dayIndex={dayIndex}/>}
     </>
   )

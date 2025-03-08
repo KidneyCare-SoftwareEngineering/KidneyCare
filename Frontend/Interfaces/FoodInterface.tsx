@@ -17,32 +17,44 @@ export interface FoodInterface {
     }[]
 }
 
-
 export interface MealplanInterface {
-    mealPlan: {
-        mealplans: {
-            meals: {
-                name: string;
-                nutrition: {
-                    calories: number;
-                    carbs: number;
-                    fat: number;
-                    phosphorus: number;
-                    potassium: number;
-                    protein: number;
-                    sodium: number;
-                };
-                recipe_id: string;
-            }[];
-            total_nutrition: {
-                calories: number;
-                carbs: number;
-                fat: number;
-                phosphorus: number;
-                potassium: number;
-                protein: number;
-                sodium: number;
-            };
-        }[];
-    }[];
+    mealplans: Array<Array<{
+        name: string;
+        nutrition: {
+            calories: number;
+            carbs: number;
+            fat: number;
+            phosphorus: number;
+            potassium: number;
+            protein: number;
+            sodium: number;
+        };
+        recipe_id: string;
+        image_url: string;
+    }>>;
+    user_line_id: string;
+
+    medicines?: Array<{
+        user_medicine_id: number;
+        medicine_schedule: string[]; 
+        medicine_amount: number;
+        medicine_per_times: number;
+        user_medicine_img_link: string[];
+        medicine_unit: string;
+        medicine_name: string;
+        medicine_note: string;
+    }>
 }
+
+// export interface MedicineData extends MealplanInterface {
+//     user_medicine_id: number;
+//     medicine_schedule: string[]; 
+//     medicine_amount: number;
+//     medicine_per_times: number;
+//     user_medicine_img_link: string[];
+//     medicine_unit: string;
+//     medicine_name: string;
+//     medicine_note: string;
+
+//   }
+  

@@ -1,6 +1,7 @@
 use axum::{
     routing::{get, post},
     Extension, Router,
+    http::{header::HeaderValue, Method, StatusCode},
 };
 use backend::routes::food::*;
 use backend::routes::mealplan::*;
@@ -8,6 +9,8 @@ use backend::routes::user::*;
 use backend::routes::pill::*;
 use backend::routes::admin::*;
 use sqlx::postgres::PgPoolOptions;
+
+use tower_http::cors::{Any, CorsLayer};
 use tokio::net::TcpListener;
 use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc, Datelike};
 use time::{format_description::well_known::{iso8601, Iso8601}, Date, PrimitiveDateTime, Time};

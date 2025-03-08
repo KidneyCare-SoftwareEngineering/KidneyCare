@@ -38,6 +38,7 @@ export default {
   			fillstrock: '#FFE6D7',
   			orange300: '#FF7E2E',
   			orange400: '#CD6525',
+  			grey200: '#CCCCCC',
   			grey300: '#7A7A7A',
   			grey500: '#4C4C4C',
   			card: {

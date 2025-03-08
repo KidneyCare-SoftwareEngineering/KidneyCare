@@ -1,11 +1,11 @@
 import React from 'react'
 import { Icon } from '@iconify/react/dist/iconify.js'
 import TitleBarStatePage from '@/Components/TitleBarStatePage'
-import statePage from '@/Interfaces/StatePage'
-import { MealplanInterface }  from '@/Interfaces/FoodInterface'
+import { StatePage1Props } from '@/Interfaces/StatePage'
+import Link from 'next/link'
 
 
-const StatePage1 : React.FC<statePage & MealplanInterface > = ({setStatePage, statePage, mealPlan, setDayIndex, dayIndex}) => {
+const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPlan, setDayIndex}) => {
     
     return (
     <>
@@ -18,7 +18,7 @@ const StatePage1 : React.FC<statePage & MealplanInterface > = ({setStatePage, st
             
             <div className="flex w-full px-6 pt-6 text-heading4 font-bold">แผนอาหารทั้งหมด 3 วัน</div>
             <div className="flex w-full px-6 pt-2 text-body2 text-grey300">สามารถดูและปรับแต่งเมนูในแต่ละวันได้</div>
-            {mealPlan.mealplans.map((data,index) => (
+            {mealPlan?.mealplans.map((data,index) => (
                 <div 
                     key={index} 
                     onClick={() => {
@@ -47,6 +47,19 @@ const StatePage1 : React.FC<statePage & MealplanInterface > = ({setStatePage, st
                     <Icon icon="weui:arrow-filled" height="24px"/>
                 </div>
             </div>
+
+            <button
+                className="flex bottom-24 w-10/12 justify-center items-center bg-orange300 text-white py-4 rounded-xl text-body1 font-bold"
+            >
+            บันทึก
+            </button>
+
+            <Link
+                href="/mealplan"
+                className="flex bottom-24 w-10/12 justify-center items-center border border-orange300 text-orange300 py-4 rounded-xl text-body1 font-bold"
+            >
+            ยกเลิก
+            </Link>
         </div>
     </>
   )

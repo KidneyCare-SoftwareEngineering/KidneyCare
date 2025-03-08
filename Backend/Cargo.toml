@@ -20,7 +20,7 @@ serde_json = {version = "1.0.111"}
 #env
 dotenvy = "0.15.7"
 
-time = { vers ion = "0.3", features = ["serde", "formatting", "parsing", "macros"] }
+time = { version = "0.3", features = ["serde", "formatting", "parsing", "macros"] }
 
 chrono = { version = "0.4", features = ["serde", "clock", "std"] }
 hyper = { version = "0.14", features = ["server"] }  # Added the server feature

@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from 'react'
 import { Icon } from '@iconify/react/dist/iconify.js'
 import TitleBarStatePage from '@/Components/TitleBarStatePage'
-import statePage from '@/Interfaces/StatePage'
 import { MealplanInterface }  from '@/Interfaces/FoodInterface'
+import { StatePage2Props } from '@/Interfaces/StatePage'
 
 
-const StatePage2 : React.FC<Pick<statePage, 'setStatePage' | 'statePage' | 'dayIndex'> & MealplanInterface> = ({
+const StatePage2 : React.FC<StatePage2Props> = ({
   setStatePage, 
   statePage, 
   mealPlan, 
-  dayIndex
+  dayIndex = 0,
+  selectedValue,
+  setMealPlan,
 }) => {
-  const [selectedMenu, setSelectedMenu] = useState<number[]>([]);
-
+  const [selectedMenu, setSelectedMenu] = useState<number[]>([])
+  const updatedMealplans = JSON.parse(JSON.stringify(mealPlan))
+  const [newMealplans, setNewMealplans] = useState<MealplanInterface | Record<string, never>>({})
   
 
   const toggleSelectMenu = (index: number) => {
@@ -21,25 +24,57 @@ const StatePage2 : React.FC<Pick<statePage, 'setStatePage' | 'statePage' | 'dayI
     )
   }
 
-  const prepareDataForBackend = () => {
-    const updatedMealplans = JSON.parse(JSON.stringify(mealPlan))
-    selectedMenu.forEach(index => {
-      updatedMealplans.mealplans[dayIndex].meals[index] = {}
+  const u_id =  "U12345678901"
+
+
+  const dataforupdateAPI = {
+    user_id: u_id,
+    days : selectedValue,
+    mealplans : updatedMealplans.mealplans
+  }
+
+  const handleCreateNewMealplans = async () => {
+    await fetch ('http://127.0.0.1:7878/update_meal_plan', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(dataforupdateAPI),
     })
-    
-    return updatedMealplans
+    .then(response => response.json())
+    .then(data => {
+      setNewMealplans(data)
+      
+    })
+    .catch(error => console.error('Error:', error));
   }
 
   const handleSubmit = () => {
-    const dataToSend = prepareDataForBackend()
-    console.log("Data to send to backend:", dataToSend.mealplans[dayIndex])
-    // async fetch 
-  }
+    if (!newMealplans || !('mealplans' in newMealplans) || Object.keys(newMealplans).length === 0) return;
+    
+    const updatedMealPlan = JSON.parse(JSON.stringify(mealPlan));
+    if (newMealplans.mealplans && dayIndex !== undefined) {
+      updatedMealPlan.mealplans[dayIndex] = newMealplans.mealplans[dayIndex];
+    }
+    
+    if (setMealPlan) { 
+      setMealPlan(updatedMealPlan);
+    }
+    
+    setSelectedMenu([]);
+    setNewMealplans({});
+  };
 
-  // useEffect(() => {
-  //   console.log("เมนูที่เลือกลบ", selectedMenu)
-  //   console.log("mealplans",mealPlan.mealplans[0].meals)
-  // })
+  useEffect(() => {
+    selectedMenu.forEach(index => {
+      updatedMealplans.mealplans[dayIndex][index] = {}
+    })
+  },[selectedMenu])
+
+  useEffect(() => {
+    console.log(mealPlan)
+  },[mealPlan])
+
 
   return (
     <>
@@ -54,7 +89,7 @@ const StatePage2 : React.FC<Pick<statePage, 'setStatePage' | 'statePage' | 'dayI
         </div>
 
 
-        {mealPlan.mealplans[dayIndex].meals.map((data, index) => {
+        {(newMealplans?.mealplans?.[dayIndex] ?? mealPlan.mealplans[dayIndex]).map((data, index) => {
             const isSelected = selectedMenu.includes(index); 
             return (
               <div
@@ -96,15 +131,32 @@ const StatePage2 : React.FC<Pick<statePage, 'setStatePage' | 'statePage' | 'dayI
 
         {selectedMenu.length > 0 && (
           <div className="flex flex-col w-screen justify-center items-center my-8 gap-3">
-            <button
-              onClick={handleSubmit}
-              className="flex bottom-24 w-10/12 justify-center items-center bg-orange300 text-white py-4 rounded-xl text-body1 font-bold"
-            >
-              สร้างใหม่
-            </button>
+
+
+            {Object.keys(newMealplans).length === 0  ? (
+              <button
+                onClick={handleCreateNewMealplans}
+                className="flex bottom-24 w-10/12 justify-center items-center bg-orange300 text-white py-4 rounded-xl text-body1 font-bold"
+              >
+                สร้างใหม่
+              </button>
+              ) 
+              : 
+              (
+              <button
+                onClick={handleSubmit}
+                className="flex bottom-24 w-10/12 justify-center items-center bg-orange300 text-white py-4 rounded-xl text-body1 font-bold"
+              >
+                บันทึก
+              </button>
+              )
+            }
+            
 
             <button
-              onClick={handleSubmit}
+              onClick={() => {setSelectedMenu([])
+                              setNewMealplans({})
+              }}
               className="flex bottom-6 w-10/12 justify-center items-center bg-sec border border-orange300 text-orange300 py-4 rounded-xl text-body1 font-bold"
             >
               ยกเลิก
