@@ -1,4 +1,4 @@
-import React, {useDebugValue, useEffect, useState} from "react";
+import React, {useState} from "react";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";

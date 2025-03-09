@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useState } from 'react'
 import StatePage1 from './StatePage1'
 import TitleBar from '@/Components/TitleBar'

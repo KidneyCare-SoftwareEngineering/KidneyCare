@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     domains: ['profile.line-scdn.net'],
   },
   eslint: {
-    ignoreDuringBuilds: true, 
+    ignoreDuringBuilds: false, 
   },
 };
 

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { Icon } from '@iconify/react/dist/iconify.js'
 import TitleBarStatePage from '@/Components/TitleBarStatePage'
 import { MealplanInterface }  from '@/Interfaces/FoodInterface'
 import { StatePage2Props } from '@/Interfaces/StatePage'

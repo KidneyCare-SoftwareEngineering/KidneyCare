@@ -1,7 +1,5 @@
 'use client';
 import React, { useEffect, useState } from "react";
-import TitleBarStatePage from "@/Components/TitleBarStatePage";
-import { Icon } from "@iconify/react/dist/iconify.js";
 import StatePage1 from "./Register1";
 import StatePage2 from "./Register2";
 // import RegisterInterface from "@/Interfaces/RegisterInterface";

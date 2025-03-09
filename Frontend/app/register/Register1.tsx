@@ -1,7 +1,7 @@
 'use client';
-import React, { useEffect, useState } from "react";
+import React from "react";
 import TitleBarStatePage from "@/Components/TitleBarStatePage";
-import { Icon } from "@iconify/react/dist/iconify.js";
+
 
 const Register1: React.FC<any> = ({setSelectCondition, selectCondition, statePage, setStatePage}) => {
 
