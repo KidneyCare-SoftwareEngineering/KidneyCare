@@ -2,17 +2,11 @@
 
 import React, { useState } from "react";
 import TitleBar from "@/Components/TitleBar";
+import Swal from "sweetalert2";
 import { FiPlus, FiMinus, FiTrash, FiX } from "react-icons/fi";
 import TimeInputPopup from "@/Components/Popup/TimeInputPopup";
-import ConfirmDeletePopup from "@/Components/Popup/ConfirmDeletePopup";
 
-// ประกาศประเภทของข้อมูลใน Props ของ ConfirmDeletePopup
-interface ShowDeletePopup {
-  type: "time" | "image" | "";
-  index: number | null;
-}
-
-export default function CreatePlan() {
+export default function CreatePill() {
   const [showPopup, setShowPopup] = useState<boolean>(false);
   const [medName, setMedName] = useState<string>("");
   const [totalPills, setTotalPills] = useState<string>("");
@@ -22,29 +16,38 @@ export default function CreatePlan() {
   const [note, setNote] = useState<string>("");
   const [newTime, setNewTime] = useState<string>("");
 
-  const [showDeletePopup, setShowDeletePopup] = useState<ShowDeletePopup>({
-    type: "",
-    index: null,
-  });  // สำหรับการแสดง popup ลบ
-
-  // ฟังก์ชันลบเวลา
-  const removeTime = (index: number) => {
-    setShowDeletePopup({ type: "time", index });
-  };
-
-  // ฟังก์ชันลบรูป
-  const removeImage = (index: number) => {
-    setShowDeletePopup({ type: "image", index });
-  };
-
   // ฟังก์ชันยืนยันการลบ
-  const confirmDelete = () => {
-    if (showDeletePopup.type === "time" && showDeletePopup.index !== null) {
-      setTimes(times.filter((_, i) => i !== showDeletePopup.index));
-    } else if (showDeletePopup.type === "image" && showDeletePopup.index !== null) {
-      setImages(images.filter((_, i) => i !== showDeletePopup.index));
+  const confirmDelete = (type: "time" | "image", index: number) => {
+    let message = "";
+    if (type === "time") {
+      message = `คุณต้องการลบเวลา ${times[index]} ออกใช่หรือไม่`;
+    } else if (type === "image") {
+      message = "คุณต้องการลบรูปภาพนี้ใช่หรือไม่";
     }
-    setShowDeletePopup({ type: "", index: null });  // ซ่อน popup หลังยืนยัน
+
+    Swal.fire({
+      title: "คุณแน่ใจหรือไม่?",
+      text: message,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#CCCCCC",
+      confirmButtonText: "ยืนยัน",
+      cancelButtonText: "ยกเลิก",
+      reverseButtons: true,
+      customClass: {
+        cancelButton: 'swal2-cancel-button', // Add custom class for cancel button
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        if (type === "time") {
+          setTimes((prevTimes) => prevTimes.filter((_, i) => i !== index));
+        } else if (type === "image") {
+          setImages((prevImages) => prevImages.filter((_, i) => i !== index));
+        }
+        Swal.fire("ลบสำเร็จ!", "ข้อมูลถูกลบเรียบร้อยแล้ว", "success");
+      }
+    });
   };
 
   // ฟังก์ชันเพิ่มเวลา
@@ -77,44 +80,42 @@ export default function CreatePlan() {
 
   // ฟังก์ชันบันทึกข้อมูลยา
   const handleSavePill = async () => {
-    // ตรวจสอบว่าข้อมูลครบถ้วนหรือไม่
     if (!medName.trim()) {
-      alert("⚠️ กรุณากรอกชื่อยา");
+      Swal.fire("⚠️ ข้อผิดพลาด", "กรุณากรอกชื่อยา", "warning");
       return;
     }
     if (!totalPills.trim() || isNaN(Number(totalPills)) || Number(totalPills) <= 0) {
-      alert("⚠️ กรุณากรอกจำนวนยาทั้งหมดให้ถูกต้อง");
+      Swal.fire("⚠️ ข้อผิดพลาด", "กรุณากรอกจำนวนยาทั้งหมดให้ถูกต้อง", "warning");
       return;
     }
     if (dose <= 0) {
-      alert("⚠️ กรุณาเลือกจำนวนยาที่ต้องทานต่อมื้อ");
+      Swal.fire("⚠️ ข้อผิดพลาด", "กรุณาเลือกจำนวนยาที่ต้องทานต่อมื้อ", "warning");
       return;
     }
     if (times.length === 0) {
-      alert("⚠️ กรุณาเพิ่มเวลาที่ต้องทานยา");
+      Swal.fire("⚠️ ข้อผิดพลาด", "กรุณาเพิ่มเวลาที่ต้องทานยา", "warning");
       return;
     }
     if (images.length === 0) {
-      alert("⚠️ กรุณาเพิ่มรูปภาพของยา");
+      Swal.fire("⚠️ ข้อผิดพลาด", "กรุณาเพิ่มรูปภาพของยา", "warning");
       return;
     }
     if (images.length > 4) {
-      alert("⚠️ รูปภาพต้องไม่เกิน 4 รูป");
+      Swal.fire("⚠️ ข้อผิดพลาด", "รูปภาพต้องไม่เกิน 4 รูป", "warning");
       return;
     }
     if (images.some((img) => img.size > 1024 * 1024)) {
-      alert("⚠️ ขนาดรูปภาพต้องไม่เกิน 1 MB");
+      Swal.fire("⚠️ ข้อผิดพลาด", "ขนาดรูปภาพต้องไม่เกิน 1 MB", "warning");
       return;
     }
     if (note.length > 200) {
-      alert("⚠️ โน้ตเพิ่มเติมต้องไม่เกิน 200 ตัวอักษร");
+      Swal.fire("⚠️ ข้อผิดพลาด", "โน้ตเพิ่มเติมต้องไม่เกิน 200 ตัวอักษร", "warning");
       return;
     }
     if (!note.trim()) {
-      alert("⚠️ กรุณากรอกโน้ตเพิ่มเติม");
+      Swal.fire("⚠️ ข้อผิดพลาด", "กรุณากรอกโน้ตเพิ่มเติม", "warning");
       return;
     }
-
 
     const pillData = {
       medName,
@@ -126,7 +127,10 @@ export default function CreatePlan() {
     };
 
     console.log("📌 บันทึกข้อมูล:", pillData);
+
+    Swal.fire("✅ บันทึกสำเร็จ!", "ข้อมูลยาของคุณถูกบันทึกแล้ว", "success");
   };
+
 
   return (
     <div className="flex flex-col items-center w-full min-h-screen bg-sec">
@@ -200,7 +204,7 @@ export default function CreatePlan() {
             <div key={index} className="flex items-center bg-white rounded-lg border border-grey500 px-4 w-26 h-14 relative">
               <span className="text-black text-lg">{time} น.</span>
               <button
-                onClick={() => removeTime(index)}
+                onClick={() => confirmDelete("time", index)}
                 className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
               >
                 <FiTrash />
@@ -238,7 +242,7 @@ export default function CreatePlan() {
                 className="w-24 h-24 rounded-xl object-cover"
               />
               <button
-                onClick={() => removeImage(index)}
+                onClick={() => confirmDelete("image", index)}
                 className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
               >
                 <FiTrash />
@@ -268,6 +272,7 @@ export default function CreatePlan() {
           placeholder="ระบุโน้ตเพิ่มเติม"
         />
       </div>
+
       {/* ปุ่มบันทึกข้อมูล */}
       <div
         onClick={() => handleSavePill()}
@@ -281,16 +286,6 @@ export default function CreatePlan() {
         <TimeInputPopup onClose={() => setShowPopup(false)} onSave={addTime} />
       )}
 
-      {/* แสดง Popup สำหรับยืนยันการลบ */}
-      {showDeletePopup.type && (
-        <ConfirmDeletePopup
-          onClose={() => setShowDeletePopup({ type: "", index: null })}
-          onConfirm={confirmDelete}
-          type={showDeletePopup.type}
-          times={times}
-          showDeletePopup={showDeletePopup}
-        />
-      )}
     </div>
   );
 }
