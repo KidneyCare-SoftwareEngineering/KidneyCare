@@ -99,7 +99,7 @@ export default function PillReminder() {
 
                 {!pill ? (
                     <Link
-                        href="/PillReminder/CreatePill"
+                        href="/pillreminder/createpill"
                         className="fixed size-12 bg-orange300 rounded-full right-3 bottom-6 flex justify-center items-center"
                     >
                         <Icon icon="ic:baseline-plus" height="32" className="text-white" />
@@ -151,7 +151,7 @@ export default function PillReminder() {
                                     </motion.div>
                                 </div>
 
-                                <Link href={`/PillReminder/CreatePill`} className="fixed">
+                                <Link href={`/pillreminder/createpill`} className="fixed">
                                     <motion.div
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
