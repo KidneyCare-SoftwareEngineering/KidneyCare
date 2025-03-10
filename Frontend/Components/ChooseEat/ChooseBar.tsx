@@ -63,14 +63,14 @@ const ChooseBar: React.FC<{ MealPlans: MealplanInterface, desc: string }> = ({ M
                                     key={index}>
 
                                     {/* // เปลี่ยน href ลิงก์ไปยังหน้า detail ยา ด้วยนะ */}
-                                    <Link href={`/pilldetail/${data.user_medicine_id}`} className="flex w-4/12 justify-center items-center">
+                                    <Link href={`/pillreminder/pilldetail/${data.user_medicine_id}`} className="flex w-4/12 justify-center items-center">
                                         <img src="https://picsum.photos/200/300" className="size-24 rounded-full p-2" />
                                     </Link>
                                     <div className="flex w-6/12 p-2 justify-center flex-col">
                                         <div className="flex text-body3 text-grey300">
                                             เวลา {data.medicine_schedule[0].split("T")[1].slice(0, 5)} น.
                                         </div>
-                                        <Link href={`/pilldetail/${data.user_medicine_id}`}
+                                        <Link href={`/pillreminder/pilldetail/${data.user_medicine_id}`}
                                             className="flex text-body1 font-bold text-black py-3">
                                             {data.medicine_name}
                                         </Link>
@@ -154,14 +154,14 @@ const ChooseBar: React.FC<{ MealPlans: MealplanInterface, desc: string }> = ({ M
                                     key={index}>
 
                                     {/* // เปลี่ยน href ลิงก์ไปยังหน้า detail ยา ด้วยนะ */}
-                                    <Link href={`/pildetail/${data.user_medicine_id}`} className="flex w-4/12 justify-center items-center">
+                                    <Link href={`/pillreminder/pildetail/${data.user_medicine_id}`} className="flex w-4/12 justify-center items-center">
                                         <img src="https://picsum.photos/200/300" className="size-24 rounded-full p-2" />
                                     </Link>
                                     <div className="flex w-6/12 p-2 justify-center flex-col">
                                         <div className="flex text-body3 text-grey300">
                                             เวลา {data.medicine_schedule[0].split("T")[1].slice(0, 5)} น.
                                         </div>
-                                        <Link href={`/pildetail/${data.user_medicine_id}`}
+                                        <Link href={`/pillreminder/pildetail/${data.user_medicine_id}`}
                                             className="flex text-body1 font-bold text-black py-3">
                                             {data.medicine_name}
                                         </Link>

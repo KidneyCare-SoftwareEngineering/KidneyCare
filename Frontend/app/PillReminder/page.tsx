@@ -11,6 +11,7 @@ export default function PillReminder() {
     const [dateSelected, setDateSelected] = useState<Date>();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+    // const pill = null;
     const pill = {
         medicines: [
             {
