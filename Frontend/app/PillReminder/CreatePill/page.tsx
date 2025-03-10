@@ -5,8 +5,6 @@ import TitleBar from "@/Components/TitleBar";
 import Swal from "sweetalert2";
 import { FiPlus, FiMinus, FiTrash, FiX } from "react-icons/fi";
 import TimeInputPopup from "@/Components/Popup/TimeInputPopup";
-import { format } from 'date-fns';
-import { th } from 'date-fns/locale';
 import { Icon } from "@iconify/react/dist/iconify.js";
 
 export default function CreatePill() {
@@ -80,7 +78,20 @@ export default function CreatePill() {
 	const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
 		if (!event.target.files) return;
 		const files = Array.from(event.target.files);
-		setpill_img_link((prev) => [...prev, ...files]);
+
+		// ตรวจสอบขนาดไฟล์ก่อนการอัปโหลด
+		const newImages = files.map((file) => {
+			if (file.size > 1024 * 1024) {
+				Swal.fire("⚠️ ข้อผิดพลาด", "ขนาดรูปภาพต้องไม่เกิน 1 MB", "warning");
+				return null; // ไม่ให้เพิ่มไฟล์ที่มีขนาดเกิน 1MB
+			} else if (file instanceof File) {
+				return file; // กรณีไฟล์ปกติ
+			} else {
+				return new File([], "invalid");
+			}
+		}).filter(Boolean); // กำจัด null หรือ invalid ไฟล์ที่ไม่ต้องการ
+
+		setpill_img_link((prev) => [...prev, ...newImages.filter((img): img is File => img !== null)]);
 	};
 
 	// const handleSavePill = async () => {

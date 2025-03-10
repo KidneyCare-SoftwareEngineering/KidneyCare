@@ -5,7 +5,6 @@ import { Icon } from "@iconify/react/dist/iconify.js";
 import Link from "next/link";
 import React, { useState } from "react";
 import ChooseEat from "@/Components/ChooseEat/ChooseEat";
-import { motion } from "framer-motion";
 
 export default function PillReminder() {
     const [dateSelected, setDateSelected] = useState<Date>();
