@@ -5,7 +5,6 @@ import { Icon } from "@iconify/react/dist/iconify.js";
 import Link from "next/link";
 import React, { useState } from "react";
 import ChooseEat from "@/Components/ChooseEat/ChooseEat";
-import { is } from "date-fns/locale";
 import { motion } from "framer-motion";
 
 export default function PillReminder() {
@@ -15,7 +14,7 @@ export default function PillReminder() {
     const pill = {
         medicines: [
             {
-                user_medicine_id: 2,
+                user_medicine_id: 1,
                 medicine_schedule: ["1990-01-01T12:00:00", "1990-01-01T12:00:00"],
                 medicine_amount: 50,
                 medicine_per_times: 1,
@@ -31,7 +30,7 @@ export default function PillReminder() {
                 user_medicine_id: 2,
                 medicine_schedule: ["1990-01-01T12:00:00", "1990-01-01T12:00:00"],
                 medicine_amount: 50,
-                medicine_per_times: 1,
+                medicine_per_times: 2,
                 user_medicine_img_link: [
                     "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/a7524e22-3209-4470-91e2-49a8957483e6.webp",
                     "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/c29e88f8-7bcb-47f5-a4bc-a849579a263c.png",
@@ -41,10 +40,10 @@ export default function PillReminder() {
                 medicine_note: "ทานแล้วง่วง",
             },
             {
-                user_medicine_id: 2,
+                user_medicine_id: 3,
                 medicine_schedule: ["1990-01-01T12:00:00", "1990-01-01T12:00:00"],
                 medicine_amount: 50,
-                medicine_per_times: 1,
+                medicine_per_times: 3,
                 user_medicine_img_link: [
                     "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/a7524e22-3209-4470-91e2-49a8957483e6.webp",
                     "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/c29e88f8-7bcb-47f5-a4bc-a849579a263c.png",
@@ -54,10 +53,10 @@ export default function PillReminder() {
                 medicine_note: "ทานแล้วง่วง",
             },
             {
-                user_medicine_id: 2,
+                user_medicine_id: 4,
                 medicine_schedule: ["1990-01-01T12:00:00", "1990-01-01T12:00:00"],
                 medicine_amount: 50,
-                medicine_per_times: 1,
+                medicine_per_times: 4,
                 user_medicine_img_link: [
                     "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/a7524e22-3209-4470-91e2-49a8957483e6.webp",
                     "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/c29e88f8-7bcb-47f5-a4bc-a849579a263c.png",
@@ -67,10 +66,10 @@ export default function PillReminder() {
                 medicine_note: "ทานแล้วง่วง",
             },
             {
-                user_medicine_id: 2,
+                user_medicine_id: 5,
                 medicine_schedule: ["1990-01-01T12:00:00", "1990-01-01T12:00:00"],
                 medicine_amount: 50,
-                medicine_per_times: 1,
+                medicine_per_times: 5,
                 user_medicine_img_link: [
                     "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/a7524e22-3209-4470-91e2-49a8957483e6.webp",
                     "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/c29e88f8-7bcb-47f5-a4bc-a849579a263c.png",

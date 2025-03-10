@@ -8,15 +8,15 @@ import FoodDetail2 from "./FoodDetail2"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import TitleBar from "@/Components/TitleBar"
-import {FoodInterface} from "@/Interfaces/FoodInterface"
+import { FoodInterface } from "@/Interfaces/FoodInterface"
 
 export default function FoodDetail() {
-    const [food, setFood] = useState<FoodInterface | null>(null); 
+    const [food, setFood] = useState<FoodInterface | null>(null);
     const { id } = useParams();
     const [statePage, setStatePage] = useState(0)
 
     useEffect(() => {
-        if (!id) return; 
+        if (!id) return;
         fetch(`http://127.0.0.1:7878/food_details/${id}`)
             .then(response => response.json())
             .then(data => {
@@ -24,29 +24,29 @@ export default function FoodDetail() {
             })
             .catch(error => {
                 console.error('Error fetching user data:', error)
-    
+
             })
     }, [id]);
 
     if (!food) return <div>ไม่มีฟู้ด</div>
 
-    return(
+    return (
         <div className="flex justify-center flex-col items-center pb-10">
-          <TitleBar title={food.recipe_name} href="/searchfood"/>
-            <div 
+            <TitleBar title={food.recipe_name} href="/searchfood" />
+            <div
                 className="flex w-full min-h-64 mt-1"
                 style={{
                     backgroundImage: `url(${food.image_url})`,
-                    backgroundSize: "cover", 
-                    backgroundRepeat: "no-repeat", 
-                    backgroundPosition: "center", 
+                    backgroundSize: "cover",
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "center",
                 }}
-            /> 
+            />
 
-            <DonutGraph food={food} /> 
-            {statePage === 0 && <FoodDetail1 information={food.ingredient} setStatePage={setStatePage}/>}
-            {statePage === 1 && <FoodDetail2 information={food.recipe_method} setStatePage={setStatePage}/>}
-            
+            <DonutGraph food={food} />
+            {statePage === 0 && <FoodDetail1 information={food.ingredient} setStatePage={setStatePage} />}
+            {statePage === 1 && <FoodDetail2 information={food.recipe_method} setStatePage={setStatePage} />}
+
 
         </div>
     )

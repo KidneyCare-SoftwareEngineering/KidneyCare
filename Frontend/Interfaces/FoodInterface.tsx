@@ -10,7 +10,7 @@ export interface FoodInterface {
     potassium: number
     image_url: string
     recipe_method: []
-    ingredient: { 
+    ingredient: {
         ingredient_amount: number
         ingredient_name: string
         ingredient_unit: string
@@ -36,7 +36,7 @@ export interface MealplanInterface {
 
     medicines?: Array<{
         user_medicine_id: number;
-        medicine_schedule: string[]; 
+        medicine_schedule: string[];
         medicine_amount: number;
         medicine_per_times: number;
         user_medicine_img_link: string[];
@@ -48,7 +48,7 @@ export interface MealplanInterface {
 
 // export interface MedicineData extends MealplanInterface {
 //     user_medicine_id: number;
-//     medicine_schedule: string[]; 
+//     medicine_schedule: string[];
 //     medicine_amount: number;
 //     medicine_per_times: number;
 //     user_medicine_img_link: string[];
@@ -57,4 +57,3 @@ export interface MealplanInterface {
 //     medicine_note: string;
 
 //   }
-  
