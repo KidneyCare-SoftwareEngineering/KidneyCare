@@ -7,6 +7,7 @@ import { FiPlus, FiMinus, FiTrash, FiX } from "react-icons/fi";
 import TimeInputPopup from "@/Components/Popup/TimeInputPopup";
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
+import { Icon } from "@iconify/react/dist/iconify.js";
 
 export default function CreatePill() {
 	const [showPopup, setShowPopup] = useState<boolean>(false);
@@ -82,44 +83,81 @@ export default function CreatePill() {
 		setpill_img_link((prev) => [...prev, ...files]);
 	};
 
-	const handleSavePill = async () => {
-		if (!pill_name.trim()) {
-			Swal.fire("⚠️ ข้อผิดพลาด", "กรุณากรอกชื่อยา", "warning");
-			return;
-		}
-		if (!pill_amount.trim() || isNaN(Number(pill_amount)) || Number(pill_amount) <= 0) {
-			Swal.fire("⚠️ ข้อผิดพลาด", "กรุณากรอกจำนวนยาทั้งหมดให้ถูกต้อง", "warning");
-			return;
-		}
-		if (pill_per_meal <= 0) {
-			Swal.fire("⚠️ ข้อผิดพลาด", "กรุณาเลือกจำนวนยาที่ต้องทานต่อมื้อ", "warning");
-			return;
-		}
-		if (pill_reminder_time.length === 0) {
-			Swal.fire("⚠️ ข้อผิดพลาด", "กรุณาเพิ่มเวลาที่ต้องทานยา", "warning");
-			return;
-		}
-		if (pill_img_link.length === 0) {
-			Swal.fire("⚠️ ข้อผิดพลาด", "กรุณาเพิ่มรูปภาพของยา", "warning");
-			return;
-		}
-		if (pill_img_link.length > 4) {
-			Swal.fire("⚠️ ข้อผิดพลาด", "รูปภาพต้องไม่เกิน 4 รูป", "warning");
-			return;
-		}
-		if (pill_img_link.some((img) => img.size > 1024 * 1024)) {
-			Swal.fire("⚠️ ข้อผิดพลาด", "ขนาดรูปภาพต้องไม่เกิน 1 MB", "warning");
-			return;
-		}
-		if (pill_note.length > 200) {
-			Swal.fire("⚠️ ข้อผิดพลาด", "โน้ตเพิ่มเติมต้องไม่เกิน 200 ตัวอักษร", "warning");
-			return;
-		}
-		if (!pill_note.trim()) {
-			Swal.fire("⚠️ ข้อผิดพลาด", "กรุณากรอกโน้ตเพิ่มเติม", "warning");
-			return;
-		}
+	// const handleSavePill = async () => {
+	// 	if (!pill_name.trim()) {
+	// 		Swal.fire("⚠️ ข้อผิดพลาด", "กรุณากรอกชื่อยา", "warning");
+	// 		return;
+	// 	}
+	// 	if (!pill_amount.trim() || isNaN(Number(pill_amount)) || Number(pill_amount) <= 0) {
+	// 		Swal.fire("⚠️ ข้อผิดพลาด", "กรุณากรอกจำนวนยาทั้งหมดให้ถูกต้อง", "warning");
+	// 		return;
+	// 	}
+	// 	if (pill_per_meal <= 0) {
+	// 		Swal.fire("⚠️ ข้อผิดพลาด", "กรุณาเลือกจำนวนยาที่ต้องทานต่อมื้อ", "warning");
+	// 		return;
+	// 	}
+	// 	if (pill_reminder_time.length === 0) {
+	// 		Swal.fire("⚠️ ข้อผิดพลาด", "กรุณาเพิ่มเวลาที่ต้องทานยา", "warning");
+	// 		return;
+	// 	}
+	// 	if (pill_img_link.length === 0) {
+	// 		Swal.fire("⚠️ ข้อผิดพลาด", "กรุณาเพิ่มรูปภาพของยา", "warning");
+	// 		return;
+	// 	}
+	// 	if (pill_img_link.length > 4) {
+	// 		Swal.fire("⚠️ ข้อผิดพลาด", "รูปภาพต้องไม่เกิน 4 รูป", "warning");
+	// 		return;
+	// 	}
+	// 	if (pill_img_link.some((img) => img.size > 1024 * 1024)) {
+	// 		Swal.fire("⚠️ ข้อผิดพลาด", "ขนาดรูปภาพต้องไม่เกิน 1 MB", "warning");
+	// 		return;
+	// 	}
+	// 	if (pill_note.length > 200) {
+	// 		Swal.fire("⚠️ ข้อผิดพลาด", "โน้ตเพิ่มเติมต้องไม่เกิน 200 ตัวอักษร", "warning");
+	// 		return;
+	// 	}
+	// 	if (!pill_note.trim()) {
+	// 		Swal.fire("⚠️ ข้อผิดพลาด", "กรุณากรอกโน้ตเพิ่มเติม", "warning");
+	// 		return;
+	// 	}
 
+
+	// 	const formattedPillReminderTime = pill_reminder_time.map(time => `${getCurrentDate()}T${time}:00`);
+
+	// 	const pillData = {
+	// 		pill_name,
+	// 		pill_amount: Number(pill_amount),
+	// 		pill_per_meal,
+	// 		pill_reminder_time: formattedPillReminderTime,
+	// 		pill_img_link,
+	// 		pill_note,
+	// 	};
+
+	// 	console.log("📌 บันทึกข้อมูล:", pillData);
+
+	// 	Swal.fire("✅ บันทึกสำเร็จ!", "ข้อมูลยาของคุณถูกบันทึกแล้ว", "success");
+	// };
+
+	const validatePillData = () => {
+		if (!pill_name.trim()) return "กรุณากรอกชื่อยา";
+		if (!pill_amount.trim() || isNaN(Number(pill_amount)) || Number(pill_amount) <= 0)
+			return "กรุณากรอกจำนวนยาทั้งหมดให้ถูกต้อง";
+		if (pill_per_meal <= 0) return "กรุณาเลือกจำนวนยาที่ต้องทานต่อมื้อ";
+		if (pill_reminder_time.length === 0) return "กรุณาเพิ่มเวลาที่ต้องทานยา";
+		if (pill_img_link.length === 0) return "กรุณาเพิ่มรูปภาพของยา";
+		if (pill_img_link.length > 4) return "รูปภาพต้องไม่เกิน 4 รูป";
+		if (pill_img_link.some(img => img.size > 1024 * 1024)) return "ขนาดรูปภาพต้องไม่เกิน 1 MB";
+		if (pill_note.length > 200) return "โน้ตเพิ่มเติมต้องไม่เกิน 200 ตัวอักษร";
+		if (!pill_note.trim()) return "กรุณากรอกโน้ตเพิ่มเติม";
+		return null; // ผ่านการตรวจสอบ
+	};
+
+	const handleSavePill = async () => {
+		const errorMessage = validatePillData();
+		if (errorMessage) {
+			Swal.fire("⚠️ ข้อผิดพลาด", errorMessage, "warning");
+			return;
+		}
 
 		const formattedPillReminderTime = pill_reminder_time.map(time => `${getCurrentDate()}T${time}:00`);
 
@@ -136,7 +174,6 @@ export default function CreatePill() {
 
 		Swal.fire("✅ บันทึกสำเร็จ!", "ข้อมูลยาของคุณถูกบันทึกแล้ว", "success");
 	};
-
 
 
 	return (
@@ -212,9 +249,9 @@ export default function CreatePill() {
 							<span className="text-black text-lg">{time} น.</span>
 							<button
 								onClick={() => confirmDelete("time", index)}
-								className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
+								className=" top-0 right-0  text-white p-1 rounded-full"
 							>
-								<FiTrash />
+								<Icon className="ml-2 text-red-500" icon="mdi:close-circle" width="24" />
 							</button>
 						</div>
 					))}
@@ -250,7 +287,7 @@ export default function CreatePill() {
 							/>
 							<button
 								onClick={() => confirmDelete("image", index)}
-								className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
+								className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-red-500 text-white p-1 rounded-full"
 							>
 								<FiTrash />
 							</button>
