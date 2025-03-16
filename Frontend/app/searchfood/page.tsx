@@ -3,12 +3,21 @@ import React, { useEffect, useState } from 'react'
 import Navbar from '@/Components/Navbar'
 import SearchFoodBox from '@/Components/SearchFoodBox'
 import SearchBox from '@/Components/SearchBox'
+import liff from '@line/liff'
 import { FoodInterface } from '@/Interfaces/FoodInterface'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/Components/ui/sheet"
 
 export default function SearchFood() {
-  // const [lineImagesrc, setLineImagesrc] = useState("");
-  // const [userName, setUserName] = useState("");
-  // const [userUid, setUserUid] = useState("");
+  const [lineImagesrc, setLineImagesrc] = useState("");
+  const [userName, setUserName] = useState("");
+  const [userUid, setUserUid] = useState("");
   const [foodData, setFoodData] = useState<FoodInterface[]>([]);
   const [filteredFoodData, setFilteredFoodData] = useState<FoodInterface[]>([]);
 

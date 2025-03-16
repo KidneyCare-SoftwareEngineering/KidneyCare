@@ -8,6 +8,7 @@ use backend::routes::mealplan::*;
 use backend::routes::user::*;
 use backend::routes::pill::*;
 use backend::routes::admin::*;
+use backend::routes::chatbot::*;
 use sqlx::postgres::PgPoolOptions;
 
 use tower_http::cors::{Any, CorsLayer};
@@ -16,6 +17,8 @@ use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc, Datelike};
 use time::{format_description::well_known::{iso8601, Iso8601}, Date, PrimitiveDateTime, Time};
 use time::macros::datetime;
 use serde::de::Error;
+
+
 
 #[tokio::main]
 async fn main() {
@@ -56,6 +59,7 @@ async fn main() {
         .route("/add_pill", post(handle_image_upload))
         .route("/get_pill_by_id", get(get_pill_by_user_line_id))
         .route("/admin_login", post(admin_login))
+        .route("/chatbot/{user_id}", get(get_user_by_id))
         // .route("/get_pills", get(get_pill_by_user_line_id)) // Change to GET and use query
         .layer(Extension(db_pool.clone()))
         .layer(cors);

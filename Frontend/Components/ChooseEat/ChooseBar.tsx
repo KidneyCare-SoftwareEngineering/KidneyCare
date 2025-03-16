@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { MealplanInterface } from "@/Interfaces/FoodInterface";
+import { MealplanInterface, MedicineData } from "@/Interfaces/FoodInterface";
 
 
 
@@ -10,7 +10,6 @@ import { MealplanInterface } from "@/Interfaces/FoodInterface";
 
 
 const ChooseBar: React.FC<{MealPlans: MealplanInterface, desc: string}> = ({MealPlans, desc}) =>  {
-
   const [eatenItems, setEatenItems] = useState<[]>([]);
   const transition = { type: "spring", stiffness: 200, damping: 20 };
 
@@ -63,7 +62,7 @@ const ChooseBar: React.FC<{MealPlans: MealplanInterface, desc: string}> = ({Meal
                       key={index}>
 
                   {/* // เปลี่ยน href ลิงก์ไปยังหน้า detail ยา ด้วยนะ */}
-                  <Link href={`/xxx/${data.user_medicine_id}`}className="flex w-4/12 justify-center items-center"> 
+                  <Link href={`/xxx/${data.user_medicine_id}`} className="flex w-4/12 justify-center items-center"> 
                     <img src="https://picsum.photos/200/300" className="size-24 rounded-full p-2"/>
                   </Link>
                   <div className="flex w-6/12 p-2 justify-center flex-col">

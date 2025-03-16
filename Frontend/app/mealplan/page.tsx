@@ -5,6 +5,7 @@ import { Icon } from '@iconify/react/dist/iconify.js'
 import Link from 'next/link'
 import React, {useState} from 'react'
 import ChooseEat from '@/Components/ChooseEat/ChooseEat'
+import { is } from 'date-fns/locale'
 import { motion } from 'framer-motion'
 
 export default function MealPlan() {
@@ -161,8 +162,8 @@ export default function MealPlan() {
             :  
             (
               <ChooseEat  dateSelected = {dateSelected}
-                          desc = "ยา"
-                          MealPlans = {pill}
+                          desc = "อาหาร"
+                          MealPlans = {MealPlans}
               />
             )
             }

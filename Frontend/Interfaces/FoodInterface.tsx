@@ -33,28 +33,19 @@ export interface MealplanInterface {
         image_url: string;
     }>>;
     user_line_id: string;
-
-    medicines?: Array<{
-        user_medicine_id: number;
-        medicine_schedule: string[]; 
-        medicine_amount: number;
-        medicine_per_times: number;
-        user_medicine_img_link: string[];
-        medicine_unit: string;
-        medicine_name: string;
-        medicine_note: string;
-    }>
 }
 
-// export interface MedicineData extends MealplanInterface {
-//     user_medicine_id: number;
-//     medicine_schedule: string[]; 
-//     medicine_amount: number;
-//     medicine_per_times: number;
-//     user_medicine_img_link: string[];
-//     medicine_unit: string;
-//     medicine_name: string;
-//     medicine_note: string;
-
-//   }
+interface Medicine {
+    user_medicine_id: number;
+    medicine_schedule: string[]; 
+    medicine_amount: number;
+    medicine_per_times: number;
+    user_medicine_img_link: string[];
+    medicine_unit: string;
+    medicine_name: string;
+    medicine_note: string;
+  }
   
+export interface MedicineData extends MealplanInterface{
+    medicines: Medicine[];
+}
