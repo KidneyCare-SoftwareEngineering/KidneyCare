@@ -17,25 +17,6 @@ export default function CreatePill() {
     const [pill_note, setpill_note] = useState<string>("");
     const [newTime, setNewTime] = useState<string>("");
 
-
-    // const pill = {
-    //     medicines: [
-    //         {
-    //             user_medicine_id: 1,
-    //             medicine_schedule: ["1990-01-01T12:00:00", "1990-01-01T12:00:00"],
-    //             medicine_amount: 50,
-    //             medicine_per_times: 1,
-    //             user_medicine_img_link: [
-    //                 "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/a7524e22-3209-4470-91e2-49a8957483e6.webp",
-    //                 "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/c29e88f8-7bcb-47f5-a4bc-a849579a263c.png",
-    //             ],
-    //             medicine_unit: "เม็ด",
-    //             medicine_name: "ยาขับปัสสาวะ",
-    //             medicine_note: "ทานแล้วง่วง",
-    //         },
-    //     ],
-    // };
-
     const pill = {
         medicines: [
             {
