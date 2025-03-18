@@ -15,6 +15,7 @@ export interface FoodInterface {
         ingredient_name: string
         ingredient_unit: string
     }[]
+    ingredients_eng: {}
 }
 
 export interface MealplanInterface {
@@ -33,6 +34,7 @@ export interface MealplanInterface {
         image_url: string;
     }>>;
     user_line_id: string;
+    medicines?: Array<any>
 }
 
 interface Medicine {

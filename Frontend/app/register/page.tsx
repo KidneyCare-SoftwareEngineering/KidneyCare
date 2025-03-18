@@ -16,7 +16,7 @@ export default function Register() {
         return initialDate.toISOString()
     });
     const [dialysis, setDialysis] = useState(false)
-    const [age, setAge] = useState("")
+    const [age, setAge] = useState(0)
     const [height, setHeight] = useState<number>(0)
     const [weight, setWeight] = useState<number>(0)
     const [statePage, setStatePage] = useState(0)
@@ -25,7 +25,7 @@ export default function Register() {
 
 
 
-    const handleBirthdateChange = (e) => {
+    const handleBirthdateChange = (e : React.ChangeEvent<HTMLInputElement>) => {
         const inputDate = new Date(e.target.value);
         const today = new Date();
         let calculatedAge = today.getFullYear() - inputDate.getFullYear();
@@ -36,7 +36,7 @@ export default function Register() {
     }   
 
         setBirthdate(e.target.value);
-        setAge(calculatedAge >= 0 ? calculatedAge : ""); 
+        setAge(calculatedAge >= 0 ? calculatedAge : 0); 
     };
 
 
@@ -118,7 +118,7 @@ export default function Register() {
                                 <select
                                     id="kidney-level"
                                     value={kidneyLevel}
-                                    onChange={(e) => setKidneyLevel(e.target.value)}
+                                    onChange={(e) => setKidneyLevel(Number(e.target.value))}
                                     className="w-full appearance-none bg-transparent text-gray-700 focus:outline-none font-bold"
                                 >
                                     <option value={0} >
@@ -210,7 +210,7 @@ export default function Register() {
                             type="number"
                             id="height"
                             value={height}
-                            onChange={(e) => setHeight(e.target.value)}
+                            onChange={(e) => setHeight(Number(e.target.value))}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
                             />
                         </div>
@@ -224,7 +224,7 @@ export default function Register() {
                             type="number"
                             id="weight"
                             value={weight}
-                            onChange={(e) => setWeight(e.target.value)}
+                            onChange={(e) => setWeight(Number(e.target.value))}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
                             />
                         </div>

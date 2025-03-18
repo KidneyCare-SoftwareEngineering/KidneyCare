@@ -50,6 +50,7 @@ const Register2: React.FC<any> = (data_) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        
       },
       body: JSON.stringify(datatoback),
     });
@@ -177,7 +178,8 @@ const Register2: React.FC<any> = (data_) => {
 
                 {/* ปุ่มบันทึก */}
                 <div
-                  onClick={() => handleRegister()}
+                  // onClick={() => handleRegister()}
+                  onClick={window.close}
                   className="flex w-full bg-[#FF7E2E] mt-4 justify-center items-center text-white font-bold py-2 rounded-lg hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-400"
                 >
                   บันทึก

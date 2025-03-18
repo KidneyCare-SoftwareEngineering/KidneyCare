@@ -10,7 +10,7 @@ import { MealplanInterface, MedicineData } from "@/Interfaces/FoodInterface";
 
 
 const ChooseBar: React.FC<{MealPlans: MealplanInterface, desc: string}> = ({MealPlans, desc}) =>  {
-  const [eatenItems, setEatenItems] = useState<[]>([]);
+  const [eatenItems, setEatenItems] = useState<any[]>([]); //by pass any
   const transition = { type: "spring", stiffness: 200, damping: 20 };
 
   const containerVariants = {
@@ -23,7 +23,7 @@ const ChooseBar: React.FC<{MealPlans: MealplanInterface, desc: string}> = ({Meal
     exit: { opacity: 0, y: -20, scale: 0.95, transition }, 
   };
 
-  const allItems = desc === "ยา" ? MealPlans.medicines : MealPlans.mealplans[0] || [];
+  const allItems = desc === "ยา" ? MealPlans.medicines || [] : MealPlans.mealplans[0] || [];
   const mealTypes = ["อาหารเช้า", "อาหารกลางวัน", "อาหารเย็น"];
 
 

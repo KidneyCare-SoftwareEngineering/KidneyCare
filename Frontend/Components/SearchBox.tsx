@@ -10,6 +10,7 @@ import {
 } from "@/Components/ui/sheet";
 import { FaSpinner } from "react-icons/fa";
 
+
 const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFoodData }) => {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState(""); 
@@ -38,7 +39,8 @@ const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFood
     const filtered = foodData.filter(food =>
       uniqueFilters.every(filter =>
         food.recipe_name.toLowerCase().includes(filter.toLowerCase()) || 
-        food.ingredients_eng.some(ingredient => ingredient.toLowerCase() === filter.toLowerCase())
+        (Array.isArray(food.ingredients_eng) && food.ingredients_eng.some(ingredient => ingredient.toLowerCase() === filter.toLowerCase()))
+        // food.ingredients_eng.some(ingredient => ingredient.toLowerCase() === filter.toLowerCase())
       )
     );
 
@@ -76,7 +78,7 @@ const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFood
       const result = await response.json();
 
       if (result.predictions.length > 0) {
-        const detectedClasses = result.predictions.map(prediction => prediction.class.toLowerCase());
+        const detectedClasses = result.predictions.map((prediction: { class: string }) => prediction.class.toLowerCase());
         updateFilters([...activeFilters, ...detectedClasses]);
       }
     } catch (error) {
