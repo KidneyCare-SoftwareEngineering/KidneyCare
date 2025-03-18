@@ -298,3 +298,108 @@ pub async fn get_pill_by_user_line_id(
 
     Ok(Json(MedicineResponse { medicines }))
 }
+
+// Define the request body structure
+#[derive(Deserialize)]
+pub struct GetMedicineRequest {
+    pub user_line_id: String,
+    pub date: Option<String>, // JS datetime string (e.g., "1990-01-01T12:00:00") - Optional for filtering
+}
+
+// Define the response structure for a single medicine entry
+#[derive(Serialize, FromRow)]
+pub struct UserMedicine {
+    pub user_medicine_id: i32,
+    pub user_id: i32,
+    pub medicine_schedule: Vec<NaiveDateTime>, // Use NaiveDateTime for simplicity
+    pub medicine_amount: Option<i32>,
+    pub medicine_per_times: f64,
+    pub user_medicine_img_link: Option<Vec<String>>,
+    pub medicine_unit: Option<String>,
+    pub medicine_name: Option<String>,
+    pub medicine_note: Option<String>,
+}
+
+// Define the overall response structure
+#[derive(Serialize)]
+pub struct GetMedicineResponse {
+    pub medicines: Vec<UserMedicine>,
+}
+
+#[axum::debug_handler]
+pub async fn get_medicine(
+    Extension(db_pool): Extension<PgPool>,
+    Json(payload): Json<GetMedicineRequest>,
+) -> Result<Json<GetMedicineResponse>, (StatusCode, Json<ErrorResponse>)> {
+    // 1. Find user_id from user_line_id
+    let user_id_result = sqlx::query!(
+        "SELECT user_id FROM users WHERE user_line_id = $1",
+        payload.user_line_id
+    )
+    .fetch_optional(&db_pool)
+    .await
+    .map_err(|e| {
+        eprintln!("Database error fetching user_id: {}", e);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ErrorResponse {
+                error: "Error fetching user".to_string(),
+            }),
+        )
+    })?;
+
+    let user_id = match user_id_result {
+        Some(user) => user.user_id,
+        None => {
+            return Err((
+                StatusCode::NOT_FOUND,
+                Json(ErrorResponse {
+                    error: "User not found".to_string(),
+                }),
+            ));
+        }
+    };
+
+    // 2. Build the query based on whether a date is provided
+    let mut query = r#"
+        SELECT user_medicine_id, user_id, medicine_schedule, medicine_amount, medicine_per_times, user_medicine_img_link, medicine_unit, medicine_name, medicine_note
+        FROM user_medicines
+        WHERE user_id = $1
+    "#.to_string();
+    let mut query_builder = sqlx::query_as::<_, UserMedicine>(&query);
+
+    if let Some(date_str) = payload.date {
+        // Parse the date string into a NaiveDateTime
+        let date = NaiveDateTime::parse_from_str(&date_str, "%Y-%m-%dT%H:%M:%S").map_err(|e| {
+            eprintln!("Error parsing date: {}", e);
+            (
+                StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: "Invalid date format. Use YYYY-MM-DDTHH:MM:SS".to_string(),
+                }),
+            )
+        })?;
+        // Add a condition to filter by date
+        query.push_str(" AND medicine_schedule @> ARRAY[$2::timestamp]");
+        query_builder = sqlx::query_as::<_, UserMedicine>(&query).bind(user_id).bind(date);
+    } else {
+        query_builder = sqlx::query_as::<_, UserMedicine>(&query).bind(user_id);
+    }
+
+    // 3. Fetch user medicines
+    let medicines = query_builder
+        .fetch_all(&db_pool)
+        .await
+        .map_err(|e| {
+            eprintln!("Database error fetching user medicines: {}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ErrorResponse {
+                    error: "Error fetching user medicines".to_string(),
+                }),
+            )
+        })?;
+
+    Ok(Json(GetMedicineResponse { medicines }))
+}
+

@@ -38,6 +38,8 @@ pub struct FoodMenu {
     pub name: String,
     pub nutrition: Nutrition,
     pub recipe_id: String,
+    // pub recipe_img_link: String,
+    pub recipe_img_link: Vec<String>,
 }
 
 #[derive(Serialize)]

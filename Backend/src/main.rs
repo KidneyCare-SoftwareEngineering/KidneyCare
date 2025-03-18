@@ -1,5 +1,5 @@
 use axum::{
-    routing::{get, post},
+    routing::{delete, get, patch, post},
     Extension, Router,
 };
 use backend::routes::food::*;
@@ -9,6 +9,8 @@ use backend::routes::pill::*;
 use backend::routes::admin::*;
 use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
+use backend::routes::recipe::*;
+use backend::routes::ingredient::*;
 
 #[tokio::main]
 async fn main() {
@@ -44,6 +46,17 @@ async fn main() {
         .route("/add_pill", post(handle_image_upload))
         .route("/get_pill_by_id", get(get_pill_by_user_line_id))
         .route("/admin_login", post(admin_login))
+        .route("/get_recipes", get(get_recipes))
+        .route("/get_recipe", get(get_recipe))
+        .route("/create_recipe", post(create_recipe))
+        .route("/update_recipe/{recipe_id}", patch(update_recipe))
+        .route("/delete_recipe/{recipe_id}", delete(delete_recipe))
+        .route("/ingredients", get(get_ingredients)) // Add this line
+        .route("/create_ingredient", post(create_ingredient))
+        .route("/update_ingredient/{ingredient_id}", patch(update_ingredient))
+        .route("/delete_ingredient/{ingredient_id}", delete(delete_ingredient))
+        .route("/get_medicine", post(get_medicine))
+        .route("/get_meal_plan", post(get_meal_plan))
         // .route("/get_pills", get(get_pill_by_user_line_id)) // Change to GET and use query
         .layer(Extension(db_pool.clone()));
 
