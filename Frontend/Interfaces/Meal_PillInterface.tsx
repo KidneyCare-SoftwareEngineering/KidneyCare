@@ -10,7 +10,7 @@ export interface FoodInterface {
     potassium: number
     image_url: string
     recipe_method: []
-    ingredient: { 
+    ingredient: {
         ingredient_amount: number
         ingredient_name: string
         ingredient_unit: string

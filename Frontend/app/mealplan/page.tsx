@@ -3,7 +3,7 @@ import DateSlider from '@/Components/DateSlider'
 import Navbar from '@/Components/Navbar'
 import { Icon } from '@iconify/react/dist/iconify.js'
 import Link from 'next/link'
-import React, {useState} from 'react'
+import React, { useState } from 'react'
 import ChooseEat from '@/Components/ChooseEat/ChooseEat'
 import { is } from 'date-fns/locale'
 import { motion } from 'framer-motion'
@@ -59,11 +59,11 @@ export default function MealPlan() {
 }
 
 
-  return (
-    <>  
-        <div className="flex reltive flex-col w-full h-full pb-8 min-h-screen bg-sec items-center">
-            <Navbar/>
-            <DateSlider onDateSelect={(date) => setDateSelected(date)} />
+    return (
+        <>
+            <div className="flex reltive flex-col w-full h-full pb-8 min-h-screen bg-sec items-center">
+                <Navbar />
+                <DateSlider onDateSelect={(date) => setDateSelected(date)} />
 
 
             {MealPlans ? (
@@ -155,27 +155,110 @@ export default function MealPlan() {
                                 </motion.div>
                             </Link>
                         </div>
+                    </>
+                )
+                    :
+                    (
+                        <ChooseEat dateSelected={dateSelected}
+                            desc="ยา"
+                            MealPlans={pill}
+                        />
+                    )
+                }
 
-                    ) : (
-                        <motion.div
-                            onClick={() => setIsMenuOpen(true)}
-                            className="fixed size-12 bg-orange300 rounded-full right-3 bottom-6 flex justify-center items-center"
-                            initial={{ rotate: 0 }}
-                            animate={{ rotate: 0 }} 
-                            exit={{ rotate: -45 }} 
-                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                        >
-                            <Icon icon="ic:baseline-plus" height="32" className="text-white"/>
-                        </motion.div>
-                    )}
-                    
-                </>
-            )
-            }
-            
 
-        </div>
+                {!MealPlans ? (
+                    <Link
+                        href="/mealplan/createplan"
+                        className="fixed size-12 bg-orange300 rounded-full right-3 bottom-6 flex justify-center items-center"
+                    >
+                        <Icon icon="ic:baseline-plus" height="32" className="text-white" />
+                    </Link>
+                ) :
+                    (
+                        <>
+                            {isMenuOpen ? (
+                                <div
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className="fixed bg-gradient-to-tl from-white to-transparent right-0 bottom-0 w-full h-full">
+                                    <motion.div
+                                        onClick={() => setIsMenuOpen(false)}
+                                        className="fixed size-12 bg-white border border-orange300 rounded-full right-3 bottom-6 flex justify-center items-center"
+                                        initial={{ rotate: 0 }}
+                                        animate={{ rotate: 45 }}
+                                        exit={{ rotate: 0 }}
+                                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                    >
+                                        <Icon icon="ic:baseline-plus" height="32" className="text-orange300" />
+                                    </motion.div>
 
-    </>
-  )
+                                    <div
+                                        onClick={() => console.log("edit")}
+                                        className="fixed">
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -20 }}
+                                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                            className="fixed size-12 right-16 bottom-20 flex justify-center items-center"
+                                        >
+                                            แก้ไข
+                                        </motion.div>
+                                        <motion.div
+                                            className="fixed size-12 bg-orange300 rounded-full right-3 bottom-20 flex justify-center items-center"
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -20 }}
+                                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                        >
+                                            <Icon icon="ic:sharp-edit" height="20" className="text-white" />
+                                        </motion.div>
+                                    </div>
+
+                                    <Link
+                                        href={`/mealplan/createplan`}
+                                        className="fixed">
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -20 }}
+                                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                            className="fixed  right-32 bottom-9 flex justify-center items-center"
+                                        >
+                                            สร้างแผน
+                                        </motion.div>
+                                        <motion.div
+                                            className="fixed size-12 bg-orange300 rounded-full right-16 bottom-6 flex justify-center items-center"
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -20 }}
+                                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                        >
+                                            <Icon icon="ic:sharp-edit" height="20" className="text-white" />
+                                        </motion.div>
+                                    </Link>
+                                </div>
+
+                            ) : (
+                                <motion.div
+                                    onClick={() => setIsMenuOpen(true)}
+                                    className="fixed size-12 bg-orange300 rounded-full right-3 bottom-6 flex justify-center items-center"
+                                    initial={{ rotate: 0 }}
+                                    animate={{ rotate: 0 }}
+                                    exit={{ rotate: -45 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                >
+                                    <Icon icon="ic:baseline-plus" height="32" className="text-white" />
+                                </motion.div>
+                            )}
+
+                        </>
+                    )
+                }
+
+
+            </div>
+
+        </>
+    )
 }
