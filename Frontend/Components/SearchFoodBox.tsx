@@ -1,17 +1,18 @@
 'use client'
 import Link from "next/link"
-import FoodInterface from "@/Interfaces/FoodInterface"
+import {FoodInterface} from "@/Interfaces/Meal_PillInterface"
 
-const SearchFoodBox: React.FC<FoodInterface> = ({food}) => {
+const SearchFoodBox: React.FC<{food:FoodInterface}> = ({food}) => {
     return(
         <>
             <Link 
-            href={`/FoodDetail/${food.id}`}
+            href={`/fooddetail/${food.id}`}
+            data-testid="food-card"
             className="flex justify-center rounded-xl bg-white w-11/12 h-full drop-shadow-lg  p-2">
                 <div 
                     className="flex w-2/5 rounded-xl"
                     style={{
-                        backgroundImage: `url(${food.imageUrl})`,
+                        backgroundImage: `url(${food.image_url[0]})`,
                         backgroundSize: "cover", 
                         backgroundRepeat: "no-repeat", 
                         backgroundPosition: "center", 
@@ -20,7 +21,7 @@ const SearchFoodBox: React.FC<FoodInterface> = ({food}) => {
                 </div>
                 <div className="flex w-3/5 h-full flex-col p-2"> 
                     <div className="flex w-full justify-between items-center mb-2">
-                        <div className="justify-start text-body1 font-extrabold">{food.name}</div>
+                        <div className="justify-start text-body1 font-extrabold">{food.recipe_name}</div>
                         <div className="justify-end text-searchcalories text-body3 font-extrabold">{food.calories} แคลอรี่</div>
                     </div>
 
@@ -77,12 +78,7 @@ const SearchFoodBox: React.FC<FoodInterface> = ({food}) => {
                             <p className="text-gray300 text-body3 ml-1"> ก. </p>
                         </div>
                     </div>
-
-
                     
-
-
-
                 </div>
             </Link>
         </>

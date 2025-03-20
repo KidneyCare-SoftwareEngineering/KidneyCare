@@ -1,0 +1,161 @@
+{
+    "user_id": "fdfghkj3f4khgfh3gh5ljkjhf53",
+    "mealplans": [
+        {
+            "meals": [
+                {
+                    "name": "ข้าวต้มถั่วแดง",
+                    "nutrition": {
+                        "calories": 315,
+                        "protein": 22,
+                        "carbs": 45,
+                        "fat": 14,
+                        "phosphorus": 15,
+                        "potassium": 16,
+                        "sodium": 18
+                    },
+                    "recipe_id": "50"
+                },
+                {
+                    "name": "ข้าวคลุกงาดำ",
+                    "nutrition": {
+                        "calories": 512,
+                        "protein": 30,
+                        "carbs": 67,
+                        "fat": 21,
+                        "phosphorus": 12,
+                        "potassium": 16,
+                        "sodium": 20
+                    },
+                    "recipe_id": "237"
+                },
+                {
+                    "name": "ข้าวเหนียวหมูพริกไทยดำ",
+                    "nutrition": {
+                        "calories": 591,
+                        "protein": 24,
+                        "carbs": 50,
+                        "fat": 19,
+                        "phosphorus": 10,
+                        "potassium": 14,
+                        "sodium": 10
+                    },
+                    "recipe_id": "247"
+                }
+            ],
+            "total_nutrition": {
+                "calories": 1418,
+                "protein": 76,
+                "carbs": 162,
+                "fat": 54,
+                "phosphorus": 37,
+                "potassium": 46,
+                "sodium": 48
+            }
+        },
+        {
+            "meals": [
+                {
+                    "name": "น้ำพริกผักโขม",
+                    "nutrition": {
+                        "calories": 482,
+                        "protein": 24,
+                        "carbs": 53,
+                        "fat": 20,
+                        "phosphorus": 19,
+                        "potassium": 11,
+                        "sodium": 19
+                    },
+                    "recipe_id": "215"
+                },
+                {
+                    "name": "ข้าวคลุกเต้าเจี้ยว",
+                    "nutrition": {
+                        "calories": 418,
+                        "protein": 32,
+                        "carbs": 66,
+                        "fat": 17,
+                        "phosphorus": 13,
+                        "potassium": 20,
+                        "sodium": 14
+                    },
+                    "recipe_id": "249"
+                },
+                {
+                    "name": "ปลาดุกย่างน้ำจิ้มซีฟู้ด",
+                    "nutrition": {
+                        "calories": 393,
+                        "protein": 24,
+                        "carbs": 53,
+                        "fat": 24,
+                        "phosphorus": 14,
+                        "potassium": 19,
+                        "sodium": 11
+                    },
+                    "recipe_id": "70"
+                }
+            ],
+            "total_nutrition": {
+                "calories": 1293,
+                "protein": 80,
+                "carbs": 172,
+                "fat": 61,
+                "phosphorus": 46,
+                "potassium": 50,
+                "sodium": 44
+            }
+        },
+        {
+            "meals": [
+                {
+                    "name": "ปลานึ่งกะปิ",
+                    "nutrition": {
+                        "calories": 571,
+                        "protein": 35,
+                        "carbs": 66,
+                        "fat": 18,
+                        "phosphorus": 16,
+                        "potassium": 17,
+                        "sodium": 13
+                    },
+                    "recipe_id": "39"
+                },
+                {
+                    "name": "ไก่ผัดสมุนไพร",
+                    "nutrition": {
+                        "calories": 410,
+                        "protein": 26,
+                        "carbs": 74,
+                        "fat": 16,
+                        "phosphorus": 18,
+                        "potassium": 12,
+                        "sodium": 15
+                    },
+                    "recipe_id": "236"
+                },
+                {
+                    "name": "ปลาทอดผัดกระเทียม",
+                    "nutrition": {
+                        "calories": 333,
+                        "protein": 23,
+                        "carbs": 47,
+                        "fat": 10,
+                        "phosphorus": 18,
+                        "potassium": 12,
+                        "sodium": 10
+                    },
+                    "recipe_id": "117"
+                }
+            ],
+            "total_nutrition": {
+                "calories": 1314,
+                "protein": 84,
+                "carbs": 187,
+                "fat": 44,
+                "phosphorus": 52,
+                "potassium": 41,
+                "sodium": 38
+            }
+        }
+    ]
+}

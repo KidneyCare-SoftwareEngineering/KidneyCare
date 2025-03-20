@@ -1,0 +1,192 @@
+[
+    {
+        "id": 3,
+        "recipe_name": "ไข่ขาวตุ๋น",
+        "calories": 280,
+        "protein": 55.8,
+        "carbs": 9,
+        "fat": 0,
+        "sodium": 0,
+        "phosphorus": 2782,
+        "potassium": 1.1,
+        "image_url": [
+            "https://img-global.cpcdn.com/recipes/56b05ddb9686354c/400x400cq70/photo.jpg"
+        ],
+        "food_category": [
+            "ทั่วไป",
+            "มังสวิรัติ",
+            "อาหารฮาลาล"
+        ],
+        "dish_type": [
+            "ของคาว"
+        ],
+        "ingredients": [
+            "น้ำเปล่า",
+            "ซอสฝาเขียว",
+            "ซอสฝาเขียว",
+            "น้ำปลา",
+            "ไข่ขาวเหลวพาสเจอร์ไรซ์ ",
+            "ต้นหอมซอย"
+        ],
+        "ingredients_eng": [
+            "egg",
+            "green onion"
+        ]
+    },
+    {
+        "id": 5,
+        "recipe_name": "ลาบไก่",
+        "calories": 342,
+        "protein": 46,
+        "carbs": 23.5,
+        "fat": 23.5,
+        "sodium": 4,
+        "phosphorus": 4070,
+        "potassium": 5,
+        "image_url": [
+            "https://s359.kapook.com//pagebuilder/e8aca16f-963f-43d9-805e-9fe8b103e0ee.jpg"
+        ],
+        "food_category": [
+            "ทั่วไป",
+            "ฮาลาล"
+        ],
+        "dish_type": [
+            "ของคาว"
+        ],
+        "ingredients": [
+            "น้ำตาล",
+            "ซอสฝาเขียว",
+            "พริกไทย",
+            "อกไก่บด",
+            "น้ำปลา(สำหรับรวนไก่)",
+            "ผักชีฝรั่งซอย",
+            "พริกป่น",
+            "ข้าวคั่ว",
+            "ใบมะกรูด",
+            "ใบสะระแหน่ ",
+            "น้ำมะนาว",
+            "หอมแดงซอย"
+        ],
+        "ingredients_eng": [
+            "lime",
+            "shallot"
+        ]
+    },
+    {
+        "id": 4,
+        "recipe_name": "เงาะลอยแก้ว",
+        "calories": 2280,
+        "protein": 9,
+        "carbs": 565,
+        "fat": 0,
+        "sodium": 9,
+        "phosphorus": 600.5,
+        "potassium": 2,
+        "image_url": [
+            "https://img.kapook.com/u/2017/surauch/cooking/q1_3.jpg"
+        ],
+        "food_category": [
+            "ทั่วไป",
+            "มังสวิรัติ",
+            "อาหารฮาลาล",
+            "เจ",
+            "วีแกน"
+        ],
+        "dish_type": [
+            "ของหวาน"
+        ],
+        "ingredients": [
+            "น้ำตาล",
+            "ซอสฝาเขียว",
+            "พริกไทย",
+            "เกลือ"
+        ],
+        "ingredients_eng": []
+    },
+    {
+        "id": 2,
+        "recipe_name": "ยำวุ้นเส้น",
+        "calories": 696,
+        "protein": 23.7,
+        "carbs": 145.8,
+        "fat": 94,
+        "sodium": 3.3,
+        "phosphorus": 1255,
+        "potassium": 1.9,
+        "image_url": [
+            "https://img.kapook.com/u/2016/surauch/cook1/u5_2.jpg"
+        ],
+        "food_category": [
+            "ทั่วไป",
+            "ฮาลาล"
+        ],
+        "dish_type": [
+            "ของคาว"
+        ],
+        "ingredients": [
+            "ซีอิ๊วขาว",
+            "วุ้นเส้น",
+            "ไก่สับ",
+            "น้ำตาล",
+            "ขึ้นฉ่าย",
+            "หอมใหญ่ซอย",
+            "พริกขี้หนูตำ",
+            "น้ำมะนาว",
+            "หอมแดงซอย",
+            "กุ้งขาว",
+            "มะเขือเทศ"
+        ],
+        "ingredients_eng": [
+            "chilli",
+            "lime",
+            "shallot",
+            "shrimp",
+            "tomato"
+        ]
+    },
+    {
+        "id": 1,
+        "recipe_name": "ข้าวผัดไข่ขาวเพื่อสุขภาพ",
+        "calories": 1144,
+        "protein": 69.8,
+        "carbs": 150.5,
+        "fat": 0,
+        "sodium": 19.9,
+        "phosphorus": 1212,
+        "potassium": 27.6,
+        "image_url": [
+            "https://www.maggi.co.th/sites/default/files/srh_recipes/a1b6cab9710d963ab0d30f62e5d3a88a.jpeg"
+        ],
+        "food_category": [
+            "ทั่วไป",
+            "มังสวิรัติ",
+            "อาหารฮาลาล"
+        ],
+        "dish_type": [
+            "ของคาว"
+        ],
+        "ingredients": [
+            "น้ำมันมะกอก",
+            "ซีอิ๊วขาว",
+            "พริกไทยป่น",
+            "ข้าวกล้อง",
+            "เห็ดหอมซอย",
+            "เม็ดมะม่วงหิมพานต์",
+            "ผักชีไทย",
+            "บรอกโคลีลวก",
+            "แครอทหั่นเต๋า",
+            "ไข่ขาวเหลวพาสเจอร์ไรซ์ ",
+            "กระเทียมสับ",
+            "ต้นหอมซอย",
+            "หอมใหญ่หั่นเต๋า"
+        ],
+        "ingredients_eng": [
+            "broccoli",
+            "carrot",
+            "egg",
+            "garlic",
+            "green onion",
+            "onion"
+        ]
+    }
+]
