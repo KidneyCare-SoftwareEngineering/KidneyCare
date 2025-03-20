@@ -15,6 +15,9 @@ use chrono::NaiveDate;
 pub struct UserData {
     name: String,
     gender: String,
+    weight: f64,
+    height: f64,
+    kidney_level: i32,
 }
 
 
@@ -33,15 +36,23 @@ pub async fn get_user_by_id(
 
 
 pub async fn fetch_user_data_by_id(pool: &PgPool, user_id: &str) -> Result<UserData, sqlx::Error> {
-    let user = sqlx::query_as::<_, UserData>( 
+    match sqlx::query_as::<_, UserData>( 
         "SELECT 
             name, 
-            gender
+            gender,
+            weight,
+            height,
+            kidney_level
             FROM users WHERE user_line_id = $1"
     )
     .bind(user_id)
     .fetch_one(pool)
-    .await?;
-    
-    Ok(user)
+    .await 
+    {
+        Ok(user) => Ok(user),
+        Err(e) => {
+            eprintln!("Database error: {:?}", e);
+            Err(e)
+        }
+    }
 }
