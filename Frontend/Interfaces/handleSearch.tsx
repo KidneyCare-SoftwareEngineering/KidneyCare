@@ -1,4 +1,4 @@
-import { FoodInterface } from '@/Interfaces/FoodInterface';
+import { FoodInterface } from '@/Interfaces/Meal_PillInterface';
 export default interface handleSearch {
     onSearch: (searchTerm: string) => void;
     foodData: FoodInterface[];

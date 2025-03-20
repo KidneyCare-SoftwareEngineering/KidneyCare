@@ -5,7 +5,7 @@ import StatePage1 from './StatePage1'
 import TitleBar from '@/Components/TitleBar'
 import Dropdown from '@/Components/Dropdown'
 import StatePage2 from './StatePage2'
-import { MealplanInterface } from '@/Interfaces/FoodInterface'
+import { MealplanInterface } from '@/Interfaces/Meal_PillInterface'
 
 
 export default function CreatePlan() {

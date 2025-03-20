@@ -1,5 +1,5 @@
 'use client'
-import {FoodInterface} from '@/Interfaces/FoodInterface'
+import {FoodInterface} from '@/Interfaces/Meal_PillInterface'
 import React from 'react'
 
 

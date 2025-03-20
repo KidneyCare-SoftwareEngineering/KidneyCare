@@ -9,7 +9,7 @@ const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPl
     
     return (
     <>
-        <div className="flex w-full h-screen flex-col items-center pb-10  bg-sec">
+        <div className="flex w-full h-full flex-col items-center pb-10  bg-sec">
             <TitleBarStatePage title="รายการอาหารของคุณ" statePage={statePage} setStatePage={setStatePage}/>
             <img
                 src="/Untitled-3.jpg"
@@ -26,7 +26,7 @@ const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPl
                       setDayIndex(index)
                     }}
                     className="flex w-11/12 h-14 rounded-xl drop-shadow-xl bg-white mt-6 px-4"> 
-                    <div className="flex w-11/12 justify-start items-center text-body1 font-bold "> 
+                    <div className="flex w-11/12 justify-start items-center text-body1 font-bold min-h-12"> 
                         วันที่ {index+1}
                     </div>
                     <div className="flex w-1/12 justify-center items-center">
@@ -35,8 +35,8 @@ const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPl
                 </div>
             ))}
             
-
-            <div className="flex w-11/12 h-14 rounded-xl drop-shadow-xl bg-white mt-6 px-4 "> 
+            {/* loading component */}
+            {/* <div className="flex w-11/12 h-14 rounded-xl drop-shadow-xl bg-white mt-6 px-4 "> 
                 <div className="flex w-11/12 animate-pulse justify-start items-center text-body1 font-bold"> 
                     
                 <div className="flex bg-slate-300 rounded-full size-8 mr-4"/>
@@ -46,10 +46,10 @@ const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPl
                 <div className="flex w-1/12 animate-pulse justify-center items-center">
                     <Icon icon="weui:arrow-filled" height="24px"/>
                 </div>
-            </div>
+            </div> */}
 
             <button
-                className="flex bottom-24 w-10/12 justify-center items-center bg-orange300 text-white py-4 rounded-xl text-body1 font-bold"
+                className="flex bottom-24 w-10/12 justify-center items-center my-4 bg-orange300 text-white py-4 rounded-xl text-body1 font-bold"
             >
             บันทึก
             </button>

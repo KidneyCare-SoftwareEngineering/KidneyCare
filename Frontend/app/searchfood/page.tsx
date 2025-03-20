@@ -4,7 +4,7 @@ import Navbar from '@/Components/Navbar'
 import SearchFoodBox from '@/Components/SearchFoodBox'
 import SearchBox from '@/Components/SearchBox'
 import liff from '@line/liff'
-import { FoodInterface } from '@/Interfaces/FoodInterface'
+import { FoodInterface } from '@/Interfaces/Meal_PillInterface'
 import {
   Sheet,
   SheetContent,

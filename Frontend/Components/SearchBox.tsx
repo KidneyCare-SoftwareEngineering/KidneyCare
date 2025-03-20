@@ -72,7 +72,7 @@ const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFood
 
     try {
       const response = await fetch(
-        "https://detect.roboflow.com/se3-zhodg/1?xxx", //on edit
+        `https://detect.roboflow.com/se3-zhodg/1`, 
         { method: "POST", body: formData }
       );
       const result = await response.json();

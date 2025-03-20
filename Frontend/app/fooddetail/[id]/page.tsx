@@ -6,7 +6,7 @@ import FoodDetail1 from "./FoodDetail1"
 import FoodDetail2 from "./FoodDetail2"
 import { useParams } from "next/navigation"
 import TitleBar from "@/Components/TitleBar"
-import {FoodInterface} from "@/Interfaces/FoodInterface"
+import {FoodInterface} from "@/Interfaces/Meal_PillInterface"
 
 export default function FoodDetail() {
     const [food, setFood] = useState<FoodInterface | null>(null); 

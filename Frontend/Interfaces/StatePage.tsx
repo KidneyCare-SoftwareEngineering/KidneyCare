@@ -1,4 +1,4 @@
-import { MealplanInterface } from "./FoodInterface";
+import { MealplanInterface } from "./Meal_PillInterface";
 
 export interface BaseStatePageMealplans {
     setStatePage: React.Dispatch<React.SetStateAction<number>>;
