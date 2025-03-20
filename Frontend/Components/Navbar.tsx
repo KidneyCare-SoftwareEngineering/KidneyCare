@@ -17,15 +17,17 @@ export default function Navbar() {
                     วางแผน
                 </Link>
 
-                <Link href={`/searchfood`} className="flex flex-col justify-center items-center text-black text-body3 gap-1">
+                <Link href={`/searchfood`} className={`flex flex-col justify-center items-center text-body3 gap-1 ${
+                    pathname === "/searchfood" ? "text-black" : "text-grey300" }`}>
                     <Icon icon="hugeicons:menu-restaurant" height="32" className={` ${pathname === "/searchfood" ? "text-orange300" : "text-grey300"}`}/>
                     ค้นหาสารอาหาร
                 </Link>
 
-                <div className="flex flex-col justify-center items-center text-grey300 text-body3 gap-1">
-                    <Icon icon="fluent:pill-24-regular" height="32" className={` ${pathname === "/" ? "text-orange300" : "text-grey300"}`}/>
+                <Link href={`/pillreminder`} className={`flex flex-col justify-center items-center text-body3 gap-1 ${
+                    pathname === "/pillreminder" ? "text-black" : "text-grey300" }`}>
+                    <Icon icon="fluent:pill-24-regular" height="32" className={` ${pathname === "/pillreminder" ? "text-orange300" : "text-grey300"}`}/>
                     แจ้งเตือนทานยา
-                </div>
+                </Link>
 
                 <div className="flex flex-col justify-center items-center text-grey300 text-body3 gap-1">
                     <Icon icon="bi:person" height="32" className={` ${pathname === "/" ? "text-orange300" : "text-grey300"}`}/>
