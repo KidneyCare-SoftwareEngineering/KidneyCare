@@ -13,7 +13,7 @@ export default function CreatePill() {
     const [pill_amount, setpill_amount] = useState<string>("");
     const [pill_per_meal, setpill_per_meal] = useState<number>(0);
     const [pill_reminder_time, setpill_reminder_time] = useState<string[]>([]);
-    const [pill_img_link, setpill_img_link] = useState<File[]>([]);
+    const [pill_img_link, setpill_img_link] = useState<(string | File)[]>([]);
     const [pill_note, setpill_note] = useState<string>("");
     const [newTime, setNewTime] = useState<string>("");
 
@@ -121,7 +121,12 @@ export default function CreatePill() {
             }
         }).filter(Boolean); // กำจัด null หรือ invalid ไฟล์ที่ไม่ต้องการ
 
-        setpill_img_link((prev) => [...prev, ...newImages.filter((img): img is File => img !== null)]);
+        setpill_img_link((prev) => [
+            ...prev,
+            ...newImages
+                .filter((img): img is File => img !== null)
+                .map((file) => URL.createObjectURL(file))
+        ]);
     };
 
     const validatePillData = () => {
@@ -132,7 +137,7 @@ export default function CreatePill() {
         if (pill_reminder_time.length === 0) return "กรุณาเพิ่มเวลาที่ต้องทานยา";
         if (pill_img_link.length === 0) return "กรุณาเพิ่มรูปภาพของยา";
         if (pill_img_link.length > 4) return "รูปภาพต้องไม่เกิน 4 รูป";
-        if (pill_img_link.some(img => img.size > 1024 * 1024)) return "ขนาดรูปภาพต้องไม่เกิน 1 MB";
+        if (pill_img_link.some((img) => img instanceof File && img.size > 1024 * 1024)) return "ขนาดรูปภาพต้องไม่เกิน 1 MB";
         if (pill_note.length > 200) return "โน้ตเพิ่มเติมต้องไม่เกิน 200 ตัวอักษร";
         if (!pill_note.trim()) return "กรุณากรอกโน้ตเพิ่มเติม";
         return null; // ผ่านการตรวจสอบ
