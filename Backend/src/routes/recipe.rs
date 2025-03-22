@@ -501,345 +501,113 @@ pub async fn create_recipe(
     ))
 }
 
-#[axum::debug_handler]
-pub async fn update_recipe(
-    Extension(db_pool): Extension<PgPool>,
-    Path(recipe_id): Path<i32>,
-    headers: HeaderMap,
-    mut multipart: Multipart, //change this
-) -> Result<Json<Value>, (StatusCode, Json<ErrorResponse>)> {
-    let mut payload: RecipeDetail = Default::default();
+// Updated Rust Code for update_recipe function
 
-    let mut image_urls = Vec::new();
+// #[axum::debug_handler]
+// pub async fn update_recipe(
+//     Extension(db_pool): Extension<PgPool>,
+//     Path(recipe_id): Path<i32>,
+//     mut multipart: Multipart,
+// ) -> Result<Json<Value>, (StatusCode, Json<ErrorResponse>)> {
+//     let mut payload: RecipeDetail = Default::default();
+//     let mut image_urls = Vec::new();
 
-    if let Some(header) = headers.get("image") {
-        if let Ok(image_urls_string) = header.to_str() {
-            let parsed_urls: Result<Vec<String>, _> = serde_json::from_str(image_urls_string);
-            match parsed_urls {
-                Ok(urls) => {
-                    image_urls = urls;
-                }
-                Err(e) => {
-                    eprintln!("Error parsing image_urls: {:?}", e);
-                }
-            }
-        }
-    }
-    while let Some(field) = multipart.next_field().await.unwrap() {
-        match field.name() {
-            Some("recipe_detail") => {
-                payload = serde_json::from_str(&field.text().await.unwrap()).unwrap_or_default()
-            }
-            _ => {}
-        }
-    }
+//     // Extract recipe details from multipart form data
+//     while let Some(field) = multipart.next_field().await.unwrap() {
+//         match field.name() {
+//             Some("recipe_detail") => {
+//                 payload = serde_json::from_str(&field.text().await.unwrap()).unwrap_or_default();
+//             }
+//             Some("image") => {
+//                 if let Ok(url) = field.text().await {
+//                     image_urls.push(url);
+//                 }
+//             }
+//             _ => {}
+//         }
+//     }
 
-    let recipe_name = &payload.recipe_name;
-    let recipe_method = payload.recipe_method.clone();
-    let calories = payload.calories;
-    let calories_unit = payload.calories_unit.clone();
-    let food_category = &payload.food_category;
-    let dish_type = payload.dish_type.clone().unwrap_or_default();
-    let ingredients: Vec<RecipeIngredient> = payload.ingredients.clone();
-    let nutrients: Vec<RecipeNutrient> = payload.nutrients.clone();
+//     // Collect the fields to update
+//     let mut updates = Vec::new();
+//     let mut values = Vec::new();
 
-    // Start a transaction
-    let mut tx = db_pool.begin().await.map_err(|e| {
-        eprintln!("Failed to begin transaction: {}", e);
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(ErrorResponse {
-                error: "Failed to begin database transaction".to_string(),
-            }),
-        )
-    })?;
+//     if !payload.recipe_name.is_empty() {
+//         updates.push("recipe_name = ?");
+//         values.push(payload.recipe_name.clone());
+//     }
+//     if !payload.recipe_method.is_empty() {
+//         updates.push("recipe_method = ?");
+//         values.push(payload.recipe_method.clone());
+//     }
+//     if payload.calories > 0.0 {  
+//         updates.push("calories = ?");
+//         values.push(payload.calories);
+//     }
+//     if !payload.calories_unit.is_empty() {
+//         updates.push("calories_unit = ?");
+//         values.push(payload.calories_unit.clone());
+//     }
+//     if !image_urls.is_empty() {
+//         updates.push("recipe_img_link = ?");
+//         values.push(image_urls);
+//     }
+//     if !payload.food_category.is_empty() {
+//         updates.push("food_category = ?");
+//         values.push(payload.food_category.clone());
+//     }
+//     if let Some(dish_type) = &payload.dish_type {
+//         updates.push("dish_type = ?");
+//         values.push(dish_type.clone());
+//     }
 
-    // Initialize the SQL query
-    let mut query = "UPDATE recipes SET".to_string();
-    let mut values = Vec::new();
-    let mut params: Vec<String> = Vec::new();
+//     if updates.is_empty() {
+//         return Err((
+//             StatusCode::BAD_REQUEST,
+//             Json(ErrorResponse {
+//                 error: "No fields to update".to_string(),
+//             }),
+//         ));
+//     }
 
-    // Update the query to check for Option types correctly
-    if !recipe_name.is_empty() {
-        query.push_str(" recipe_name = $1,");
-        values.push(payload.recipe_name.clone());
-    }
-    if !payload.recipe_method.is_empty() {
-        query.push_str(" recipe_method = $2,");
-        values.push(serde_json::to_string(&recipe_method).unwrap());
-    }
-    if let Some(cal) = Some(payload.calories) {
-        query.push_str(" calories = $3,");
-        values.push(cal.to_string());
-    }
-    if !calories_unit.is_empty() {
-        query.push_str(" calories_unit = $4,"); 
-        values.push(payload.calories_unit);
-    }
-    if !image_urls.is_empty() {
-        query.push_str(" recipe_img_link = $5,");
-        values.push(serde_json::to_string(&image_urls).unwrap()); // Correctly serialize Vec<String>
-    }
-    if !food_category.is_empty() {
-        query.push_str(" food_category = $6,");
-        values.push(serde_json::to_string(&payload.food_category).unwrap()); // Correctly serialize Vec<String>
-    }
-    if let Some(dish) = Some(payload.dish_type.clone()) {
-        query.push_str(" dish_type = $7,");
-        values.push(serde_json::to_string(&dish).unwrap_or_default());
-    }
+//     // Build the SQL query
+//     let query = format!(
+//         "UPDATE recipes SET {} WHERE recipe_id = ?",
+//         updates.join(", ")
+//     );
 
-    // Remove the last comma (if any)
-    if query.ends_with(',') {
-        query.pop();
-    }
+//     // Start a database transaction
+//     let mut tx = db_pool.begin().await.map_err(|_| (
+//         StatusCode::INTERNAL_SERVER_ERROR,
+//         Json(ErrorResponse {
+//             error: "Failed to begin transaction".to_string(),
+//         }),
+//     ))?;
 
-    // Add the WHERE clause for the recipe_id
-    query.push_str(" WHERE recipe_id = $8");
+//     // Execute the dynamically built query
+//     sqlx::query_with(&query, values)
+//         .execute(&mut *tx)
+//         .await
+//         .map_err(|_| (
+//             StatusCode::INTERNAL_SERVER_ERROR,
+//             Json(ErrorResponse {
+//                 error: "Failed to update recipe".to_string(),
+//             }),
+//         ))?;
 
-    // Execute the query with dynamic parameters
-    let mut query_builder = sqlx::query(&query);
-    for value in values {
-        query_builder = query_builder.bind(value);
-    }
-    let update_result = query_builder.bind(recipe_id).execute(&mut *tx)
-        .await;
+//     // Commit the transaction
+//     tx.commit().await.map_err(|_| (
+//         StatusCode::INTERNAL_SERVER_ERROR,
+//         Json(ErrorResponse {
+//             error: "Failed to commit transaction".to_string(),
+//         }),
+//     ))?;
 
-    match update_result {
-        Ok(_) => {
-            println!("Successfully updated recipe with recipe_id: {}", recipe_id);
-        }
-        Err(e) => {
-            eprintln!("Database error updating recipe: {}", e);
-            tx.rollback().await.map_err(|e| {
-                eprintln!("Failed to rollback transaction: {}", e);
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(ErrorResponse {
-                        error: "Failed to rollback database transaction".to_string(),
-                    }),
-                )
-            })?;
-            return Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ErrorResponse {
-                    error: format!("Database error updating recipe: {}", e),
-                }),
-            ));
-        }
-    };
+//     Ok(Json(json!({ "message": "Recipe updated successfully", "recipe_id": recipe_id })))
+// }
 
-    // Update the recipes table
-    let recipes_update_result = sqlx::query!(
-        r#"
-        UPDATE recipes SET recipe_name = $1, recipe_method = $2, calories = $3, calories_unit = $4, recipe_img_link = $5, food_category = $6, dish_type = $7
-        WHERE recipe_id = $8
-        "#,
-        recipe_name,
-        &recipe_method,
-        calories,
-        calories_unit,
-        &image_urls,
-        &food_category,
-        &dish_type,
-        recipe_id
-    )
-    .execute(&mut *tx)
-    .await;
-    match recipes_update_result {
-        Ok(_) => {
-            // Log success
-            println!(
-                "Successfully update into recipes with recipe_id: {}",
-                recipe_id
-            );
-        }
-        Err(e) => {
-            // Log error
-            eprintln!("Database error update into recipes: {}", e);
-            tx.rollback().await.map_err(|e| {
-                eprintln!("Failed to rollback transaction: {}", e);
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(ErrorResponse {
-                        error: "Failed to rollback database transaction".to_string(),
-                    }),
-                )
-            })?;
-            return Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ErrorResponse {
-                    error: format!("Database error update into recipes: {}", e),
-                }),
-            ));
-        }
-    };
 
-    // Delete existing ingredients and nutrients for this recipe
-    let recipes_ingredients_delete_result = sqlx::query!(
-        r#"DELETE FROM recipes_ingredients WHERE recipe_id = $1"#,
-        recipe_id
-    )
-    .execute(&mut *tx)
-    .await;
-    match recipes_ingredients_delete_result {
-        Ok(_) => {
-            // Log success
-            println!(
-                "Successfully delete ingredients with recipe_id: {}",
-                recipe_id
-            );
-        }
-        Err(e) => {
-            // Log error
-            eprintln!("Database error delete ingredients: {}", e);
-            tx.rollback().await.map_err(|e| {
-                eprintln!("Failed to rollback transaction: {}", e);
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(ErrorResponse {
-                        error: "Failed to rollback database transaction".to_string(),
-                    }),
-                )
-            })?;
-            return Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ErrorResponse {
-                    error: format!("Database error delete ingredients: {}", e),
-                }),
-            ));
-        }
-    };
-    let recipes_nutrients_delete_result = sqlx::query!(
-        r#"DELETE FROM recipes_nutrients WHERE recipe_id = $1"#,
-        recipe_id
-    )
-    .execute(&mut *tx)
-    .await;
-    match recipes_nutrients_delete_result {
-        Ok(_) => {
-            // Log success
-            println!(
-                "Successfully delete nutrients with recipe_id: {}",
-                recipe_id
-            );
-        }
-        Err(e) => {
-            // Log error
-            eprintln!("Database error delete nutrients: {}", e);
-            tx.rollback().await.map_err(|e| {
-                eprintln!("Failed to rollback transaction: {}", e);
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(ErrorResponse {
-                        error: "Failed to rollback database transaction".to_string(),
-                    }),
-                )
-            })?;
-            return Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ErrorResponse {
-                    error: format!("Database error delete nutrients: {}", e),
-                }),
-            ));
-        }
-    };
-    // Re-insert the ingredients
-    for ingredient in &ingredients {
-        // Use payload.ingredients
-        let ingredient_insert_result = sqlx::query(
-            r#"
-            INSERT INTO recipes_ingredients (recipe_id, ingredient_id, amount, ingredient_unit)
-            VALUES ($1, $2, $3, $4)
-            "#,
-        )
-        .bind(recipe_id)
-        .bind(ingredient.ingredient_id)
-        .bind(ingredient.amount)
-        .bind(&ingredient.ingredient_unit)
-        .execute(&mut *tx)
-        .await;
-        match ingredient_insert_result {
-            Ok(_) => {
-                println!("Successfully re-inserted ingredient: {:?}", ingredient);
-            }
-            Err(e) => {
-                eprintln!(
-                    "Database error re-inserting ingredient {:?}: {}",
-                    ingredient, e
-                );
-                tx.rollback().await.map_err(|e| {
-                    eprintln!("Failed to rollback transaction: {}", e);
-                    (
-                        StatusCode::INTERNAL_SERVER_ERROR,
-                        Json(ErrorResponse {
-                            error: "Failed to rollback database transaction".to_string(),
-                        }),
-                    )
-                })?;
-                return Err((
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(ErrorResponse {
-                        error: format!("Database error re-inserting ingredient: {}", e),
-                    }),
-                ));
-            }
-        }
-    }
-    // Re-insert the nutrients
-    for nutrient in &nutrients {
-        // use payload.nutrients
-        let nutrient_insert_result = sqlx::query(
-            r#"
-            INSERT INTO recipes_nutrients (recipe_id, nutrient_id, quantity)
-            VALUES ($1, $2, $3)
-            "#,
-        )
-        .bind(recipe_id)
-        .bind(nutrient.nutrient_id)
-        .bind(nutrient.quantity)
-        .execute(&mut *tx)
-        .await;
-        match nutrient_insert_result {
-            Ok(_) => {
-                println!("Successfully re-inserted nutrient: {:?}", nutrient);
-            }
-            Err(e) => {
-                eprintln!("Database error re-inserting nutrient {:?}: {}", nutrient, e);
-                tx.rollback().await.map_err(|e| {
-                    eprintln!("Failed to rollback transaction: {}", e);
-                    (
-                        StatusCode::INTERNAL_SERVER_ERROR,
-                        Json(ErrorResponse {
-                            error: "Failed to rollback database transaction".to_string(),
-                        }),
-                    )
-                })?;
-                return Err((
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(ErrorResponse {
-                        error: format!("Database error re-inserting nutrient: {}", e),
-                    }),
-                ));
-            }
-        }
-    }
 
-    // Commit the transaction
-    tx.commit().await.map_err(|e| {
-        eprintln!("Failed to commit transaction: {}", e);
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(ErrorResponse {
-                error: "Failed to commit database transaction".to_string(),
-            }),
-        )
-    })?;
 
-    Ok(Json(
-        json!({ "message": "Recipe updated successfully", "recipe_id": recipe_id }),
-    ))
-}
 
 // ... (other struct)
 #[axum::debug_handler]
@@ -867,15 +635,17 @@ pub async fn delete_recipe(
         }
         Err(e) => {
             eprintln!("Database error deleting recipe: {}", e);
-            tx.rollback().await.map_err(|e| {
-                eprintln!("Failed to rollback transaction: {}", e);
-                (
+            if let Err(rollback_err) = tx.rollback().await {
+                eprintln!("Failed to rollback transaction: {}", rollback_err);
+                return Err((
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Json(ErrorResponse {
                         error: "Failed to rollback database transaction".to_string(),
                     }),
-                )
-            })?;
+                ));
+            }
+
+
             return Err((
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ErrorResponse {
