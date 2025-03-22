@@ -3,15 +3,11 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import TitleBar from "@/Components/TitleBar";
-import dynamic from "next/dynamic";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/pagination";
+import { Pagination, Autoplay } from "swiper/modules";
 
-// Import `Carousel` แบบ dynamic เพื่อแก้ปัญหาการโหลดใน SSR
-const Carousel = dynamic(
-    () => import('react-responsive-carousel').then(mod => mod.Carousel),
-    { ssr: false }
-);
-
-import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
 interface MedicineInterface {
     user_medicine_id: number;
@@ -29,7 +25,6 @@ export default function PillDetail() {
     const { id } = useParams();
 
     useEffect(() => {
-        // จำลองการดึงข้อมูลยา
         const pill: MedicineInterface = {
             user_medicine_id: 2,
             medicine_schedule: ["1990-01-01T08:00:00", "1990-01-01T12:00:00", "1990-01-01T15:00:00"],
@@ -42,7 +37,7 @@ export default function PillDetail() {
             ],
             medicine_unit: "เม็ด",
             medicine_name: "ยาขับปัสสาวะ",
-            medicine_note: "เป็นกลุ่มยาที่ช่วยเพิ่มการขับน้ำและเกลือแร่ส่วนเกินออกจากร่างกายทางปัสสาวะโดยยาประเภทนี้มีจุดประสงค์เพื่อรักษาหรือบรรเทาอาการจากโรคหรือภาวะที่เกี่ยวข้องกับการสะสมของน้ำในร่างกาย เช่น ความดันโลหิตสูง, ภาวะบวมน้ำ, หรือภาวะหัวใจล้มเหลว",
+            medicine_note: "เป็นกลุ่มยาที่ช่วยเพิ่มการขับน้ำและเกลือแร่ส่วนเกินออกจากร่างกายทางปัสสาวะ...",
         };
 
         setMedicine(pill);
@@ -54,31 +49,27 @@ export default function PillDetail() {
         <>
             <TitleBar title={medicine.medicine_name} href="/pillreminder" />
             <div className="flex justify-center flex-col items-center pb-10">
-                {/* แสดงภาพด้วย Carousel */}
-                <Carousel
+
+                {/* แสดงภาพด้วย Swiper */}
+                <Swiper
                     className="w-full mt-2"
-                    showThumbs={false}
-                    infiniteLoop={true}
-                    autoPlay={true}
-                    interval={5000}
-                    stopOnHover={true}
-                    axis="horizontal"
-                    centerSlidePercentage={100}
-                    labels={{ leftArrow: 'previous slide / item', rightArrow: 'next slide / item', item: 'slide item' }}
-                    onClickItem={() => { }}
-                    onClickThumb={() => { }}
-                    onChange={() => { }}
+                    modules={[Pagination, Autoplay]}
+                    pagination={{ clickable: true }}
+                    autoplay={{ delay: 5000 }}
+                    loop={true}
                 >
                     {medicine.user_medicine_img_link.map((imgLink, index) => (
-                        <div key={index} className="w-full flex justify-center items-center min-h-[200px] bg-red-500">
-                            <img
-                                src={imgLink}
-                                alt={`Medicine image ${index + 1}`}
-                                className="w-full h-96 object-cover"
-                            />
-                        </div>
+                        <SwiperSlide key={index}>
+                            <div className="w-full flex justify-center items-center min-h-[200px] bg-red-500">
+                                <img
+                                    src={imgLink}
+                                    alt={`Medicine image ${index + 1}`}
+                                    className="w-full h-96 object-cover"
+                                />
+                            </div>
+                        </SwiperSlide>
                     ))}
-                </Carousel>
+                </Swiper>
 
                 {/* รายละเอียดของยา */}
                 <div className="text-center mt-4 px-4 w-full sm:w-10/12 h-auto rounded-xl p-4">
