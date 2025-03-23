@@ -1,5 +1,5 @@
 use axum::{
-    routing::{get, post},
+    routing::{delete, get, patch, post},
     Extension, Router,
     http::{header::HeaderValue, Method, StatusCode},
 };
@@ -13,12 +13,8 @@ use sqlx::postgres::PgPoolOptions;
 
 use tower_http::cors::{Any, CorsLayer};
 use tokio::net::TcpListener;
-use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc, Datelike};
-use time::{format_description::well_known::{iso8601, Iso8601}, Date, PrimitiveDateTime, Time};
-use time::macros::datetime;
-use serde::de::Error;
-
-
+use backend::routes::recipe::*;
+use backend::routes::ingredient::*;
 
 #[tokio::main]
 async fn main() {
@@ -60,6 +56,18 @@ async fn main() {
         .route("/get_pill_by_id", get(get_pill_by_user_line_id))
         .route("/admin_login", post(admin_login))
         .route("/chatbot/{user_id}", get(get_user_by_id))
+        .route("/get_recipes", get(get_recipes))
+        .route("/get_recipe", get(get_recipe))
+        .route("/create_recipe", post(create_recipe))
+        // .route("/update_recipe/{recipe_id}", patch(update_recipe))
+        .route("/delete_recipe/{recipe_id}", delete(delete_recipe))
+        .route("/ingredients", get(get_ingredients)) // Add this line
+        .route("/create_ingredient", post(create_ingredient))
+        .route("/update_ingredient/{ingredient_id}", patch(update_ingredient))
+        .route("/delete_ingredient/{ingredient_id}", delete(delete_ingredient))
+        .route("/get_medicine", post(get_medicine))
+        .route("/get_meal_plan", post(get_meal_plan))
+        .route("/take_medicine", post(take_medicine))
         // .route("/get_pills", get(get_pill_by_user_line_id)) // Change to GET and use query
         .layer(Extension(db_pool.clone()))
         .layer(cors);
