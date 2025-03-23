@@ -7,18 +7,21 @@ import FoodDetail2 from "./FoodDetail2"
 import { useParams } from "next/navigation"
 import TitleBar from "@/Components/TitleBar"
 import {FoodInterface} from "@/Interfaces/Meal_PillInterface"
+import PuffLoader from "react-spinners/PuffLoader";
 
 export default function FoodDetail() {
     const [food, setFood] = useState<FoodInterface | null>(null);
     const { id } = useParams();
     const [statePage, setStatePage] = useState(0)
-
+    const [isLoading, setLoading] = useState<boolean>(false);
     useEffect(() => {
+        setLoading(true)
         if (!id) return;
         fetch(`http://127.0.0.1:7878/food_details/${id}`)
             .then(response => response.json())
             .then(data => {
                 setFood(data)
+                setLoading(false)
             })
             .catch(error => {
                 console.error('Error fetching user data:', error)
@@ -26,7 +29,7 @@ export default function FoodDetail() {
             })
     }, [id]);
 
-    if (!food) return <div>ไม่มีฟู้ด</div>
+    if (isLoading || !food) return <div className='flex w-screen h-screen justify-center items-center bg-sec'> <PuffLoader /> </div>
 
     return (
         <div className="flex justify-center flex-col items-center pb-10">

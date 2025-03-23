@@ -5,143 +5,57 @@ import { Icon } from '@iconify/react/dist/iconify.js'
 import Link from 'next/link'
 import React, {useState} from 'react'
 import ChooseEat from '@/Components/ChooseEat/ChooseEat'
-import { is } from 'date-fns/locale'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function MealPlan() {
   const [dateSelected, setDateSelected] = useState<Date>()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const MealPlans = {
-    // "mealplans": [
-    //     [
-    //         {
-    //             "name": "ลาบไก่",
-    //             "nutrition": {
-    //                 "calories": 4172.0,
-    //                 "carbs": 4172.0,
-    //                 "fat": 4172.0,
-    //                 "phosphorus": 4172.0,
-    //                 "potassium": 4172.0,
-    //                 "protein": 4172.0,
-    //                 "sodium": 4172.0
-    //             },
-    //             "recipe_id": "5"
-    //         },
-    //         {
-    //             "name": "เงาะลอยแก้ว",
-    //             "nutrition": {
-    //                 "calories": 1185.5,
-    //                 "carbs": 1185.5,
-    //                 "fat": 1185.5,
-    //                 "phosphorus": 1185.5,
-    //                 "potassium": 1185.5,
-    //                 "protein": 1185.5,
-    //                 "sodium": 1185.5
-    //             },
-    //             "recipe_id": "4"
-    //         },
-    //         {
-    //             "name": "ข้าวเหนียวหมูพริกไทยดำ",
-    //             "nutrition": {
-    //                 "calories": 591,
-    //                 "carbs": 120,
-    //                 "fat": 34,
-    //                 "phosphorus": 540,
-    //                 "potassium": 700,
-    //                 "protein": 27,
-    //                 "sodium": 550
-    //             },
-    //             "recipe_id": "24"
-    //         }
-    //     ]
-    // ],
-    // "user_line_id": "U12345678901"
-}
-    const pill = {
-        "medicines": [
+    "mealplans": [
+        [
             {
-                "user_medicine_id": 2,
-                "medicine_schedule": [
-                    "1990-01-01T12:00:00",
-                    "1990-01-01T12:00:00"
-                ],
-                "medicine_amount": 50,
-                "medicine_per_times": 1,
-                "user_medicine_img_link": [
-                    "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/a7524e22-3209-4470-91e2-49a8957483e6.webp",
-                    "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/c29e88f8-7bcb-47f5-a4bc-a849579a263c.png"
-                ],
-                "medicine_unit": "เม็ด",
-                "medicine_name": "ยาขับปัสสาวะ",
-                "medicine_note": "ทานแล้วง่วง"
+                "name": "ลาบไก่",
+                "nutrition": {
+                    "calories": 4172.0,
+                    "carbs": 4172.0,
+                    "fat": 4172.0,
+                    "phosphorus": 4172.0,
+                    "potassium": 4172.0,
+                    "protein": 4172.0,
+                    "sodium": 4172.0
+                },
+                "recipe_id": "5"
             },
             {
-                "user_medicine_id": 2,
-                "medicine_schedule": [
-                    "1990-01-01T12:00:00",
-                    "1990-01-01T12:00:00"
-                ],
-                "medicine_amount": 50,
-                "medicine_per_times": 1,
-                "user_medicine_img_link": [
-                    "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/a7524e22-3209-4470-91e2-49a8957483e6.webp",
-                    "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/c29e88f8-7bcb-47f5-a4bc-a849579a263c.png"
-                ],
-                "medicine_unit": "เม็ด",
-                "medicine_name": "ยาขับปัสสาวะ",
-                "medicine_note": "ทานแล้วง่วง"
+                "name": "เงาะลอยแก้ว",
+                "nutrition": {
+                    "calories": 1185.5,
+                    "carbs": 1185.5,
+                    "fat": 1185.5,
+                    "phosphorus": 1185.5,
+                    "potassium": 1185.5,
+                    "protein": 1185.5,
+                    "sodium": 1185.5
+                },
+                "recipe_id": "4"
             },
             {
-                "user_medicine_id": 2,
-                "medicine_schedule": [
-                    "1990-01-01T12:00:00",
-                    "1990-01-01T12:00:00"
-                ],
-                "medicine_amount": 50,
-                "medicine_per_times": 1,
-                "user_medicine_img_link": [
-                    "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/a7524e22-3209-4470-91e2-49a8957483e6.webp",
-                    "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/c29e88f8-7bcb-47f5-a4bc-a849579a263c.png"
-                ],
-                "medicine_unit": "เม็ด",
-                "medicine_name": "ยาขับปัสสาวะ",
-                "medicine_note": "ทานแล้วง่วง"
-            },
-            {
-                "user_medicine_id": 2,
-                "medicine_schedule": [
-                    "1990-01-01T12:00:00",
-                    "1990-01-01T12:00:00"
-                ],
-                "medicine_amount": 50,
-                "medicine_per_times": 1,
-                "user_medicine_img_link": [
-                    "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/a7524e22-3209-4470-91e2-49a8957483e6.webp",
-                    "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/c29e88f8-7bcb-47f5-a4bc-a849579a263c.png"
-                ],
-                "medicine_unit": "เม็ด",
-                "medicine_name": "ยาขับปัสสาวะ",
-                "medicine_note": "ทานแล้วง่วง"
-            },
-            {
-                "user_medicine_id": 2,
-                "medicine_schedule": [
-                    "1990-01-01T12:00:00",
-                    "1990-01-01T12:00:00"
-                ],
-                "medicine_amount": 50,
-                "medicine_per_times": 1,
-                "user_medicine_img_link": [
-                    "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/a7524e22-3209-4470-91e2-49a8957483e6.webp",
-                    "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/c29e88f8-7bcb-47f5-a4bc-a849579a263c.png"
-                ],
-                "medicine_unit": "เม็ด",
-                "medicine_name": "ยาขับปัสสาวะ",
-                "medicine_note": "ทานแล้วง่วง"
+                "name": "ข้าวเหนียวหมูพริกไทยดำ",
+                "nutrition": {
+                    "calories": 591,
+                    "carbs": 120,
+                    "fat": 34,
+                    "phosphorus": 540,
+                    "potassium": 700,
+                    "protein": 27,
+                    "sodium": 550
+                },
+                "recipe_id": "24"
             }
-            
         ]
-    }
+    ],
+    "user_line_id": "U12345678901"
+}
 
 
   return (
@@ -151,7 +65,7 @@ export default function MealPlan() {
             <DateSlider onDateSelect={(date) => setDateSelected(date)} />
 
 
-            {MealPlans ? (
+            {MealPlans === null ? (
               <>
                 <img src='NoFood.png' className='size-48 mt-32'/>
                 <div className="text-heading3 mt-8">
@@ -169,7 +83,7 @@ export default function MealPlan() {
             }
 
 
-            {!MealPlans ? (
+            {MealPlans === null ? (
                 <Link 
                 href="/mealplan/createplan"
                 className="fixed size-12 bg-orange300 rounded-full right-3 bottom-6 flex justify-center items-center"
@@ -178,9 +92,9 @@ export default function MealPlan() {
                 </Link>
             ) : 
             (
-                <>
+                <AnimatePresence>
                     {isMenuOpen ? (
-                        <div 
+                        <motion.div 
                             onClick={() => setIsMenuOpen(false)}
                             className="fixed bg-gradient-to-tl from-white to-transparent right-0 bottom-0 w-full h-full">
                             <motion.div
@@ -239,7 +153,7 @@ export default function MealPlan() {
                                     <Icon icon="iconoir:book" height="28" className="text-white"/>
                                 </motion.div>
                             </Link>
-                        </div>
+                        </motion.div>
 
                     ) : (
                         <motion.div
@@ -247,14 +161,14 @@ export default function MealPlan() {
                             className="fixed size-12 bg-orange300 rounded-full right-3 bottom-6 flex justify-center items-center"
                             initial={{ rotate: 0 }}
                             animate={{ rotate: 0 }} 
-                            exit={{ rotate: -45 }} 
+                            exit={{ rotate: 45 }} 
                             transition={{ type: "spring", stiffness: 300, damping: 20 }}
                         >
                             <Icon icon="ic:baseline-plus" height="32" className="text-white"/>
                         </motion.div>
                     )}
                     
-                </>
+                </AnimatePresence>
             )
             }
             

@@ -10,7 +10,7 @@ export default function Navbar() {
         <>
             <div className={`flex justify-around bg-white w-screen h-20 rounded-b-xl drop-shadow-lg`}>
                 <Link   href={`/mealplan`} 
-                        className={`flex flex-col justify-center items-center text-body3 gap-1 ${
+                        className={`flex flex-col justify-center items-center text-body3 gap-1  ${
                     pathname === "/mealplan" ? "text-black" : "text-grey300" }`}
                 >
                     <Icon icon="hugeicons:cook-book" height="32" className={` ${pathname === "/mealplan" ? "text-orange300" : "text-grey300"}`}/>

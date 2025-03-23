@@ -6,17 +6,20 @@ import TitleBar from '@/Components/TitleBar'
 import Dropdown from '@/Components/Dropdown'
 import StatePage2 from './StatePage2'
 import { MealplanInterface } from '@/Interfaces/Meal_PillInterface'
+import PuffLoader from "react-spinners/PuffLoader";
+import { ScatterBoxLoader } from "react-awesome-loaders";
 
 
 export default function CreatePlan() {
   const [selectedOption, setSelectedOption] = useState("เลือกระยะเวลา");
   const [selectedValue, setSelectedValue] = useState<number>(0);
   const [statePage, setStatePage] = useState<number>(0);
+  const [isLoading, setLoading] = useState<boolean>(false);
   const [mealPlan, setMealPlan] = useState<MealplanInterface>({
     mealplans: [],
     user_line_id: "",
   });
-  const [dayIndex, setDayIndex] = useState(0);
+  const [dayIndex, setDayIndex] = useState<number>(0);
 
   const u_id =  "U12345678901"
 
@@ -28,6 +31,7 @@ export default function CreatePlan() {
   };
 
   const handleGenMealPlan = async () => {
+    setLoading(true)
     try {
       const response = await fetch('http://127.0.0.1:7878/meal_plan', {
         method: 'POST',
@@ -38,11 +42,25 @@ export default function CreatePlan() {
       });
       const data = await response.json();
       setMealPlan(data);
-      setStatePage(1);
     } catch (error) {
       console.error('Error:', error);
+    } finally {
+      setLoading(false)
+      setStatePage(1);
     }
   };
+
+  if (isLoading) 
+    return (
+        <div className="flex w-screen h-screen flex-col justify-center items-center bg-sec"> 
+            {/* <PuffLoader size={60} color="#FF5733" /> */}
+            {/* <p className="mt-4 text-lg font-bold text-orange300 animate-pulse">กำลังสร้างแผนมื้ออาหาร</p> */}
+            <ScatterBoxLoader
+              primaryColor={"#FF7E2E"}
+              background={"#FAF5EF"}
+            />
+        </div>
+      )
   
   return (
     <>  
@@ -73,7 +91,8 @@ export default function CreatePlan() {
                             setStatePage={setStatePage} 
                             statePage={statePage} 
                             mealPlan={mealPlan}
-                            setDayIndex={setDayIndex}/>}
+                            setDayIndex={setDayIndex}
+                            selectedValue={selectedValue}/>}
 
       {statePage === 2 && <StatePage2
                             setStatePage={setStatePage} 

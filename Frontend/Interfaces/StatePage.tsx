@@ -8,6 +8,7 @@ export interface BaseStatePageMealplans {
   
 export interface StatePage1Props extends BaseStatePageMealplans {
     setDayIndex: React.Dispatch<React.SetStateAction<number>>;
+    selectedValue: number
 }
   
 export interface StatePage2Props extends BaseStatePageMealplans {

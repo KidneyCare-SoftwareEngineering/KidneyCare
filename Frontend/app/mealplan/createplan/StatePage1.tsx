@@ -1,12 +1,25 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 import { Icon } from '@iconify/react/dist/iconify.js'
 import TitleBarStatePage from '@/Components/TitleBarStatePage'
 import { StatePage1Props } from '@/Interfaces/StatePage'
 import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
 
 
-const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPlan, setDayIndex}) => {
+const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPlan, setDayIndex, selectedValue}) => {
     
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: (index: number) => ({
+          opacity: 1,
+          y: 0,
+          transition: { 
+            duration: 0.5, 
+            delay: index * 0.2  
+          },
+        }),
+      };
+
     return (
     <>
         <div className="flex w-full h-full flex-col items-center pb-10  bg-sec">
@@ -16,10 +29,14 @@ const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPl
                 className="flex w-full"
               />
             
-            <div className="flex w-full px-6 pt-6 text-heading4 font-bold">แผนอาหารทั้งหมด 3 วัน</div>
+            <div className="flex w-full px-6 pt-6 text-heading4 font-bold">แผนอาหารทั้งหมด {selectedValue} วัน</div>
             <div className="flex w-full px-6 pt-2 text-body2 text-grey300">สามารถดูและปรับแต่งเมนูในแต่ละวันได้</div>
             {mealPlan?.mealplans.map((data,index) => (
-                <div 
+                <motion.div 
+                    variants={itemVariants} 
+                    initial="hidden" 
+                    animate="visible" 
+                    custom={index}
                     key={index} 
                     onClick={() => {
                       setStatePage(2)
@@ -32,11 +49,11 @@ const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPl
                     <div className="flex w-1/12 justify-center items-center">
                         <Icon icon="weui:arrow-filled" height="24px"/>
                     </div>
-                </div>
+                </motion.div>
             ))}
             
             {/* loading component */}
-            {/* <div className="flex w-11/12 h-14 rounded-xl drop-shadow-xl bg-white mt-6 px-4 "> 
+            <div className="flex w-11/12 h-14 rounded-xl drop-shadow-xl bg-white mt-6 px-4 "> 
                 <div className="flex w-11/12 animate-pulse justify-start items-center text-body1 font-bold"> 
                     
                 <div className="flex bg-slate-300 rounded-full size-8 mr-4"/>
@@ -46,7 +63,7 @@ const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPl
                 <div className="flex w-1/12 animate-pulse justify-center items-center">
                     <Icon icon="weui:arrow-filled" height="24px"/>
                 </div>
-            </div> */}
+            </div>
 
             <button
                 className="flex bottom-24 w-10/12 justify-center items-center my-4 bg-orange300 text-white py-4 rounded-xl text-body1 font-bold"

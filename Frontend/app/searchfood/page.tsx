@@ -5,14 +5,9 @@ import SearchFoodBox from '@/Components/SearchFoodBox'
 import SearchBox from '@/Components/SearchBox'
 import liff from '@line/liff'
 import { FoodInterface } from '@/Interfaces/Meal_PillInterface'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/Components/ui/sheet"
+import PuffLoader from "react-spinners/PuffLoader";
+import { motion } from "framer-motion";
+
 
 export default function SearchFood() {
   const [lineImagesrc, setLineImagesrc] = useState("");
@@ -25,7 +20,6 @@ export default function SearchFood() {
     fetch(`http://127.0.0.1:7878/food_cards`)
       .then(response => response.json())
       .then(data => {
-        console.log(data)
         setFoodData(data)
         setFilteredFoodData(data);
       })
@@ -35,15 +29,31 @@ export default function SearchFood() {
   }, [])
 
   const handleSearch = (searchTerm: string) => {
-    if (searchTerm.trim() === '') {
-      setFilteredFoodData(foodData);
-    } else {
-      const filtered = foodData.filter(food =>
-        food.recipe_name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredFoodData(filtered);
+    if (foodData) {
+      if (searchTerm.trim() === '') {
+        setFilteredFoodData(foodData);
+      } else {
+        const filtered = foodData.filter(food =>
+          food.recipe_name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setFilteredFoodData(filtered);
+      }
     }
   };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (index: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: { 
+        duration: 0.5, 
+        delay: index * 0.2  
+      },
+    }),
+  };
+
+  // if(!foodData) return <div className='flex w-screen h-screen justify-center items-center'> <PuffLoader /> </div>
 
   return (
     <>
@@ -56,12 +66,21 @@ export default function SearchFood() {
         />
         
         {filteredFoodData.length > 0 ? (
-          filteredFoodData.map((food) => (
-            <SearchFoodBox key={food.id} food={food} />
+          filteredFoodData.map((food, index) => (
+            <motion.div 
+              key={food.id} 
+              variants={itemVariants} 
+              initial="hidden" 
+              animate="visible" 
+              custom={index}
+              className='flex w-full h-full justify-center'
+            >
+              <SearchFoodBox key={food.id} food={food} />
+            </motion.div>
           ))
         ) : (
           <div className="text-center text-gray-500 mt-8">
-            ไม่พบเมนูอาหาร
+            <PuffLoader />
           </div>
         )}
       </div>
