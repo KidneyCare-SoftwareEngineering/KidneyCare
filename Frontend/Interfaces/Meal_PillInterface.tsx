@@ -19,7 +19,7 @@ export interface FoodInterface {
 }
 
 export interface MealplanInterface {
-    mealplans: Array<Array<{
+    meal_plans: Array<Array<{
         name: string;
         nutrition: {
             calories: number;

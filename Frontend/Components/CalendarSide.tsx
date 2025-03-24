@@ -59,6 +59,8 @@ export default function CalendarSide({ onDateSelect }) {
     nextDate.setDate(selectDate.getDate() + 1);
     setSelectDate(nextDate);
   };
+  
+  
 
   return (
     <div className="flex flex-col items-center w-full">

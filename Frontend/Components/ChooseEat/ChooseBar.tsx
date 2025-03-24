@@ -23,7 +23,7 @@ const ChooseBar: React.FC<{MealPlans: MealplanInterface, desc: string}> = ({Meal
     exit: { opacity: 0, y: -20, scale: 0.95, transition }, 
   };
 
-  const allItems = desc === "ยา" ? MealPlans.medicines || [] : MealPlans.mealplans[0] || [];
+  const allItems = desc === "ยา" ? MealPlans.medicines || [] : MealPlans.meal_plans[0].recipes || [];
   const mealTypes = ["อาหารเช้า", "อาหารกลางวัน", "อาหารเย็น"];
 
 
@@ -93,7 +93,7 @@ const ChooseBar: React.FC<{MealPlans: MealplanInterface, desc: string}> = ({Meal
                       className="flex w-10/12 bg-white min-h-24 drop-shadow-md rounded-xl mt-3"
                       key={index}>
                   <Link href={`/fooddetail/${data.recipe_id}`} className="flex w-4/12 justify-center items-center">
-                    <img src="https://picsum.photos/200/300" alt="food" className="size-24 rounded-full p-2"/>
+                    <img src={`${data.recipe_img_link}`} alt="food" className="size-24 rounded-full p-2"/>
                   </Link>
                   <div className="flex w-6/12 p-2 justify-center flex-col">
                     <div className="flex text-body3 text-grey300">
@@ -101,10 +101,10 @@ const ChooseBar: React.FC<{MealPlans: MealplanInterface, desc: string}> = ({Meal
                     </div> 
                     <Link href={`/fooddetail/${data.recipe_id}`}
                           className="flex text-body1 font-bold text-black py-3 line-clamp-1">
-                      {data.name} 
+                      {data.recipe_name} 
                     </Link> 
                     <div className="flex text-body3 text-black">
-                      {data.nutrition.calories} <p className="text-grey300"> &nbsp;กิโลแคลอรี่</p> 
+                      {/* {data.nutrition.calories} <p className="text-grey300"> &nbsp;กิโลแคลอรี่</p>  */}
                     </div> 
                   </div>
                   <div  onClick={() => handleSelectFood(data)}
@@ -126,7 +126,7 @@ const ChooseBar: React.FC<{MealPlans: MealplanInterface, desc: string}> = ({Meal
             <div className="flex bg-white w-10/12 justify-between items-center rounded-xl drop-shadow-xl mt-6 py-3 px-5 text-body2 font-bold">
               <div>{desc}ที่รับประทานแล้ว</div>
               <div className="flex text-body3">
-                <div className="font-bold"> {eatenItems.reduce((sum, food) => sum + food.nutrition.calories, 0)} </div>
+                {/* <div className="font-bold"> {eatenItems.reduce((sum, food) => sum + food.nutrition.calories, 0)} </div> */}
                 <div className="font-bold text-grey300"> &nbsp;/ 2785 แคลอรี่ </div>
               </div>
             </div>
@@ -186,17 +186,17 @@ const ChooseBar: React.FC<{MealPlans: MealplanInterface, desc: string}> = ({Meal
                       className="flex w-10/12 bg-grey200 border border-grey300 min-h-24 drop-shadow-md rounded-xl mt-3"
                       key={index}>                        
                     <div className="flex w-4/12 justify-center items-center">
-                      <img src="https://picsum.photos/200/300" alt="food" className="size-24 rounded-full p-2"/>
+                      <img src={`${data.recipe_img_link}`} alt="food" className="size-24 rounded-full p-2"/>
                     </div>
                     <div className="flex w-6/12 p-2 justify-center flex-col">
                       <div className="flex text-body3 text-grey300">
                         {mealTypes[allItems.indexOf(data)]}
                       </div> 
                       <div className="flex text-body1 font-bold text-black py-3">
-                        {data.name} 
+                        {data.recipe_name} 
                       </div> 
                       <div className="flex text-body3 text-black">
-                        {data.nutrition.calories} <p className="text-grey300"> &nbsp;กิโลแคลอรี่</p> 
+                        {/* {data.nutrition.calories} <p className="text-grey300"> &nbsp;กิโลแคลอรี่</p>  */}
                       </div> 
                     </div>
                     <div  onClick={() => handleDeselectFood(data)} 

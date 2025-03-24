@@ -9,7 +9,7 @@ import Profile from "../page";
 
 export default function History() {
   return (
-    <section>
+    <section className="bg-sec">
       <Navbar />
       <ProfileHistory />
       <SumCalorie />

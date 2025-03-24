@@ -29,10 +29,10 @@ export default function Navbar() {
                     แจ้งเตือนทานยา
                 </Link>
 
-                <div className="flex flex-col justify-center items-center text-grey300 text-body3 gap-1">
-                    <Icon icon="bi:person" height="32" className={` ${pathname === "/" ? "text-orange300" : "text-grey300"}`}/>
+                <Link href={`/profile/history`} className="flex flex-col justify-center items-center text-grey300 text-body3 gap-1">
+                    <Icon icon="bi:person" height="32" className={` ${pathname === "/profile/history" ? "text-orange300" : "text-grey300"}`}/>
                     ประวัติการกิน
-                </div>
+                </Link>
             </div>
         </>
     )

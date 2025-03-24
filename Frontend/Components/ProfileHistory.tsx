@@ -43,7 +43,7 @@ export default function ProfileHistory() {
           {/* ปก */}
           <div className="relative h-24 bg-black rounded-t-lg overflow-hidden">
             <img
-              className="object-cover w-full h-full opacity-50"
+              className="object-cover w-full h-full rounded-t-lg opacity-50"
               src="https://img.pikbest.com/backgrounds/20190710/simple-solid-color-black-background-banner_2753863.jpg!w700wp"
               alt="Profile Banner"
             />

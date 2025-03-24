@@ -4,9 +4,7 @@ import { th } from 'date-fns/locale'
 import ChooseBar from "./ChooseBar";
 
 const ChooseEat: React.FC<{ dateSelected?: Date, desc: string, MealPlans: any }> = ({ dateSelected, desc, MealPlans }) => {
-  useEffect(() => {
-    console.log(MealPlans)
-  })
+  
   return (
     <div className='flex w-full h-full flex-col items-center pt-12'>
       <div className="flex w-full text-heading4 text-black font-bold px-12">

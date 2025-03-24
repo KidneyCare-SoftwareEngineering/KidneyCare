@@ -6,7 +6,7 @@ Chart.register(ArcElement);
 
 const SumCalorie: React.FC = () => {
   const totalCalories = 2000;
-  const consumedCalories = 1200;
+  const consumedCalories = 200;
   const remainingCalories = totalCalories - consumedCalories;
 
   const data = {
