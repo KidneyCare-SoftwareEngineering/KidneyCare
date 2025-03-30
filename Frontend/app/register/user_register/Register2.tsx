@@ -2,12 +2,12 @@
 import React, { useEffect, useState } from "react";
 import TitleBarStatePage from "@/Components/TitleBarStatePage";
 import Checkbox from '@mui/material/Checkbox';
- 
+import { Register2Interface } from "@/Interfaces/RegisterInterface";
 
-const Register2: React.FC<any> = (data_) => {
-
+const Register2: React.FC<Register2Interface> = (data_) => {
   const [selectedDisease, setSelectedDisease] = useState<number[]>([]); 
   const [selectedAllergies, setSelectedAllergies] = useState<number[]>([]); 
+  const [userProfile, setUserProfile] = useState<string | null>("");
 
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, value: number) => {
@@ -18,8 +18,6 @@ const Register2: React.FC<any> = (data_) => {
     }
   };
 
-
-
   const handleCheckboxChange2 = (event: React.ChangeEvent<HTMLInputElement>, value: number) => {
     if (event.target.checked) {
       setSelectedAllergies((prevSelected) => [...prevSelected, value]);
@@ -28,33 +26,61 @@ const Register2: React.FC<any> = (data_) => {
     }
   };
 
-
-  const user_line_id = "fjdsiofjs"
-
   const datatoback = {
-    user_line_id: user_line_id,
+    user_line_id: data_.userUid,
     name: data_.name,
     birthdate: data_.birthdate,
-    weight: parseInt(data_.weight),
-    height: parseInt(data_.height),
+    weight: data_.weight,
+    height: data_.height,
+    profile_img_link: data_.userProfile,
     gender: data_.gender,
-    kidney_level: parseInt(data_.kidneyLevel),
+    kidney_level: data_.kidneyLevel,
     kidney_dialysis: data_.dialysis,
     users_food_condition: data_.selectCondition,
     user_disease:  selectedDisease, 
     users_ingredient_allergies: selectedAllergies
   }
-  console.log(datatoback)
-  const handleRegister = async() => {
+
+
+
+  const handleRegister = async () => {
+    const url = `https://api.line.me/v2/bot/user/${data_.userUid}/richmenu/richmenu-97022c20434cafd443740905eeebcd2d`;  
+    
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        
       },
       body: JSON.stringify(datatoback),
     });
+
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers:{
+          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_LINE_ACCESS_TOKEN}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({}),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      return response;
+    } catch (error) {
+      console.error("Error linking rich menu:", error);
+      throw error;
+    }
   };
+  
+    
+  
+    
+  
+  
 
 
   return(
@@ -178,8 +204,7 @@ const Register2: React.FC<any> = (data_) => {
 
                 {/* ปุ่มบันทึก */}
                 <div
-                  // onClick={() => handleRegister()}
-                  onClick={window.close}
+                  onClick={() => handleRegister()}
                   className="flex w-full bg-[#FF7E2E] mt-4 justify-center items-center text-white font-bold py-2 rounded-lg hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-400"
                 >
                   บันทึก

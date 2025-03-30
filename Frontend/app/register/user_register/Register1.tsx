@@ -2,8 +2,9 @@
 import React, { useEffect, useState } from "react";
 import TitleBarStatePage from "@/Components/TitleBarStatePage";
 import { Icon } from "@iconify/react/dist/iconify.js";
+import { Register1Interface } from "@/Interfaces/RegisterInterface";
 
-const Register1: React.FC<any> = ({setSelectCondition, selectCondition, statePage, setStatePage}) => {
+const Register1: React.FC<Register1Interface> = ({setSelectCondition, selectCondition, statePage, setStatePage}) => {
 
   
   const handleSelection = (index: number) => {

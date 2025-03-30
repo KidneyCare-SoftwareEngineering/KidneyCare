@@ -6,11 +6,12 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import ChooseEat from "@/Components/ChooseEat/ChooseEat";
 import liff from "@line/liff";
+import { MedicineData } from "@/Interfaces/Meal_PillInterface";
 
 export default function PillReminder() {
     const [dateSelected, setDateSelected] = useState<Date>();
     const formattedDate = dateSelected?.toISOString().split("T")[0] + "T12:00:00";
-    const [pill, setPill] = useState([]);
+    const [pill, setPill] = useState<MedicineData>();
     const [userUid, setUserUid] = useState("");
 
     // Line LIFF

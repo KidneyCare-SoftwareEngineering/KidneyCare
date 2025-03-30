@@ -37,6 +37,25 @@ export interface MealplanInterface {
     medicines?: Array<any>
 }
 
+export interface Meal_planInterface {
+    meal_plans: Array<Array<{
+        name: string;
+        nutrition: {
+            calories: number;
+            carbs: number;
+            fat: number;
+            phosphorus: number;
+            potassium: number;
+            protein: number;
+            sodium: number;
+        };
+        recipe_id: string;
+        recipe_img_link: string;
+    }>>;
+    userUid: string;
+    medicines?: Array<any>
+}
+
 interface Medicine {
     user_medicine_id: number;
     medicine_schedule: string[]; 

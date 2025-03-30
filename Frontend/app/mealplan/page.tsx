@@ -8,12 +8,13 @@ import ChooseEat from '@/Components/ChooseEat/ChooseEat'
 import { motion, AnimatePresence } from 'framer-motion'
 import PuffLoader from "react-spinners/PuffLoader";
 import liff from '@line/liff'
+import { Meal_planInterface } from '@/Interfaces/Meal_PillInterface'
 
 export default function MealPlan() {
   const [dateSelected, setDateSelected] = useState<Date>()
   const formattedDate = dateSelected?.toISOString().split("T")[0] + "T12:00:00";
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [mealPlans, setMealPlans] = useState<any>([])
+  const [mealPlans, setMealPlans] = useState<Meal_planInterface>()
   const [isLoading, setIsLoading] = useState(false);
   const [userUid, setUserUid] = useState("");
 
@@ -55,6 +56,10 @@ export default function MealPlan() {
   
 
 
+
+  useEffect(() => {
+    console.log("userUid", userUid);
+  },[userUid])
   useEffect(() => {
       const get_meal_plan = async () => {
         setIsLoading(true)
