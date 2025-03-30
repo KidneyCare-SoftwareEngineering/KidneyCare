@@ -1,3 +1,4 @@
 /Backend/target
 Backend/.env
 /supabase_uploader/.env
+.DS_Store
