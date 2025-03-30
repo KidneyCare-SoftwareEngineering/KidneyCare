@@ -7,6 +7,7 @@ import React, {useEffect, useState} from 'react'
 import ChooseEat from '@/Components/ChooseEat/ChooseEat'
 import { motion, AnimatePresence } from 'framer-motion'
 import PuffLoader from "react-spinners/PuffLoader";
+import liff from '@line/liff'
 
 export default function MealPlan() {
   const [dateSelected, setDateSelected] = useState<Date>()
@@ -14,19 +15,51 @@ export default function MealPlan() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [mealPlans, setMealPlans] = useState<any>([])
   const [isLoading, setIsLoading] = useState(false);
+  const [userUid, setUserUid] = useState("");
 
-  const user_line_id = "U12345678902";
+
 
   const SendToGet_Meal_Plan = {
-    user_line_id: user_line_id,
+    user_line_id: userUid,
     date: formattedDate
   }
+  
+
+
+  // Line LIFF
+    useEffect(() => {
+        const initLiff = async () => {
+          try {
+            await liff.init({ liffId: "2006794580-DXPWN340" });
+            if (!liff.isLoggedIn()) {
+              liff.login(); 
+            }
+            else{
+              console.log("User is logged in", liff.isLoggedIn());
+            }
+          } catch (error) {
+            console.error("Error initializing LIFF: ", error);
+          }
+          
+          try {
+            const profile = await liff.getProfile();
+            setUserUid(profile.userId);
+    
+          } catch (error) {
+            console.error("Error fetching profile: ", error);
+          }
+        }; 
+        initLiff();
+      }, []);
+    // ---------------------------------
+  
+
 
   useEffect(() => {
       const get_meal_plan = async () => {
         setIsLoading(true)
         try {
-            const response = await fetch('http://127.0.0.1:7878/get_meal_plan', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_meal_plan`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -77,7 +110,7 @@ export default function MealPlan() {
 
             {!mealPlans?.meal_plans || mealPlans.meal_plans.length === 0 ? (
                     <Link 
-                    href="/mealplan/createplan"
+                    href={`mealplan/createplan/${userUid}`} 
                     className="fixed size-12 bg-orange300 rounded-full right-3 bottom-6 flex justify-center items-center"
                     >
                         <Icon icon="ic:baseline-plus" height="32" className="text-white"/>

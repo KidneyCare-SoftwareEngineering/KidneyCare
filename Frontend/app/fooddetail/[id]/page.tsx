@@ -17,7 +17,7 @@ export default function FoodDetail() {
     useEffect(() => {
         setLoading(true)
         if (!id) return;
-        fetch(`http://127.0.0.1:7878/food_details/${id}`)
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/food_details/${id}`)
             .then(response => response.json())
             .then(data => {
                 setFood(data)

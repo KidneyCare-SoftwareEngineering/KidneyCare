@@ -10,14 +10,42 @@ import { motion } from "framer-motion";
 
 
 export default function SearchFood() {
-  const [lineImagesrc, setLineImagesrc] = useState("");
-  const [userName, setUserName] = useState("");
   const [userUid, setUserUid] = useState("");
   const [foodData, setFoodData] = useState<FoodInterface[]>([]);
   const [filteredFoodData, setFilteredFoodData] = useState<FoodInterface[]>([]);
 
+  // Line LIFF
   useEffect(() => {
-    fetch(`http://127.0.0.1:7878/food_cards`)
+      const initLiff = async () => {
+        try {
+          await liff.init({ liffId: "2006794580-jmO39r8Z" });
+          if (!liff.isLoggedIn()) {
+            liff.login(); 
+          }
+          else{
+            console.log("User is logged in", liff.isLoggedIn());
+          }
+        } catch (error) {
+          console.error("Error initializing LIFF: ", error);
+        }
+        
+        try {
+          const profile = await liff.getProfile();
+          setUserUid(profile.userId);
+  
+        } catch (error) {
+          console.error("Error fetching profile: ", error);
+        }
+      }; 
+      initLiff();
+    }, []);
+  // ---------------------------------
+
+
+  
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/food_cards`)
       .then(response => response.json())
       .then(data => {
         setFoodData(data)

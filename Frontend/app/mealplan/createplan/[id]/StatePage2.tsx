@@ -12,6 +12,7 @@ const StatePage2 : React.FC<StatePage2Props> = ({
   dayIndex = 0,
   selectedValue,
   setMealPlan,
+  userUid
 }) => {
   const [selectedMenu, setSelectedMenu] = useState<number[]>([])
   const updatedMealplans = JSON.parse(JSON.stringify(mealPlan))
@@ -24,17 +25,16 @@ const StatePage2 : React.FC<StatePage2Props> = ({
     )
   }
 
-  const u_id =  "U12345678901"
 
 
   const dataforupdateAPI = {
-    user_id: u_id,
+    user_id: userUid,
     days : selectedValue,
     mealplans : updatedMealplans.mealplans
   }
 
   const handleCreateNewMealplans = async () => {
-    await fetch ('http://127.0.0.1:7878/update_meal_plan', {
+    await fetch (`${process.env.NEXT_PUBLIC_API_URL}/update_meal_plan`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -100,17 +100,11 @@ const StatePage2 : React.FC<StatePage2Props> = ({
                 onClick={() => toggleSelectMenu(index)}
               >
                 <div className="flex w-11/12 justify-start items-center text-body1 font-bold">
-                  <div
-                    className="flex w-2/5 rounded-xl"
-                    style={{
-                      backgroundImage: `url(${data.image_url})`,
-                      backgroundSize: "cover",
-                      backgroundRepeat: "no-repeat",
-                      backgroundPosition: "center",
-                    }}
-                  />
+                  <div className="flex justify-center items-center w-4/12">
+                    <img src={`${data.recipe_img_link[0]}`} alt="food" className="size-24 rounded-full p-2"/>
+                  </div>
 
-                  <div className="flex flex-col h-full w-full justify-around py-3">
+                  <div className="flex flex-col h-full justify-around py-3 ml-2">
                     <div className="flex text-body3 text-grey300">
                       {index === 0 ? "อาหารเช้า" : index === 1 ? "อาหารกลางวัน" : "อาหารเย็น"}
                     </div>
@@ -154,8 +148,9 @@ const StatePage2 : React.FC<StatePage2Props> = ({
             
 
             <button
-              onClick={() => {setSelectedMenu([])
-                              setNewMealplans({})
+              onClick={() => {
+                setSelectedMenu([])
+                setNewMealplans({})
               }}
               className="flex bottom-6 w-10/12 justify-center items-center bg-sec border border-orange300 text-orange300 py-4 rounded-xl text-body1 font-bold"
             >

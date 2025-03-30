@@ -1,31 +1,34 @@
 'use client'
 import React, { useEffect } from 'react'
 import { useState } from 'react'
+import { useParams } from 'next/navigation'
 import StatePage1 from './StatePage1'
 import TitleBar from '@/Components/TitleBar'
 import Dropdown from '@/Components/Dropdown'
 import StatePage2 from './StatePage2'
 import { MealplanInterface } from '@/Interfaces/Meal_PillInterface'
 import PuffLoader from "react-spinners/PuffLoader";
-import { ScatterBoxLoader } from "react-awesome-loaders";
+
 
 
 export default function CreatePlan() {
+  const { id } = useParams();
+  const userUid = id;
   const [selectedOption, setSelectedOption] = useState("เลือกระยะเวลา");
   const [selectedValue, setSelectedValue] = useState<number>(0);
   const [statePage, setStatePage] = useState<number>(0);
   const [isLoading, setLoading] = useState<boolean>(false);
   const [mealPlan, setMealPlan] = useState<MealplanInterface>({
     mealplans: [],
-    user_line_id: "",
+    userUid: "",
   });
   const [dayIndex, setDayIndex] = useState<number>(0);
 
-  const u_id =  "U12345678901"
+  
 
   const SendToMealPlan = {
     data: {
-      u_id: u_id,
+      u_id: userUid,
       days: selectedValue
     }
   };
@@ -33,7 +36,7 @@ export default function CreatePlan() {
   const handleGenMealPlan = async () => {
     setLoading(true)
     try {
-      const response = await fetch('http://127.0.0.1:7878/meal_plan', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/meal_plan`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -55,9 +58,8 @@ export default function CreatePlan() {
         <div className="flex w-screen h-screen flex-col justify-center items-center bg-sec"> 
             {/* <PuffLoader size={60} color="#FF5733" /> */}
             {/* <p className="mt-4 text-lg font-bold text-orange300 animate-pulse">กำลังสร้างแผนมื้ออาหาร</p> */}
-            <ScatterBoxLoader
-              primaryColor={"#FF7E2E"}
-              background={"#FAF5EF"}
+            <PuffLoader
+              size={60}
             />
         </div>
       )
@@ -92,7 +94,9 @@ export default function CreatePlan() {
                             statePage={statePage} 
                             mealPlan={mealPlan}
                             setDayIndex={setDayIndex}
-                            selectedValue={selectedValue}/>}
+                            selectedValue={selectedValue}
+                            userUid={userUid}
+                            />}
 
       {statePage === 2 && <StatePage2
                             setStatePage={setStatePage} 
@@ -100,7 +104,9 @@ export default function CreatePlan() {
                             statePage={statePage} 
                             mealPlan={mealPlan}
                             setMealPlan={setMealPlan}
-                            dayIndex={dayIndex}/>}
+                            dayIndex={dayIndex}
+                            userUid={userUid}
+                            />}
     </>
   )
 }

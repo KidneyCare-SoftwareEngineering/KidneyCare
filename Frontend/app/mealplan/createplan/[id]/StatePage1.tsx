@@ -4,10 +4,14 @@ import TitleBarStatePage from '@/Components/TitleBarStatePage'
 import { StatePage1Props } from '@/Interfaces/StatePage'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 
 
-const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPlan, setDayIndex, selectedValue}) => {
+const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPlan, setDayIndex, selectedValue, userUid}) => {
     
+    const [loading, setLoading] = useState<boolean>(false);
+    const router = useRouter()
+
     const itemVariants = {
         hidden: { opacity: 0, y: 20 },
         visible: (index: number) => ({
@@ -19,6 +23,25 @@ const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPl
           },
         }),
       };
+
+      const handleCreateNewMealplans = async () => {
+        setLoading(true)
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/create_meal_plan`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(mealPlan),
+          });
+        } catch (error) {
+            console.error('Error:', error);
+        } finally {
+            setLoading(false)
+            console.log("mealplan", mealPlan)
+            router.push('/mealplan');
+        }
+      }
 
     return (
     <>
@@ -66,6 +89,7 @@ const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPl
             </div>
 
             <button
+                onClick={() => handleCreateNewMealplans()}
                 className="flex bottom-24 w-10/12 justify-center items-center my-4 bg-orange300 text-white py-4 rounded-xl text-body1 font-bold"
             >
             บันทึก

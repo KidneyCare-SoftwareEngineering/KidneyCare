@@ -9,16 +9,10 @@ const SearchFoodBox: React.FC<{food:FoodInterface}> = ({food}) => {
             href={`/fooddetail/${food.id}`}
             data-testid="food-card"
             className="flex justify-center rounded-xl bg-white w-11/12 h-full drop-shadow-lg  p-2">
-                <div 
-                    className="flex w-2/5 rounded-xl"
-                    style={{
-                        backgroundImage: `url(${food.image_url[0]})`,
-                        backgroundSize: "cover", 
-                        backgroundRepeat: "no-repeat", 
-                        backgroundPosition: "center", 
-                    }}
-                > 
-                </div>
+                <img src={`${food.image_url[0]}`} 
+                    className="flex w-2/5 rounded-xl object-cover" 
+                    loading="lazy"/>
+
                 <div className="flex w-3/5 h-full flex-col p-2"> 
                     <div className="flex w-full justify-between items-center mb-2">
                         <div className="justify-start text-body1 font-extrabold">{food.recipe_name}</div>

@@ -19,7 +19,7 @@ export interface FoodInterface {
 }
 
 export interface MealplanInterface {
-    meal_plans: Array<Array<{
+    mealplans: Array<Array<{
         name: string;
         nutrition: {
             calories: number;
@@ -31,9 +31,9 @@ export interface MealplanInterface {
             sodium: number;
         };
         recipe_id: string;
-        image_url: string;
+        recipe_img_link: string;
     }>>;
-    user_line_id: string;
+    userUid: string;
     medicines?: Array<any>
 }
 

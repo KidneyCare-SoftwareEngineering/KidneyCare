@@ -46,7 +46,7 @@ const Register2: React.FC<any> = (data_) => {
   }
   console.log(datatoback)
   const handleRegister = async() => {
-    await fetch('http://127.0.0.1:7878/users', {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

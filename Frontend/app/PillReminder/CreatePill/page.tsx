@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import TitleBar from "@/Components/TitleBar";
 import Swal from "sweetalert2";
 import { FiPlus, FiMinus, FiTrash, FiX } from "react-icons/fi";
@@ -163,6 +163,18 @@ export default function CreatePill() {
 		return null; // ผ่านการตรวจสอบ
 	};
 
+	const pillData = {
+		pill_name,
+		pill_amount: Number(pill_amount),
+		pill_per_meal,
+		// pill_reminder_time: formattedPillReminderTime,
+		pill_img_link,
+		pill_note,
+	};
+
+	useEffect(() => {
+		console.log(pillData)
+	},[pill_name, pill_amount, pill_per_meal, pill_reminder_time, pill_img_link, pill_note])
 	const handleSavePill = async () => {
 		const errorMessage = validatePillData();
 		if (errorMessage) {
@@ -172,18 +184,34 @@ export default function CreatePill() {
 
 		const formattedPillReminderTime = pill_reminder_time.map(time => `${getCurrentDate()}T${time}:00`);
 
-		const pillData = {
-			pill_name,
-			pill_amount: Number(pill_amount),
-			pill_per_meal,
-			pill_reminder_time: formattedPillReminderTime,
-			pill_img_link,
-			pill_note,
-		};
+		
 
-		console.log("📌 บันทึกข้อมูล:", pillData);
 
-		Swal.fire("✅ บันทึกสำเร็จ!", "ข้อมูลยาของคุณถูกบันทึกแล้ว", "success");
+		const formData = new FormData();
+		formData.append("medicine_name", pill_name);
+		formData.append("medicine_amount", pill_amount);
+		formData.append("medicine_per_times", pill_per_meal.toString());
+		formData.append("medicine_schedule", JSON.stringify(formattedPillReminderTime));
+		formData.append("medicine_note", pill_note);
+		formData.append("medicine_unit", "เม็ด");
+		formData.append("user_line_id", "U5251e034b6d1a207df047bf7fb34e30a"); // wait liff
+		pill_img_link.forEach((file) => {
+			formData.append("image", file);
+		});
+
+
+		try {	
+			const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/add_pill`, {
+				method: 'POST',
+				body: formData,
+			  });
+			  const data = await response.json();
+			  Swal.fire("✅ บันทึกสำเร็จ!", "ข้อมูลยาของคุณถูกบันทึกแล้ว", "success");
+			} catch (error) {
+				console.error('Error:', error);
+			} 
+
+		
 	};
 
 

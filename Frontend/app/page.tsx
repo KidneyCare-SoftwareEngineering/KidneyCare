@@ -14,9 +14,10 @@ export default function Home() {
   useEffect(() => {
     const initLiff = async () => {
       try {
-        await liff.init({ liffId: "2006794580-ZJx18Yj9" });
+        await liff.init({ liffId: "2006794580-jmO39r8Z" });
         if (!liff.isLoggedIn()) {
           liff.login(); 
+          console.log("User is logging in");
         }
         else{
           console.log("User is logged in", liff.isLoggedIn());
