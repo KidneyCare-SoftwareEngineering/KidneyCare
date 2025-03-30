@@ -261,61 +261,6 @@ pub async fn update_meal_plan(
     Ok(Json(ai_response))
 }
 
-// #[derive(Serialize)]
-// pub struct GetMealPlanResponse {
-//     pub meal_plans: Vec<MealPlanEntry>,
-// }
-
-// #[axum::debug_handler]
-// pub async fn get_meal_plan(
-//     Extension(pg_pool): Extension<PgPool>,
-//     Json(payload): Json<GetMealPlanRequest>,
-// ) -> Result<Json<GetMealPlanResponse>, (StatusCode, String)> {
-//     // 1. Find user_id from user_line_id
-//     let user_id_result = sqlx::query!(
-//         "SELECT user_id FROM users WHERE user_line_id = $1",
-//         payload.user_line_id
-//     )
-//     .fetch_optional(&pg_pool)
-//     .await
-//     .map_err(|e| {
-//         eprintln!("Database error fetching user_id: {}", e);
-//         (
-//             StatusCode::INTERNAL_SERVER_ERROR,
-//             "Error fetching user".to_string(),
-//         )
-//     })?;
-
-//     let user_id = match user_id_result {
-//         Some(user) => user.user_id,
-//         None => {
-//             return Err((StatusCode::NOT_FOUND, "User not found".to_string()));
-//         }
-//     };
-
-//     // 2. Fetch meal plans for the user_id and date
-//     let meal_plans = sqlx::query_as::<_, MealPlanEntry>(
-//         r#"
-//         SELECT meal_plan_id, user_id, recipe_id, meal_time, created_at, updated_at
-//         FROM meal_plans
-//         WHERE user_id = $1 AND DATE(created_at) = DATE($2)
-//         "#,
-//     )
-//     .bind(user_id)
-//     .bind(payload.date)
-//     .fetch_all(&pg_pool)
-//     .await
-//     .map_err(|e| {
-//         eprintln!("Database error fetching meal plans: {}", e);
-//         (
-//             StatusCode::INTERNAL_SERVER_ERROR,
-//             "Error fetching meal plans".to_string(),
-//         )
-//     })?;
-
-//     Ok(Json(GetMealPlanResponse { meal_plans }))
-// }
-
 // Define the request body structure (same as get_medicine)
 #[derive(Deserialize)]
 pub struct GetMealPlanRequest {
