@@ -14,7 +14,7 @@ mod routes; // Declare the routes module
 
 use routes::ingredient::get_ingredients;
 use routes::recipe::{update_recipe, delete_recipe};
-use routes::mealplan::{create_meal_plan, update_meal_plan}; // Import create_meal_plan
+use routes::mealplan::create_meal_plan; // Import create_meal_plan
 
 // Define a struct to represent the ingredient table rows
 #[derive(Serialize, Queryable)]
@@ -62,7 +62,6 @@ async fn main() {
         .route("/update_recipe/{r_id}", patch(update_recipe))
         .route("/delete_recipe/{r_id}", delete(delete_recipe))
         .route("/create_meal_plan", post(create_meal_plan))
-        .route("/update_meal_plan", post(update_meal_plan))
         .fallback(fallback_handler) // Add a fallback route
         .layer(Extension(db_pool));
 
