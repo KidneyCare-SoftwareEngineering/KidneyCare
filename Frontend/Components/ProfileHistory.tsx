@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Icon } from "@iconify/react";
 
-export default function ProfileHistory() {
+export const ProfileHistory: React.FC<{ userUid: string; userProfile: string; userDisplayname}> = ({ userUid, userProfile, userDisplayname }) => {
   const [isOptionsVisible, setIsOptionsVisible] = useState(false);
   const optionsRef = useRef(null);
   const buttonRef = useRef(null);
@@ -10,7 +10,7 @@ export default function ProfileHistory() {
   const toggleOptions = () => {
     setIsOptionsVisible(!isOptionsVisible);
   };
-
+  console.log(userProfile)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -44,7 +44,7 @@ export default function ProfileHistory() {
           <div className="relative h-24 bg-black rounded-t-lg overflow-hidden">
             <img
               className="object-cover w-full h-full rounded-t-lg opacity-50"
-              src="https://img.pikbest.com/backgrounds/20190710/simple-solid-color-black-background-banner_2753863.jpg!w700wp"
+              src={`${userProfile}`}
               alt="Profile Banner"
             />
             {/* ปุ่มสามจุด */}
@@ -72,14 +72,14 @@ export default function ProfileHistory() {
           <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-10">
             <img
               className="w-24 h-24 rounded-full"
-              src="https://image.posttoday.com/media/content/2021/03/22/F4635AAD3681D5D27986EF3FC84875EF.jpg?x-image-process=style/lg-webp"
+              src={`${userProfile}`}
               alt="Profile"
             />
           </div>
 
           {/* ข้อมูล */}
           <div className="mt-16 px-8">
-            <h2 className="text-lg font-semibold">인프런</h2>
+            <h2 className="text-lg font-semibold">{`${userDisplayname}`}</h2>
             <div className="grid grid-cols-2 gap-4 mt-4">
               {/* คอลัมน์ซ้าย */}
               <div className="space-y-2">

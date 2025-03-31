@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import PuffLoader from "react-spinners/PuffLoader";
 import liff from '@line/liff'
 import { Meal_planInterface } from '@/Interfaces/Meal_PillInterface'
+import { set } from 'date-fns'
 
 export default function MealPlan() {
   const [dateSelected, setDateSelected] = useState<Date>()
@@ -16,7 +17,8 @@ export default function MealPlan() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [mealPlans, setMealPlans] = useState<Meal_planInterface>()
   const [isLoading, setIsLoading] = useState(false);
-  const [userUid, setUserUid] = useState("");
+  const [userUid, setUserUid] = useState("U5251e034b6d1a207df047bf7fb34e30a");
+  const [isEdit, setIsEdit] = useState(false)
 
 
 
@@ -28,30 +30,30 @@ export default function MealPlan() {
 
 
   // Line LIFF
-    useEffect(() => {
-        const initLiff = async () => {
-          try {
-            await liff.init({ liffId: "2006794580-DXPWN340" });
-            if (!liff.isLoggedIn()) {
-              liff.login(); 
-            }
-            else{
-              console.log("User is logged in", liff.isLoggedIn());
-            }
-          } catch (error) {
-            console.error("Error initializing LIFF: ", error);
-          }
+    // useEffect(() => {
+    //     const initLiff = async () => {
+    //       try {
+    //         await liff.init({ liffId: "2006794580-DXPWN340" });
+    //         if (!liff.isLoggedIn()) {
+    //           liff.login(); 
+    //         }
+    //         else{
+    //           console.log("User is logged in", liff.isLoggedIn());
+    //         }
+    //       } catch (error) {
+    //         console.error("Error initializing LIFF: ", error);
+    //       }
           
-          try {
-            const profile = await liff.getProfile();
-            setUserUid(profile.userId);
+    //       try {
+    //         const profile = await liff.getProfile();
+    //         setUserUid(profile.userId);
     
-          } catch (error) {
-            console.error("Error fetching profile: ", error);
-          }
-        }; 
-        initLiff();
-      }, []);
+    //       } catch (error) {
+    //         console.error("Error fetching profile: ", error);
+    //       }
+    //     }; 
+    //     initLiff();
+    //   }, []);
     // ---------------------------------
   
 
@@ -81,7 +83,7 @@ export default function MealPlan() {
         
       }; 
       get_meal_plan()
-    }, [formattedDate, dateSelected]);
+    }, [formattedDate, dateSelected, userUid]);
 
 
   return (
@@ -107,7 +109,7 @@ export default function MealPlan() {
                         </div>
                     </motion.div>
                 ) : (
-                    <ChooseEat dateSelected={dateSelected} desc="อาหาร" MealPlans={mealPlans} />
+                    <ChooseEat dateSelected={dateSelected} desc="อาหาร" MealPlans={mealPlans} isEdit={isEdit} setIsEdit={setIsEdit}/>
                 )
             }
             
@@ -139,7 +141,7 @@ export default function MealPlan() {
                             </motion.div>
                             
                             <div 
-                                onClick={() => console.log("edit")}
+                                onClick={() => setIsEdit(true)}
                                 className="fixed">
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}
@@ -162,7 +164,7 @@ export default function MealPlan() {
                             </div>
 
                             <Link
-                                href={`/mealplan/createplan`} 
+                                href={`mealplan/createplan/${userUid}`} 
                                 className="fixed">
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}

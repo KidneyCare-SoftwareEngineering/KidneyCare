@@ -2,8 +2,9 @@ import React, { useEffect } from "react";
 import { format } from 'date-fns'
 import { th } from 'date-fns/locale'
 import ChooseBar from "./ChooseBar";
+import { Meal_planInterface } from "@/Interfaces/Meal_PillInterface";
 
-const ChooseEat: React.FC<{ dateSelected?: Date, desc: string, MealPlans: any }> = ({ dateSelected, desc, MealPlans }) => {
+const ChooseEat: React.FC<{ dateSelected?: Date, desc: string, MealPlans: Meal_planInterface, isEdit: boolean, setIsEdit: React.Dispatch<React.SetStateAction<boolean>> }> = ({ dateSelected, desc, MealPlans, isEdit, setIsEdit}) => {
   
   return (
     <div className='flex w-full h-full flex-col items-center pt-12'>
@@ -16,7 +17,9 @@ const ChooseEat: React.FC<{ dateSelected?: Date, desc: string, MealPlans: any }>
       </div>
 
       <ChooseBar MealPlans={MealPlans}
-        desc={desc} />
+        desc={desc} 
+        isEdit={isEdit}
+        setIsEdit={setIsEdit}/>
     </div>
 
   );

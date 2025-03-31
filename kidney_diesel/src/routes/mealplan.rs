@@ -49,9 +49,11 @@ pub async fn create_meal_plan(
             for (day_index, day_mealplans) in payload.mealplans.iter().enumerate() {
                 println!("Processing day {}: {:?}", day_index + 1, day_mealplans);
 
-                let today = chrono::Local::now().naive_local().date();
+                let today = chrono::Local::now().date_naive();
                 let meal_plan_date = today + chrono::Duration::days(day_index as i64);
-                let meal_plan_name = format!("Meal Plan {}", meal_plan_date.format("%d:%m:%y"));
+                println!("Calculated meal_plan_date: {}", meal_plan_date);
+
+                let meal_plan_name = format!("Meal Plan {}", meal_plan_date.format("%d/%m/%Y"));
 
                 let meal_plan_id: i32 = diesel::insert_into(meal_plans::table)
                     .values((

@@ -54,6 +54,9 @@ export interface Meal_planInterface {
     }>>;
     userUid: string;
     medicines?: Array<any>
+    isEdit?: boolean
+    setIsEdit?: React.Dispatch<React.SetStateAction<boolean>>
+
 }
 
 interface Medicine {

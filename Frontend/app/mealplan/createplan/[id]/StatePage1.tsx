@@ -27,22 +27,31 @@ const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPl
       const handleCreateNewMealplans = async () => {
         setLoading(true)
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/create_meal_plan`, {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/create_meal_plan`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify(mealPlan),
           });
+          if (!response.ok) {
+            throw new Error('Network response no ok');
+          }
         } catch (error) {
             console.error('Error:', error);
+            console.log("mealplan", mealPlan)
         } finally {
             setLoading(false)
             console.log("mealplan", mealPlan)
-            router.push('/mealplan');
+            // router.push('/mealplan');
         }
       }
-
+    if (loading) 
+        return (
+            <div className="flex w-screen h-screen flex-col justify-center items-center bg-sec"> 
+                <p className="mt-4 text-lg font-bold text-orange300 animate-pulse">กำลังสร้างแผนมื้ออาหาร</p>
+            </div>
+        )
     return (
     <>
         <div className="flex w-full h-full flex-col items-center pb-10  bg-sec">

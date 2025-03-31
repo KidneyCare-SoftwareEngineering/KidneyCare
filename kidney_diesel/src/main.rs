@@ -1,6 +1,7 @@
 use axum::{
     routing::{delete, get, patch, post}, Extension, Router
 };
+use tower_http::cors::{Any, CorsLayer};
 use dotenvy::dotenv;
 use serde::Serialize;
 use std::sync::Arc;
@@ -15,6 +16,7 @@ mod routes; // Declare the routes module
 use routes::ingredient::get_ingredients;
 use routes::recipe::{update_recipe, delete_recipe};
 use routes::mealplan::create_meal_plan; // Import create_meal_plan
+
 
 // Define a struct to represent the ingredient table rows
 #[derive(Serialize, Queryable)]
@@ -55,6 +57,17 @@ async fn main() {
     println!("Listening on {}", listener.local_addr().unwrap());
 
     let db_pool = Arc::new(db_pool);
+    
+    let cors = CorsLayer::new()
+        .allow_origin(Any)
+        .allow_methods([
+            http::Method::GET,
+            http::Method::POST,
+            http::Method::PATCH,
+            http::Method::DELETE,
+            http::Method::OPTIONS,
+        ])
+        .allow_headers(Any);
 
     let app = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
@@ -63,7 +76,8 @@ async fn main() {
         .route("/delete_recipe/{r_id}", delete(delete_recipe))
         .route("/create_meal_plan", post(create_meal_plan))
         .fallback(fallback_handler) // Add a fallback route
-        .layer(Extension(db_pool));
+        .layer(Extension(db_pool))
+        .layer(cors);
 
     if let Err(err) = axum::serve(listener, app).await {
         eprintln!("Server error: {}", err);
