@@ -43,6 +43,7 @@ diesel::table! {
         meal_plan_id -> Int4,
         recipe_id -> Int4,
         ischecked -> Nullable<Bool>,
+        meal_time -> Nullable<Int4>,
     }
 }
 

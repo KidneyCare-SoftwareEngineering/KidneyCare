@@ -11,7 +11,7 @@ use std::sync::Arc;
 
 #[derive(Deserialize, Debug)]
 pub struct Recipe {
-    pub recipe_id: Option<String>, // recipe_id is optional as it might be missing
+    pub recipe_id: Option<i32>, // Change recipe_id to Option<i32>
 }
 
 #[derive(Deserialize, Debug)]
@@ -32,7 +32,9 @@ pub struct RecipeInfo {
     pub recipe_name: String,
     pub recipe_img_link: Vec<String>,
     pub ischecked: Option<bool>,
-    pub meal_plan_recipe_id: i32, // Add meal_plan_recipe_id
+    pub meal_plan_recipe_id: i32,
+    pub meal_time: Option<i32>, // Add meal_time
+    pub calories: f64,         // Add calories
 }
 
 #[derive(Serialize, Debug)]
@@ -52,6 +54,19 @@ pub struct GetMealPlanResponse {
 #[derive(Serialize, Debug)]
 pub struct ErrorResponse {
     pub error: String,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct UserAlreadyEatPayload {
+    pub meal_plan_recipe_id: i32,
+    pub ischecked: bool,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct EditMealPlanPayload {
+    pub user_line_id: String,
+    pub date: String,
+    pub recipes: Vec<Recipe>,
 }
 
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
@@ -121,16 +136,23 @@ pub async fn create_meal_plan(
 
                 println!("Created meal_plan_id: {}", meal_plan_id);
 
-                for (_, recipe) in day_mealplans.iter().enumerate() {
-                    if let Some(recipe_id_str) = &recipe.recipe_id {
-                        println!("Processing recipe_id: {}", recipe_id_str);
+                for (recipe_index, recipe) in day_mealplans.iter().enumerate() {
+                    if let Some(recipe_id) = recipe.recipe_id {
+                        println!("Processing recipe_id: {}", recipe_id);
+
+                        // Determine meal_time
+                        let meal_time = if recipe_index < 4 {
+                            (recipe_index + 1) as i32 // 1, 2, 3, 4 for the first four recipes
+                        } else {
+                            4 // 4 for all subsequent recipes
+                        };
+
                         diesel::insert_into(meal_plan_recipes::table)
                             .values((
                                 meal_plan_recipes::meal_plan_id.eq(meal_plan_id),
-                                meal_plan_recipes::recipe_id.eq(recipe_id_str
-                                    .parse::<i32>()
-                                    .map_err(|_| diesel::result::Error::RollbackTransaction)?),
+                                meal_plan_recipes::recipe_id.eq(recipe_id),
                                 meal_plan_recipes::ischecked.eq(false),
+                                meal_plan_recipes::meal_time.eq(Some(meal_time)), // Assign meal_time
                             ))
                             .execute(conn)?;
                     }
@@ -209,10 +231,12 @@ pub async fn get_meal_plan(
             meal_plans::user_id,
             meal_plans::name,
             meal_plans::date,
-            meal_plan_recipes::meal_plan_recipe_id, // Include meal_plan_recipe_id
+            meal_plan_recipes::meal_plan_recipe_id,
             meal_plan_recipes::recipe_id,
+            meal_plan_recipes::meal_time, // Include meal_time
             recipes::recipe_name,
             recipes::recipe_img_link,
+            recipes::calories, // Include calories
             meal_plan_recipes::ischecked,
         ))
         .load::<(
@@ -222,8 +246,10 @@ pub async fn get_meal_plan(
             NaiveDate,
             i32,
             i32,
+            Option<i32>,
             String,
             Option<Vec<Option<String>>>,
+            f64,
             Option<bool>,
         )>(&mut conn)
         .map_err(|err| {
@@ -245,8 +271,10 @@ pub async fn get_meal_plan(
         date,
         meal_plan_recipe_id,
         recipe_id,
+        meal_time,
         recipe_name,
         recipe_img_link,
+        calories,
         ischecked,
     ) in results
     {
@@ -269,11 +297,166 @@ pub async fn get_meal_plan(
                 .filter_map(|x| x)
                 .collect(),
             ischecked,
-            meal_plan_recipe_id, // Add meal_plan_recipe_id to the response
+            meal_plan_recipe_id,
+            meal_time,
+            calories,
         });
     }
 
     let meal_plans: Vec<MealPlanEntry> = meal_plans_map.into_values().collect();
 
     Ok(Json(GetMealPlanResponse { meal_plans }))
+}
+
+#[axum::debug_handler]
+pub async fn user_already_eat(
+    Extension(db_pool): Extension<Arc<DbPool>>,
+    Json(payload): Json<UserAlreadyEatPayload>,
+) -> Result<Json<serde_json::Value>, (StatusCode, Json<ErrorResponse>)> {
+    let mut conn = db_pool.get().map_err(|err| {
+        eprintln!("Failed to connect to the database: {}", err);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ErrorResponse {
+                error: "Failed to connect to the database".to_string(),
+            }),
+        )
+    })?;
+
+    // Update the ischecked field for the given meal_plan_recipe_id
+    diesel::update(meal_plan_recipes::table.filter(meal_plan_recipes::meal_plan_recipe_id.eq(payload.meal_plan_recipe_id)))
+        .set(meal_plan_recipes::ischecked.eq(payload.ischecked))
+        .execute(&mut conn)
+        .map_err(|err| {
+            eprintln!("Failed to update ischecked: {}", err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ErrorResponse {
+                    error: "Failed to update meal plan recipe".to_string(),
+                }),
+            )
+        })?;
+
+    println!(
+        "Updated meal_plan_recipe_id {} with ischecked = {}",
+        payload.meal_plan_recipe_id, payload.ischecked
+    );
+
+    Ok(Json(json!({
+        "status": "success",
+        "message": "Meal plan recipe updated successfully"
+    })))
+}
+
+#[axum::debug_handler]
+pub async fn edit_meal_plan(
+    Extension(db_pool): Extension<Arc<DbPool>>,
+    Json(payload): Json<EditMealPlanPayload>,
+) -> Result<Json<serde_json::Value>, (StatusCode, Json<ErrorResponse>)> {
+    let mut conn = db_pool.get().map_err(|err| {
+        eprintln!("Failed to connect to the database: {}", err);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ErrorResponse {
+                error: "Failed to connect to the database".to_string(),
+            }),
+        )
+    })?;
+
+    // 1. Fetch user_id from user_line_id
+    let user_id: i32 = users::table
+        .filter(users::user_line_id.eq(&payload.user_line_id))
+        .select(users::user_id)
+        .first(&mut conn)
+        .map_err(|_| {
+            (
+                StatusCode::NOT_FOUND,
+                Json(ErrorResponse {
+                    error: "User not found".to_string(),
+                }),
+            )
+        })?;
+
+    // 2. Parse the date and find the meal_plan_id
+    let date = NaiveDate::parse_from_str(&payload.date, "%Y-%m-%d").map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(ErrorResponse {
+                error: "Invalid date format. Use YYYY-MM-DD".to_string(),
+            }),
+        )
+    })?;
+
+    let meal_plan_id: i32 = meal_plans::table
+        .filter(meal_plans::user_id.eq(user_id))
+        .filter(meal_plans::date.eq(date))
+        .select(meal_plans::meal_plan_id)
+        .first(&mut conn)
+        .map_err(|_| {
+            (
+                StatusCode::NOT_FOUND,
+                Json(ErrorResponse {
+                    error: "Meal plan not found for the given date".to_string(),
+                }),
+            )
+        })?;
+
+    println!("Found meal_plan_id: {}", meal_plan_id);
+
+    // 3. Delete existing recipes for the meal_plan_id
+    diesel::delete(meal_plan_recipes::table.filter(meal_plan_recipes::meal_plan_id.eq(meal_plan_id)))
+        .execute(&mut conn)
+        .map_err(|err| {
+            eprintln!("Failed to delete old recipes: {}", err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ErrorResponse {
+                    error: "Failed to delete old recipes".to_string(),
+                }),
+            )
+        })?;
+
+    println!("Deleted old recipes for meal_plan_id: {}", meal_plan_id);
+
+    // 4. Insert new recipes
+    let transaction_result = {
+        let conn = &mut conn;
+        conn.transaction::<_, diesel::result::Error, _>(|conn| {
+            for (recipe_index, recipe) in payload.recipes.iter().enumerate() {
+                let meal_time = if recipe_index < 4 {
+                    (recipe_index + 1) as i32 // 1, 2, 3, 4 for the first four recipes
+                } else {
+                    4 // 4 for all subsequent recipes
+                };
+
+                diesel::insert_into(meal_plan_recipes::table)
+                    .values((
+                        meal_plan_recipes::meal_plan_id.eq(meal_plan_id),
+                        meal_plan_recipes::recipe_id.eq(recipe.recipe_id
+                            .ok_or_else(|| diesel::result::Error::RollbackTransaction)?),
+                        meal_plan_recipes::ischecked.eq(false),
+                        meal_plan_recipes::meal_time.eq(Some(meal_time)),
+                    ))
+                    .execute(conn)?;
+            }
+            Ok(())
+        })
+    };
+
+    transaction_result.map_err(|err| {
+        eprintln!("Failed to insert new recipes: {}", err);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ErrorResponse {
+                error: "Failed to insert new recipes".to_string(),
+            }),
+        )
+    })?;
+
+    println!("Updated meal plan successfully for meal_plan_id: {}", meal_plan_id);
+
+    Ok(Json(json!({
+        "status": "success",
+        "message": "Meal plan updated successfully"
+    })))
 }
