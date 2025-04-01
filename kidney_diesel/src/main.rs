@@ -15,7 +15,7 @@ mod routes; // Declare the routes module
 
 use routes::ingredient::get_ingredients;
 use routes::recipe::{update_recipe, delete_recipe};
-use routes::mealplan::create_meal_plan; // Import create_meal_plan
+use routes::mealplan::{create_meal_plan, get_meal_plan, user_already_eat, edit_meal_plan}; // Import edit_meal_plan
 
 
 // Define a struct to represent the ingredient table rows
@@ -31,8 +31,8 @@ async fn main() {
     dotenv().expect("Failed to load .env file");
 
     let server_address = std::env::var("SERVER_ADDRESS").unwrap_or_else(|_| {
-        eprintln!("SERVER_ADDRESS not set, defaulting to 127.0.0.1:3000");
-        "127.0.0.1:3000".to_owned()
+        eprintln!("SERVER_ADDRESS not set, defaulting to 127.0.0.1:3005");
+        "127.0.0.1:3005".to_owned()
     });
 
     let database_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| {
@@ -75,6 +75,9 @@ async fn main() {
         .route("/update_recipe/{r_id}", patch(update_recipe))
         .route("/delete_recipe/{r_id}", delete(delete_recipe))
         .route("/create_meal_plan", post(create_meal_plan))
+        .route("/get_meal_plan", post(get_meal_plan))
+        .route("/user_already_eat", patch(user_already_eat))
+        .route("/edit_meal_plan", patch(edit_meal_plan)) // Add route for edit_meal_plan
         .fallback(fallback_handler) // Add a fallback route
         .layer(Extension(db_pool))
         .layer(cors);
