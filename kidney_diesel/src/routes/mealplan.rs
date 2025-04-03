@@ -1,15 +1,30 @@
-use crate::schema::{meal_plan_recipes, meal_plans, recipes, users};
+use crate::schema::{
+    meal_plan_recipes, meal_plans, recipes, recipes_nutrients, recipes_ingredient_allergies, users,
+    users_ingredient_allergies, users_nutrients_limit_per_day,
+};
 use axum::http::StatusCode;
 use axum::{Extension, Json};
 use chrono::NaiveDate;
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool};
+use reqwest::Client;
 use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+pub struct Nutrition {
+    pub calories: f32,
+    pub carbs: f32,
+    pub fat: f32,
+    pub phosphorus: f32,
+    pub potassium: f32,
+    pub protein: f32,
+    pub sodium: f32,
+}
 use serde_json::json;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Recipe {
     pub recipe_id: Option<i32>, // Change recipe_id to Option<i32>
 }
@@ -67,6 +82,55 @@ pub struct EditMealPlanPayload {
     pub user_line_id: String,
     pub date: String,
     pub recipes: Vec<Recipe>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct MealPlanRequest {
+    pub data: MealPlanRequestData,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct MealPlanRequestData {
+    pub u_id: String,
+    pub days: i32,
+}
+
+#[derive(Serialize, Debug, Clone)]
+pub struct FoodMenu {
+    pub name: String,
+    pub nutrition: Nutrition,
+    pub recipe_id: i32,
+    pub recipe_img_link: Vec<String>,
+}
+
+#[derive(Serialize, Debug)]
+pub struct ResponseData {
+    pub user_line_id: String,
+    pub days: i32,
+    pub food_menus: Vec<FoodMenu>,
+    pub nutrition_limit_per_day: Nutrition,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct UpdateMealPlanRequest {
+    pub user_id: String,
+    pub days: i32,
+    pub mealplans: Vec<Vec<Recipe>>, // Use Recipe for mealplans
+}
+
+#[derive(Serialize, Debug)]
+pub struct UpdateMealPlanResponse {
+    pub user_line_id: String,
+    pub days: i32,
+    pub nutrition_limit_per_day: Nutrition,
+    pub food_menus: Vec<FoodMenu>,
+    pub mealplan: UpdateMealPlanRequestWithoutDays,
+}
+
+#[derive(Serialize, Debug)]
+pub struct UpdateMealPlanRequestWithoutDays {
+    pub user_id: String,
+    pub mealplans: Vec<Vec<FoodMenu>>,
 }
 
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
@@ -459,4 +523,338 @@ pub async fn edit_meal_plan(
         "status": "success",
         "message": "Meal plan updated successfully"
     })))
+}
+
+#[axum::debug_handler]
+pub async fn ai_meal_plan(
+    Extension(db_pool): Extension<Arc<DbPool>>,
+    Json(payload): Json<MealPlanRequest>,
+) -> Result<Json<serde_json::Value>, (StatusCode, String)> {
+    let mut conn = db_pool.get().map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Database connection error".to_string(),
+        )
+    })?;
+
+    // 1. Fetch user information
+    let user = users::table
+        .filter(users::user_line_id.eq(&payload.data.u_id))
+        .select((users::user_id, users::user_line_id))
+        .first::<(i32, Option<String>)>(&mut conn)
+        .map_err(|_| (StatusCode::NOT_FOUND, "User not found".to_string()))?;
+
+    let user_id = user.0;
+
+    // 2. Fetch food menus that the user is not allergic to
+    let filtered_recipes = recipes::table
+        .left_join(recipes_nutrients::table.on(recipes::recipe_id.eq(recipes_nutrients::recipe_id)))
+        .filter(diesel::dsl::not(diesel::dsl::exists(
+            recipes_ingredient_allergies::table
+                .inner_join(users_ingredient_allergies::table.on(
+                    recipes_ingredient_allergies::ingredient_allergy_id
+                        .eq(users_ingredient_allergies::ingredient_allergy_id),
+                ))
+                .filter(users_ingredient_allergies::user_id.eq(user_id))
+                .filter(recipes_ingredient_allergies::recipe_id.eq(recipes::recipe_id)),
+        )))
+        .group_by((recipes::recipe_id, recipes::recipe_name, recipes::recipe_img_link))
+        .select((
+            recipes::recipe_id,
+            recipes::recipe_name,
+            recipes::recipe_img_link,
+            diesel::dsl::sum(recipes_nutrients::quantity).nullable(), // protein
+            diesel::dsl::sum(recipes_nutrients::quantity).nullable(), // carbs
+            diesel::dsl::sum(recipes_nutrients::quantity).nullable(), // fat
+            diesel::dsl::sum(recipes_nutrients::quantity).nullable(), // sodium
+            diesel::dsl::sum(recipes_nutrients::quantity).nullable(), // phosphorus
+            diesel::dsl::sum(recipes_nutrients::quantity).nullable(), // potassium
+            diesel::dsl::sum(recipes_nutrients::quantity).nullable(), // calories
+        ))
+        .load::<(
+            i32,
+            String,
+            Option<Vec<Option<String>>>,
+            Option<f64>,
+            Option<f64>,
+            Option<f64>,
+            Option<f64>,
+            Option<f64>,
+            Option<f64>,
+            Option<f64>,
+        )>(&mut conn)
+        .map_err(|_| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Error fetching filtered recipes".to_string(),
+            )
+        })?;
+
+    // 3. Fetch the user's daily nutrition limits
+    let nutrition_limits = users_nutrients_limit_per_day::table
+        .filter(users_nutrients_limit_per_day::user_id.eq(user_id))
+        .select((
+            users_nutrients_limit_per_day::nutrient_id,
+            users_nutrients_limit_per_day::nutrient_limit,
+        ))
+        .load::<(Option<i32>, Option<f64>)>(&mut conn)
+        .map_err(|_| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Error fetching nutrition limits".to_string(),
+            )
+        })?;
+
+    let mut nutrition_map = Nutrition {
+        calories: 0.0,
+        carbs: 0.0,
+        fat: 0.0,
+        phosphorus: 0.0,
+        potassium: 0.0,
+        protein: 0.0,
+        sodium: 0.0,
+    };
+
+    for (nutrient_id, nutrient_limit) in nutrition_limits {
+        match nutrient_id {
+            Some(1) => nutrition_map.calories = nutrient_limit.unwrap_or(0.0) as f32,
+            Some(2) => nutrition_map.carbs = nutrient_limit.unwrap_or(0.0) as f32,
+            Some(3) => nutrition_map.fat = nutrient_limit.unwrap_or(0.0) as f32,
+            Some(4) => nutrition_map.phosphorus = nutrient_limit.unwrap_or(0.0) as f32,
+            Some(5) => nutrition_map.potassium = nutrient_limit.unwrap_or(0.0) as f32,
+            Some(6) => nutrition_map.protein = nutrient_limit.unwrap_or(0.0) as f32,
+            Some(7) => nutrition_map.sodium = nutrient_limit.unwrap_or(0.0) as f32,
+            _ => (),
+        }
+    }
+
+    // 4. Convert the filtered recipes into the required `FoodMenu` format
+    let food_menus: Vec<FoodMenu> = filtered_recipes
+        .into_iter()
+        .map(|recipe| FoodMenu {
+            name: recipe.1,
+            nutrition: Nutrition {
+                calories: recipe.9.unwrap_or(0.0) as f32,
+                carbs: recipe.4.unwrap_or(0.0) as f32,
+                fat: recipe.5.unwrap_or(0.0) as f32,
+                phosphorus: recipe.7.unwrap_or(0.0) as f32,
+                potassium: recipe.8.unwrap_or(0.0) as f32,
+                protein: recipe.3.unwrap_or(0.0) as f32,
+                sodium: recipe.6.unwrap_or(0.0) as f32,
+            },
+            recipe_id: recipe.0,
+            recipe_img_link: recipe
+                .2
+                .unwrap_or_default()
+                .into_iter()
+                .filter_map(|x| x)
+                .collect(),
+        })
+        .collect();
+
+    // 5. Construct the request payload
+    let response_data = ResponseData {
+        user_line_id: user_id.to_string(), // Send user_id but label it as user_line_id
+        days: payload.data.days,
+        food_menus,
+        nutrition_limit_per_day: nutrition_map,
+    };
+
+    // Print request before sending
+    println!("Sending request to AI service: {:#?}", response_data);
+
+    // 6. Send a POST request to the external AI service
+    let client = Client::new();
+    let api_url = "https://ai-rec-1025044834972.asia-southeast1.run.app/ai";
+
+    let response = client
+        .post(api_url)
+        .json(&response_data)
+        .send()
+        .await
+        .map_err(|_| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Failed to send request".to_string(),
+            )
+        })?
+        .json::<serde_json::Value>()
+        .await
+        .map_err(|_| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Failed to parse response".to_string(),
+            )
+        })?;
+
+    // 7. Return the response from the external API
+    Ok(Json(response))
+}
+
+#[axum::debug_handler]
+pub async fn update_meal_plan(
+    Extension(db_pool): Extension<Arc<DbPool>>,
+    Json(payload): Json<UpdateMealPlanRequest>,
+) -> Result<Json<serde_json::Value>, (StatusCode, String)> {
+    let mut conn = db_pool.get().map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Database connection error".to_string()))?;
+
+    // 1. Fetch user information
+    let user = users::table
+        .filter(users::user_line_id.eq(&payload.user_id))
+        .select((users::user_id, users::user_line_id))
+        .first::<(i32, Option<String>)>(&mut conn)
+        .map_err(|_| (StatusCode::NOT_FOUND, "User not found".to_string()))?;
+
+    let user_id = user.0;
+    let user_line_id = user.1.ok_or((StatusCode::NOT_FOUND, "User LINE ID not found".to_string()))?;
+
+    // 2. Validate and filter mealplans
+    let valid_mealplans: Vec<Vec<Recipe>> = payload
+        .mealplans
+        .iter()
+        .map(|day| {
+            day.iter()
+                .filter(|recipe| recipe.recipe_id.is_some()) // Keep only recipes with valid recipe_id
+                .cloned()
+                .collect()
+        })
+        .collect();
+
+    // 3. Fetch food menus that the user is not allergic to
+    let filtered_recipes = recipes::table
+        .left_join(recipes_nutrients::table.on(recipes::recipe_id.eq(recipes_nutrients::recipe_id)))
+        .filter(diesel::dsl::not(diesel::dsl::exists(
+            recipes_ingredient_allergies::table
+                .inner_join(users_ingredient_allergies::table.on(
+                    recipes_ingredient_allergies::ingredient_allergy_id.eq(users_ingredient_allergies::ingredient_allergy_id),
+                ))
+                .filter(users_ingredient_allergies::user_id.eq(user_id))
+                .filter(recipes_ingredient_allergies::recipe_id.eq(recipes::recipe_id)),
+        )))
+        .group_by((recipes::recipe_id, recipes::recipe_name, recipes::recipe_img_link))
+        .select((
+            recipes::recipe_id,
+            recipes::recipe_name,
+            recipes::recipe_img_link,
+            diesel::dsl::sum(recipes_nutrients::quantity).nullable(), // protein
+            diesel::dsl::sum(recipes_nutrients::quantity).nullable(), // carbs
+            diesel::dsl::sum(recipes_nutrients::quantity).nullable(), // fat
+            diesel::dsl::sum(recipes_nutrients::quantity).nullable(), // sodium
+            diesel::dsl::sum(recipes_nutrients::quantity).nullable(), // phosphorus
+            diesel::dsl::sum(recipes_nutrients::quantity).nullable(), // potassium
+            diesel::dsl::sum(recipes_nutrients::quantity).nullable(), // calories
+        ))
+        .load::<(
+            i32,
+            String,
+            Option<Vec<Option<String>>>,
+            Option<f64>,
+            Option<f64>,
+            Option<f64>,
+            Option<f64>,
+            Option<f64>,
+            Option<f64>,
+            Option<f64>,
+        )>(&mut conn)
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Error fetching filtered recipes".to_string()))?;
+
+    // 4. Fetch the user's daily nutrition limits
+    let nutrition_limits = users_nutrients_limit_per_day::table
+        .filter(users_nutrients_limit_per_day::user_id.eq(user_id))
+        .select((users_nutrients_limit_per_day::nutrient_id, users_nutrients_limit_per_day::nutrient_limit))
+        .load::<(Option<i32>, Option<f64>)>(&mut conn)
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Error fetching nutrition limits".to_string()))?;
+
+    let mut nutrition_map = Nutrition {
+        calories: 0.0,
+        carbs: 0.0,
+        fat: 0.0,
+        phosphorus: 0.0,
+        potassium: 0.0,
+        protein: 0.0,
+        sodium: 0.0,
+    };
+
+    for (nutrient_id, nutrient_limit) in nutrition_limits {
+        match nutrient_id {
+            Some(1) => nutrition_map.calories = nutrient_limit.unwrap_or(0.0) as f32,
+            Some(2) => nutrition_map.carbs = nutrient_limit.unwrap_or(0.0) as f32,
+            Some(3) => nutrition_map.fat = nutrient_limit.unwrap_or(0.0) as f32,
+            Some(4) => nutrition_map.phosphorus = nutrient_limit.unwrap_or(0.0) as f32,
+            Some(5) => nutrition_map.potassium = nutrient_limit.unwrap_or(0.0) as f32,
+            Some(6) => nutrition_map.protein = nutrient_limit.unwrap_or(0.0) as f32,
+            Some(7) => nutrition_map.sodium = nutrient_limit.unwrap_or(0.0) as f32,
+            _ => (),
+        }
+    }
+
+    // 5. Convert the filtered recipes into the required `FoodMenu` format
+    let food_menus: Vec<FoodMenu> = filtered_recipes
+        .into_iter()
+        .map(|recipe| FoodMenu {
+            name: recipe.1,
+            nutrition: Nutrition {
+                calories: recipe.9.unwrap_or(0.0) as f32,
+                carbs: recipe.4.unwrap_or(0.0) as f32,
+                fat: recipe.5.unwrap_or(0.0) as f32,
+                phosphorus: recipe.7.unwrap_or(0.0) as f32,
+                potassium: recipe.8.unwrap_or(0.0) as f32,
+                protein: recipe.3.unwrap_or(0.0) as f32,
+                sodium: recipe.6.unwrap_or(0.0) as f32,
+            },
+            recipe_id: recipe.0,
+            recipe_img_link: recipe.2.unwrap_or_default().into_iter().filter_map(|x| x).collect(),
+        })
+        .collect();
+
+    // 6. Construct the detailed mealplans
+    let detailed_mealplans: Vec<Vec<FoodMenu>> = valid_mealplans
+        .iter()
+        .map(|day| {
+            day.iter()
+                .filter_map(|recipe| {
+                    food_menus.iter().find(|menu| menu.recipe_id == recipe.recipe_id.unwrap_or_default()).cloned()
+                })
+                .collect()
+        })
+        .collect();
+
+    // 7. Construct the response to send to the external API
+    let response_data = UpdateMealPlanResponse {
+        user_line_id: user_line_id.clone(),
+        days: payload.days,
+        nutrition_limit_per_day: nutrition_map,
+        food_menus,
+        mealplan: UpdateMealPlanRequestWithoutDays {
+            user_id: user_line_id.clone(),
+            mealplans: detailed_mealplans, // Use detailed mealplans
+        },
+    };
+
+    // Print the request JSON
+    let request_json = serde_json::to_string(&response_data).map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Failed to serialize request JSON".to_string()))?;
+    println!("Request JSON to ai_update: {}", request_json);
+
+    // 8. Send a POST request to the external AI service
+    let client = Client::new();
+    let api_url = "https://ai-rec-1025044834972.asia-southeast1.run.app/ai_update";
+
+    let mut ai_response = client
+        .post(api_url)
+        .json(&response_data)
+        .send()
+        .await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Failed to send request".to_string()))?
+        .json::<serde_json::Value>()
+        .await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Failed to parse response".to_string()))?;
+
+    // 9. Rename `user_id` to `user_line_id` in the AI response
+    if let Some(user_id) = ai_response.get("user_id").cloned() {
+        ai_response.as_object_mut().unwrap().remove("user_id");
+        ai_response.as_object_mut().unwrap().insert("user_line_id".to_string(), user_id);
+    }
+
+    // 10. Return the modified AI response
+    Ok(Json(ai_response))
 }

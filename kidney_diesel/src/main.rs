@@ -13,9 +13,9 @@ mod schema;
 mod models;
 mod routes; // Declare the routes module
 
-use routes::ingredient::get_ingredients;
+use routes::ingredient::{get_ingredients, create_ingredient}; // Import create_ingredient
 use routes::recipe::{update_recipe, delete_recipe};
-use routes::mealplan::{create_meal_plan, get_meal_plan, user_already_eat, edit_meal_plan}; // Import edit_meal_plan
+use routes::mealplan::{create_meal_plan, get_meal_plan, user_already_eat, edit_meal_plan, ai_meal_plan, update_meal_plan}; // Import edit_meal_plan
 
 
 // Define a struct to represent the ingredient table rows
@@ -72,12 +72,15 @@ async fn main() {
     let app = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
         .route("/ingredients", get(get_ingredients))
+        .route("/create_ingredient", post(create_ingredient)) // Add route for create_ingredient
         .route("/update_recipe/{r_id}", patch(update_recipe))
         .route("/delete_recipe/{r_id}", delete(delete_recipe))
         .route("/create_meal_plan", post(create_meal_plan))
         .route("/get_meal_plan", post(get_meal_plan))
         .route("/user_already_eat", patch(user_already_eat))
-        .route("/edit_meal_plan", patch(edit_meal_plan)) // Add route for edit_meal_plan
+        .route("/edit_meal_plan", patch(edit_meal_plan))
+        .route("/ai_meal_plan", post(ai_meal_plan))
+        .route("/update_meal_plan", post(update_meal_plan))
         .fallback(fallback_handler) // Add a fallback route
         .layer(Extension(db_pool))
         .layer(cors);
