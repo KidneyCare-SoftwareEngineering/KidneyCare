@@ -4,7 +4,6 @@ import Navbar from "@/Components/Navbar";
 import {ProfileHistory} from "@/Components/ProfileHistory";
 import SumCalorie from "@/Components/SumCalorie";
 import FoodHistory from "@/Components/FoodHistory";
-import Profile from "../page";
 import liff from "@line/liff";
 
 export default function History() {

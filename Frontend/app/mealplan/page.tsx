@@ -13,14 +13,12 @@ import { set } from 'date-fns'
 
 export default function MealPlan() {
   const [dateSelected, setDateSelected] = useState<Date>()
-  const formattedDate = dateSelected?.toISOString().split("T")[0] + "T12:00:00";
+  const formattedDate = dateSelected?.toISOString().split("T")[0];
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [mealPlans, setMealPlans] = useState<Meal_planInterface>()
   const [isLoading, setIsLoading] = useState(false);
-  const [userUid, setUserUid] = useState("U5251e034b6d1a207df047bf7fb34e30a");
+  const [userUid, setUserUid] = useState("");
   const [isEdit, setIsEdit] = useState(false)
-
-
 
   const SendToGet_Meal_Plan = {
     user_line_id: userUid,
@@ -30,30 +28,30 @@ export default function MealPlan() {
 
 
   // Line LIFF
-    // useEffect(() => {
-    //     const initLiff = async () => {
-    //       try {
-    //         await liff.init({ liffId: "2006794580-DXPWN340" });
-    //         if (!liff.isLoggedIn()) {
-    //           liff.login(); 
-    //         }
-    //         else{
-    //           console.log("User is logged in", liff.isLoggedIn());
-    //         }
-    //       } catch (error) {
-    //         console.error("Error initializing LIFF: ", error);
-    //       }
+    useEffect(() => {
+        const initLiff = async () => {
+          try {
+            await liff.init({ liffId: "2006794580-DXPWN340" });
+            if (!liff.isLoggedIn()) {
+              liff.login(); 
+            }
+            else{
+              console.log("User is logged in", liff.isLoggedIn());
+            }  
+          } catch (error) {
+            console.error("Error initializing LIFF: ", error);
+          }
           
-    //       try {
-    //         const profile = await liff.getProfile();
-    //         setUserUid(profile.userId);
+          try {
+            const profile = await liff.getProfile();
+            setUserUid(profile.userId);
     
-    //       } catch (error) {
-    //         console.error("Error fetching profile: ", error);
-    //       }
-    //     }; 
-    //     initLiff();
-    //   }, []);
+          } catch (error) {
+            console.error("Error fetching profile: ", error);
+          }
+        }; 
+        initLiff();
+      }, []);
     // ---------------------------------
   
 
@@ -62,11 +60,12 @@ export default function MealPlan() {
   useEffect(() => {
     console.log("userUid", userUid);
   },[userUid])
+  
   useEffect(() => {
       const get_meal_plan = async () => {
         setIsLoading(true)
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_meal_plan`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/get_meal_plan`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -75,10 +74,12 @@ export default function MealPlan() {
                 });
                 const data = await response.json();
                 setMealPlans(data);
+                console.log("mealPlans", data);
         } catch (error) {
             console.log("error", error)
         } finally{
             setIsLoading(false)
+
         }
         
       }; 
@@ -109,7 +110,7 @@ export default function MealPlan() {
                         </div>
                     </motion.div>
                 ) : (
-                    <ChooseEat dateSelected={dateSelected} desc="อาหาร" MealPlans={mealPlans} isEdit={isEdit} setIsEdit={setIsEdit}/>
+                    <ChooseEat dateSelected={dateSelected} desc="อาหาร" MealPlans={mealPlans} isEdit={isEdit} setIsEdit={setIsEdit} userUid={userUid} setIsLoading={setIsLoading}/>
                 )
             }
             

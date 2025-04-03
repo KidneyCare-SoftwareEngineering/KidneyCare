@@ -79,7 +79,8 @@ export default function PillReminder() {
                         <div className="text-heading3 mt-8">ยังไม่มีการบันทึกยา</div>
                     </>
                 ) : (
-                    <ChooseEat dateSelected={dateSelected} desc="ยา" MealPlans={pill} />
+                    // <ChooseEat dateSelected={dateSelected} desc="ยา" MealPlans={pill} />
+                    <></>
                 )}
 
                 <Link

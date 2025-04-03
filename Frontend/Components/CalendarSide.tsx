@@ -2,7 +2,11 @@
 import { Icon } from "@iconify/react/dist/iconify.js";
 import React, { useState, useEffect } from "react";
 
-export default function CalendarSide({ onDateSelect }) {
+interface CalendarSideProps {
+  onDateSelect?: (date: Date) => void;
+}
+
+export default function CalendarSide({ onDateSelect }: CalendarSideProps) {
   const [selectDate, setSelectDate] = useState(new Date());
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentDate] = useState(new Date());
@@ -22,27 +26,29 @@ export default function CalendarSide({ onDateSelect }) {
     "ธันวาคม",
   ];
 
-  const getBuddhistYear = (date) => {
+  const getBuddhistYear = (date: Date) => {
     return date.getFullYear() + 543;
   };
 
   useEffect(() => {}, [selectDate]);
 
-  const handleDateClick = (date) => {
+  const handleDateClick = (date: Date) => {
     if (isAnimating) return;
     setIsAnimating(true);
     setTimeout(() => {
       setSelectDate(date);
-      onDateSelect(date);
+      if (onDateSelect) {
+        onDateSelect(date);
+      }
       setIsAnimating(false);
     }, 300);
   };
 
-  const isSelect = (date) => {
+  const isSelect = (date : Date) => {
     return date.toDateString() === selectDate.toDateString();
   };
 
-  const isCurrentDate = (date) => {
+  const isCurrentDate = (date : Date) => {
     return date.toDateString() === currentDate.toDateString();
   };
 

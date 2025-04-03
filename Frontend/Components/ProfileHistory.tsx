@@ -2,10 +2,10 @@
 import { useState, useEffect, useRef } from "react";
 import { Icon } from "@iconify/react";
 
-export const ProfileHistory: React.FC<{ userUid: string; userProfile: string; userDisplayname}> = ({ userUid, userProfile, userDisplayname }) => {
+export const ProfileHistory: React.FC<{ userUid: string; userProfile: string; userDisplayname: any}> = ({ userUid, userProfile, userDisplayname }) => {
   const [isOptionsVisible, setIsOptionsVisible] = useState(false);
-  const optionsRef = useRef(null);
-  const buttonRef = useRef(null);
+  const optionsRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const toggleOptions = () => {
     setIsOptionsVisible(!isOptionsVisible);

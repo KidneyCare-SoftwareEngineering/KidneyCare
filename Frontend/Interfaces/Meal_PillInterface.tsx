@@ -16,6 +16,7 @@ export interface FoodInterface {
         ingredient_unit: string
     }[]
     ingredients_eng: {}
+
 }
 
 export interface MealplanInterface {
@@ -38,38 +39,72 @@ export interface MealplanInterface {
 }
 
 export interface Meal_planInterface {
-    meal_plans: Array<Array<{
+    meal_plans: Array<{
+        meal_plan_id: number;
+        user_id: number;
         name: string;
-        nutrition: {
+        date: string;
+        recipes: Array<{
+            recipe_id: number;
+            recipe_name: string;
+            recipe_img_link: string[];
+            ischecked: boolean;
+            meal_plan_recipe_id: number;
+            meal_time: number;
             calories: number;
-            carbs: number;
-            fat: number;
-            phosphorus: number;
-            potassium: number;
-            protein: number;
-            sodium: number;
-        };
-        recipe_id: string;
-        recipe_img_link: string;
-    }>>;
+        }>
+    }>;
     userUid: string;
     medicines?: Array<any>
     isEdit?: boolean
     setIsEdit?: React.Dispatch<React.SetStateAction<boolean>>
 
 }
+// export interface Meal_planInterface {
+//     meal_plans: Array<Array<{
+//         name: string;
+//         nutrition: {
+//             calories: number;
+//             carbs: number;
+//             fat: number;
+//             phosphorus: number;
+//             potassium: number;
+//             protein: number;
+//             sodium: number;
+//         };
+//         recipe_id: string;
+//         recipe_img_link: string;
+//     }>>;
+//     userUid: string;
+//     medicines?: Array<any>
+//     isEdit?: boolean
+//     setIsEdit?: React.Dispatch<React.SetStateAction<boolean>>
+
+// }
 
 interface Medicine {
-    user_medicine_id: number;
-    medicine_schedule: string[]; 
-    medicine_amount: number;
-    medicine_per_times: number;
-    user_medicine_img_link: string[];
-    medicine_unit: string;
-    medicine_name: string;
-    medicine_note: string;
+    user_medicine_id?: number;
+    medicine_schedule?: string[]; 
+    medicine_amount?: number;
+    medicine_per_times?: number;
+    user_medicine_img_link?: string[];
+    medicine_unit?: string;
+    medicine_name?: string;
+    medicine_note?: string;
   }
   
 export interface MedicineData extends MealplanInterface{
-    medicines: Medicine[];
+    medicines?: Medicine[];
+}
+
+
+export interface recipesInterface extends Medicine{
+    recipe_id : number;
+    recipe_name : string;
+    recipe_img_link : string[];
+    ischecked: boolean;
+    meal_plan_recipe_id: number;
+    meal_time: number;
+    calories: number;
+    
 }
