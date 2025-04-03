@@ -53,7 +53,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   const notEatenItems = isMedicine 
     ? allItems.filter(item => !item.ischecked) 
     : allItems.filter(item => !item.ischecked);
-  const mealTypes = ["อาหารเช้า", "อาหารกลางวัน", "อาหารเย็น", "อาหารมื้อพิเศษ"];
+  const mealTypes = ["อาหารเช้า", "อาหารกลางวัน", "อาหารเย็น", "ของว่าง"];
 
 
   useEffect(() => {
@@ -179,7 +179,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
       recipe_img_link: foodChoosedData?.image_url ? [foodChoosedData.image_url] : [],
       ischecked: false,
       meal_plan_recipe_id: 123456789,
-      meal_time: 4,
+      meal_time: 1,
       calories: foodChoosedData?.calories || 0,
     }
 

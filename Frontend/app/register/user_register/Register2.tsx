@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import TitleBarStatePage from "@/Components/TitleBarStatePage";
 import Checkbox from '@mui/material/Checkbox';
 import { Register2Interface } from "@/Interfaces/RegisterInterface";
+import liff from "@line/liff";
 
 const Register2: React.FC<Register2Interface> = (data_) => {
   const [selectedDisease, setSelectedDisease] = useState<number[]>([]); 
@@ -44,17 +45,19 @@ const Register2: React.FC<Register2Interface> = (data_) => {
 
 
   const handleRegister = async () => {
-    const url = `https://api.line.me/v2/bot/user/${data_.userUid}/richmenu/richmenu-97022c20434cafd443740905eeebcd2d`;  
+    const url = `https://api.line.me/v2/bot/user/${data_.userUid}/richmenu/${process.env.NEXT_PUBLIC_RICH_MENU_MEMBER}`;  
     
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+    try{
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(datatoback),
-    });
-
-
+    });} catch (error) {
+      throw error
+    }
+    
     try {
       const response = await fetch(url, {
         method: "POST",
@@ -73,6 +76,8 @@ const Register2: React.FC<Register2Interface> = (data_) => {
     } catch (error) {
       console.error("Error linking rich menu:", error);
       throw error;
+    } finally{
+      liff.closeWindow();
     }
   };
   

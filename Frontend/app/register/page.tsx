@@ -43,6 +43,7 @@ const TermsAndConditions = () => {
     // ---------------------------------
 
 
+
   return (
     <div className="flex flex-col w-screen max-w-md mx-auto p-6 bg-[#F8F4F1] min-h-screen">
       {/* Header */}
@@ -126,12 +127,13 @@ const TermsAndConditions = () => {
           ตกลง
         </div>
         :
-        <Link 
-          href={`https://liff.line.me/2006794580-6ZGZ5Eja`}
+        <a
+          onClick={() => {liff.closeWindow();}}
+          href='https://liff.line.me/2006794580-6ZGZ5Eja'
           className="flex w-full py-3 justify-center items-center rounded-lg transition-colors bg-orange300 text-white"
           >
           ตกลง
-        </Link>
+        </a>
         }
       </div>
     </div>
