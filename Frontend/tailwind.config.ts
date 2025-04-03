@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 export default {
+	mode: 'jit',
     darkMode: ["class"],
     content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -88,4 +89,5 @@ export default {
   	}
   },
   plugins: [require("tailwindcss-animate")],
+  safelist: [{ pattern: /.*/ }],
 } satisfies Config;

@@ -1,3 +1,4 @@
+'use client'
 import { useState, useEffect } from "react"
 import DonutGraph from "@/Components/DonutGraph"
 import FoodDetail1 from "./FoodDetail1"

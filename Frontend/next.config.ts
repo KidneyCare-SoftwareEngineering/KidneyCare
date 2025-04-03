@@ -10,6 +10,14 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_API: process.env.NEXT_PUBLIC_API,
   },
+  reactStrictMode: true,
+  compiler: {
+    styledComponents: true,
+  },
+  sassOptions: {
+    implementation: 'sass-embedded',
+  },
 };
+
 
 export default nextConfig;

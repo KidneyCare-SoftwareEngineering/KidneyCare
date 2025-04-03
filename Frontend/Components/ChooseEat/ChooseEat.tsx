@@ -1,9 +1,10 @@
+'use client'
 import React, { useEffect } from "react";
+import { MedicineData } from "@/Interfaces/Meal_PillInterface";
 import { format } from 'date-fns'
 import { th } from 'date-fns/locale'
 import ChooseBar from "./ChooseBar";
 import { Meal_planInterface } from "@/Interfaces/Meal_PillInterface";
-import { MedicineData } from "@/Interfaces/Meal_PillInterface";
 
 const ChooseEat: React.FC<{ dateSelected?: Date, desc: string, MealPlans: Meal_planInterface, isEdit: boolean, setIsEdit: React.Dispatch<React.SetStateAction<boolean>>, userUid: string; setIsLoading: (value: boolean) => void;}> = ({ dateSelected, desc, MealPlans, isEdit, setIsEdit, userUid, setIsLoading}) => {
   

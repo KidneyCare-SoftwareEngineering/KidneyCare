@@ -1,3 +1,4 @@
+'use client'
 import React, { useEffect, useState } from "react";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import Link from "next/link";
