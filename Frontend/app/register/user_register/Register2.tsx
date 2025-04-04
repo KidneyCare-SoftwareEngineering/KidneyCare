@@ -81,7 +81,7 @@ const Register2: React.FC<Register2Interface> = (data_) => {
     });} catch (error) {
       throw error
     }finally{
-      RichMenu()
+      await RichMenu()
     }
     
     
