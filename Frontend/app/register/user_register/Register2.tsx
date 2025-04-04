@@ -62,7 +62,7 @@ const Register2: React.FC<Register2Interface> = (data_) => {
       const response = await fetch(url, {
         method: "POST",
         headers:{
-          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_LINE_ACCESS_TOKEN}`,
+          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_LINE_CHANNEL_ACCESS_TOKEN}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({}),
