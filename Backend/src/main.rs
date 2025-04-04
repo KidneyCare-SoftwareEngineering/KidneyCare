@@ -16,32 +16,31 @@ use tokio::net::TcpListener;
 use backend::routes::recipe::*;
 use backend::routes::ingredient::*;
 
+use std::env;
+
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().expect("Failed to load .env file");
 
-    let server_address =
-        std::env::var("SERVER_ADDRESS").unwrap_or_else(|_| "127.0.0.1:3000".to_owned());
+    let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
+    let server_address = format!("0.0.0.0:{}", port);
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL is not set");
 
     let db_pool = PgPoolOptions::new()
-        .max_connections(16)
+        .max_connections(100)
         .connect(&database_url)
         .await
         .expect("Failed to connect to database");
 
-        let cors = CorsLayer::new()
+    let cors = CorsLayer::new()
         .allow_origin(Any)
         .allow_methods([Method::GET, Method::POST, Method::PATCH])
         .allow_headers(Any);
 
     let listener = TcpListener::bind(&server_address)
         .await
-        .unwrap_or_else(|_| {
-            tokio::runtime::Handle::current()
-                .block_on(TcpListener::bind("127.0.0.1:3000"))
-                .expect("Failed to bind to default address")
-        });
+        .expect("Failed to bind to address");
+
     println!("Listening on {}", listener.local_addr().unwrap());
 
     let app = Router::new()
