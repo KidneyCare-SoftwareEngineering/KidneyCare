@@ -13,6 +13,47 @@ export default function SearchFood() {
   const [userUid, setUserUid] = useState("");
   const [foodData, setFoodData] = useState<FoodInterface[]>([]);
   const [filteredFoodData, setFilteredFoodData] = useState<FoodInterface[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredFoodData.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredFoodData.length / itemsPerPage);
+
+  const genNum = () => {
+    const maxVisible = 5;
+    const pages = [];
+    const half = Math.floor(maxVisible / 2);
+
+    let start = Math.max(1, currentPage - half);
+    let end = Math.min(totalPages, currentPage + half);
+
+    if (currentPage <= half) {
+      end = Math.min(totalPages, maxVisible);
+    }
+
+    if (currentPage + half >= totalPages) {
+      start = Math.max(1, totalPages - maxVisible + 1);
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (start > 1) {
+      if (start > 2) pages.unshift('...');
+      pages.unshift(1);
+    }
+
+    if (end < totalPages) {
+      if (end < totalPages - 1) pages.push('...');
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
+
+  const pageNumbers = genNum();
 
   // Line LIFF
   useEffect(() => {
@@ -94,7 +135,7 @@ export default function SearchFood() {
         />
         
         {filteredFoodData.length > 0 ? (
-          filteredFoodData.map((food, index) => (
+          currentItems.map((food, index) => (
             <motion.div 
               key={food.id} 
               variants={itemVariants} 
@@ -111,6 +152,31 @@ export default function SearchFood() {
             <PuffLoader />
           </div>
         )}
+
+
+        
+        <div className="flex flex-wrap justify-center gap-2 mt-6">
+          {pageNumbers.map((page, idx) =>
+            page === '...' ? (
+              <span key={`ellipsis-${idx}`} className="px-3 py-1 text-gray-500">...</span>
+            ) : (
+              <button
+                key={page}
+                onClick={() => {
+                  setCurrentPage(page as number);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className={`px-3 py-1 rounded ${
+                  currentPage === page
+                    ? 'bg-orange300 text-white'
+                    : 'bg-gray-200 text-gray-700'
+                }`}
+              >
+                {page}
+              </button>
+            )
+          )}
+        </div>
       </div>
     </>
   )

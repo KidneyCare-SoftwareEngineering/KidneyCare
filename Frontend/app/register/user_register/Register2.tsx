@@ -43,6 +43,29 @@ const Register2: React.FC<Register2Interface> = (data_) => {
   }
 
 
+  const RichMenu = async () => {
+    const url = `https://api.line.me/v2/bot/user/${data_.userUid}/richmenu/${process.env.NEXT_PUBLIC_RICH_MENU_MEMBER}`;  
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers:{
+          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_LINE_CHANNEL_ACCESS_TOKEN}`,
+        },
+        body: JSON.stringify({}),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response;
+    } catch (error) {
+      console.error("Error linking rich menu:", error);
+      throw error;
+    } finally{
+      liff.closeWindow();
+    }
+  }
+
 
   const handleRegister = async () => {
     const url = `https://api.line.me/v2/bot/user/${data_.userUid}/richmenu/${process.env.NEXT_PUBLIC_RICH_MENU_MEMBER}`;  
@@ -56,29 +79,11 @@ const Register2: React.FC<Register2Interface> = (data_) => {
       body: JSON.stringify(datatoback),
     });} catch (error) {
       throw error
+    }finally{
+      await RichMenu()
     }
     
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers:{
-          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_LINE_ACCESS_TOKEN}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({}),
-      });
-  
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-  
-      return response;
-    } catch (error) {
-      console.error("Error linking rich menu:", error);
-      throw error;
-    } finally{
-      liff.closeWindow();
-    }
+    
   };
   
     
