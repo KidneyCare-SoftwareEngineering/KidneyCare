@@ -1,2 +1,7 @@
 /Backend/target
 Backend/.env
+/supabase_uploader/.env
+.DS_Store
+/kidney_diesel/.env
+*.lock
+*/target/

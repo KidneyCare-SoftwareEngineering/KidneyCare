@@ -1,7 +1,12 @@
 use axum::{http::StatusCode, Extension, Json};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
+use sqlx::Row;
 use sqlx::PgPool;
+use std::collections::HashMap;
+// use sqlx::types::chrono::NaiveDate;
+use chrono::NaiveDate;
 // use crate::models::user::UserData;
 use crate::models::mealplan::*;
 
@@ -23,7 +28,7 @@ pub async fn create_meal_plan(
 
     let filtered_recipes = sqlx::query!(
         r#"
-        SELECT r.recipe_id, r.recipe_name, 
+        SELECT r.recipe_id, r.recipe_name, r.recipe_img_link,
             COALESCE(SUM(rn.quantity), 0) as protein,
             COALESCE(SUM(rn.quantity), 0) as carbs,
             COALESCE(SUM(rn.quantity), 0) as fat,
@@ -93,6 +98,8 @@ pub async fn create_meal_plan(
                 sodium: recipe.sodium.unwrap_or(0.0) as f32,
             },
             recipe_id: recipe.recipe_id.to_string(),
+            // Add recipe_img_link here
+            recipe_img_link: recipe.recipe_img_link.unwrap_or_default(),
         })
         .collect();
 
@@ -140,7 +147,7 @@ pub async fn update_meal_plan(
     // Fetch food menus that the user is not allergic to
     let filtered_recipes = sqlx::query!(
         r#"
-        SELECT r.recipe_id, r.recipe_name, 
+        SELECT r.recipe_id, r.recipe_name, r.recipe_img_link,
             COALESCE(SUM(rn.quantity), 0) as protein,
             COALESCE(SUM(rn.quantity), 0) as carbs,
             COALESCE(SUM(rn.quantity), 0) as fat,
@@ -213,6 +220,8 @@ pub async fn update_meal_plan(
                 sodium: recipe.sodium.unwrap_or(0.0) as f32,
             },
             recipe_id: recipe.recipe_id.to_string(),
+            // Add recipe_img_link here
+            recipe_img_link: recipe.recipe_img_link.unwrap_or_default(),
         })
         .collect();
 
@@ -250,4 +259,157 @@ pub async fn update_meal_plan(
 
     // Return the modified AI response
     Ok(Json(ai_response))
+}
+
+// Define the request body structure (same as get_medicine)
+#[derive(Deserialize)]
+pub struct GetMealPlanRequest {
+    pub user_line_id: String,
+    pub date: Option<String>, // JS datetime string (e.g., "1990-01-01T12:00:00") - Optional for filtering
+}
+
+// Define the response structure for a single meal plan entry
+#[derive(Serialize, FromRow)]
+pub struct MealPlanEntry {
+    pub meal_plan_id: i32,
+    pub user_id: i32,
+    pub name: String,
+    pub date: NaiveDate,
+    pub recipes: Vec<RecipeInfo>,
+}
+
+#[derive(Serialize, FromRow, Clone)]
+pub struct RecipeInfo {
+    pub recipe_id: i32,
+    pub recipe_name: String,
+    pub recipe_img_link: Vec<String>,
+    pub ischecked: bool
+}
+
+// Define the overall response structure
+#[derive(Serialize)]
+pub struct GetMealPlanResponse {
+    pub meal_plans: Vec<MealPlanEntry>,
+}
+
+#[derive(Serialize)]
+pub struct ErrorResponse {
+    pub error: String,
+}
+
+#[axum::debug_handler]
+pub async fn get_meal_plan(
+    Extension(db_pool): Extension<PgPool>,
+    Json(payload): Json<GetMealPlanRequest>,
+) -> Result<Json<GetMealPlanResponse>, (StatusCode, Json<ErrorResponse>)> {
+    // 1. Find user_id from user_line_id
+    let user_id_result = sqlx::query!(
+        "SELECT user_id FROM users WHERE user_line_id = $1",
+        payload.user_line_id
+    )
+    .fetch_optional(&db_pool)
+    .await
+    .map_err(|e| {
+        eprintln!("Database error fetching user_id: {}", e);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ErrorResponse {
+                error: "Error fetching user".to_string(),
+            }),
+        )
+    })?;
+
+    let user_id = match user_id_result {
+        Some(user) => user.user_id,
+        None => {
+            return Err((
+                StatusCode::NOT_FOUND,
+                Json(ErrorResponse {
+                    error: "User not found".to_string(),
+                }),
+            ));
+        }
+    };
+
+    // 2. Build the query based on whether a date is provided
+    let mut query = r#"
+        SELECT
+            mp.meal_plan_id,
+            mp.user_id,
+            mp.name,
+            mp.date,
+            mpr.recipe_id,
+            r.recipe_name,
+            r.recipe_img_link,
+            mpr.ischecked -- Added ischecked
+        FROM
+            meal_plans mp
+        INNER JOIN
+            meal_plan_recipes mpr ON mp.meal_plan_id = mpr.meal_plan_id
+        INNER JOIN
+            recipes r ON mpr.recipe_id = r.recipe_id
+        WHERE
+            mp.user_id = $1
+    "#.to_string();
+    let mut query_builder = sqlx::query(&query);
+
+    if let Some(date_str) = payload.date {
+        // Parse the date string into a NaiveDate
+        let date = NaiveDate::parse_from_str(&date_str, "%Y-%m-%dT%H:%M:%S").map_err(|e| {
+            eprintln!("Error parsing date: {}", e);
+            (
+                StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: "Invalid date format. Use YYYY-MM-DDTHH:MM:SS".to_string(),
+                }),
+            )
+        })?;
+        // Add a condition to filter by date
+        query.push_str(" AND mp.date = $2");
+        query_builder = sqlx::query(&query).bind(user_id).bind(date);
+    } else {
+        query_builder = sqlx::query(&query).bind(user_id);
+    }
+
+    // 3. Fetch meal plans
+    let rows = query_builder.fetch_all(&db_pool).await.map_err(|e| {
+        eprintln!("Database error fetching meal plans: {}", e);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ErrorResponse {
+                error: "Error fetching meal plans".to_string(),
+            }),
+        )
+    })?;
+
+    // 4. Organize the data into the desired structure
+    let mut meal_plans_map: HashMap<i32, MealPlanEntry> = HashMap::new();
+    for row in rows {
+        let meal_plan_id: i32 = row.get("meal_plan_id");
+        let recipe_id: i32 = row.get("recipe_id");
+        let recipe_name: String = row.get("recipe_name");
+        let recipe_img_link: Vec<String> = row.get("recipe_img_link");
+        let ischecked: bool = row.get("ischecked"); // Get ischecked
+
+        let meal_plan_entry = meal_plans_map.entry(meal_plan_id).or_insert_with(|| {
+            MealPlanEntry {
+                meal_plan_id: row.get("meal_plan_id"),
+                user_id: row.get("user_id"),
+                name: row.get("name"),
+                date: row.get("date"),
+                recipes: Vec::new(),
+            }
+        });
+
+        meal_plan_entry.recipes.push(RecipeInfo {
+            recipe_id,
+            recipe_name,
+            recipe_img_link,
+            ischecked, // Add ischecked
+        });
+    }
+
+    let meal_plans: Vec<MealPlanEntry> = meal_plans_map.into_values().collect();
+
+    Ok(Json(GetMealPlanResponse { meal_plans }))
 }
