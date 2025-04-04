@@ -50,7 +50,6 @@ const Register2: React.FC<Register2Interface> = (data_) => {
         method: "POST",
         headers:{
           "Authorization": `Bearer ${process.env.NEXT_PUBLIC_LINE_CHANNEL_ACCESS_TOKEN}`,
-          "Content-Type": "application/json"
         },
         body: JSON.stringify({}),
       });
