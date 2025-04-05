@@ -28,7 +28,6 @@ export default function MealPlan() {
 
   // Line LIFF
     useEffect(() => {
-        setIsLoading(true)
         const initLiff = async () => {
           try {
             await liff.init({ liffId: "2006794580-DXPWN340" });
@@ -45,27 +44,15 @@ export default function MealPlan() {
           try {
             const profile = await liff.getProfile();
             setUserUid(profile.userId);
+    
           } catch (error) {
             console.error("Error fetching profile: ", error);
-          } finally{
-            setIsLoading(false)
           }
         }; 
         initLiff();
       }, []);
     // ---------------------------------
   
-
-    
-
-    if (!isLoading) 
-        return (
-            <div className="flex w-screen h-screen flex-col justify-center items-center bg-sec"> 
-                <PuffLoader
-                    size={60}
-                />
-            </div>
-            )
   
   useEffect(() => {
       const get_meal_plan = async () => {
@@ -120,9 +107,9 @@ export default function MealPlan() {
                 )
             }
             
-
-
-            {!mealPlans?.meal_plans || mealPlans.meal_plans.length === 0 ? (
+            {userUid != "" ? (
+            <>
+                { !userUid || !mealPlans?.meal_plans || mealPlans.meal_plans.length === 0 ? (
                     <Link 
                     href={`mealplan/createplan/${userUid}`} 
                     className="fixed size-12 bg-orange300 rounded-full right-3 bottom-6 flex justify-center items-center"
@@ -208,8 +195,12 @@ export default function MealPlan() {
                     )}
                     
                 </AnimatePresence>
-            )
-            }
+            )}
+            </>) : (
+            <>
+            </>)}
+
+            
             
 
         </div>
