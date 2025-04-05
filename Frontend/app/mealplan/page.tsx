@@ -17,7 +17,7 @@ export default function MealPlan() {
   const [mealPlans, setMealPlans] = useState<Meal_planInterface>()
   const [isLoading, setIsLoading] = useState(false);
   const [userUid, setUserUid] = useState("");
-  const [isEdit, setIsEdit] = useState(false)
+  const [isEdit, setIsEdit] = useState(false)]
 
   const SendToGet_Meal_Plan = {
     user_line_id: userUid,
@@ -28,6 +28,7 @@ export default function MealPlan() {
 
   // Line LIFF
     useEffect(() => {
+        setIsLoading(true)
         const initLiff = async () => {
           try {
             await liff.init({ liffId: "2006794580-DXPWN340" });
@@ -44,9 +45,10 @@ export default function MealPlan() {
           try {
             const profile = await liff.getProfile();
             setUserUid(profile.userId);
-    
           } catch (error) {
             console.error("Error fetching profile: ", error);
+          } finally{
+            setIsLoading(false)
           }
         }; 
         initLiff();
@@ -54,18 +56,16 @@ export default function MealPlan() {
     // ---------------------------------
   
 
-    if (!userUid) 
+    
+
+    if (!isLoading) 
         return (
             <div className="flex w-screen h-screen flex-col justify-center items-center bg-sec"> 
                 <PuffLoader
-                  size={60}
+                    size={60}
                 />
             </div>
-          )
-
-  useEffect(() => {
-    console.log("userUid", userUid);
-  },[userUid])
+            )
   
   useEffect(() => {
       const get_meal_plan = async () => {
