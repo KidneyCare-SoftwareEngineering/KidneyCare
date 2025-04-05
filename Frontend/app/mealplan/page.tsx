@@ -17,7 +17,7 @@ export default function MealPlan() {
   const [mealPlans, setMealPlans] = useState<Meal_planInterface>()
   const [isLoading, setIsLoading] = useState(false);
   const [userUid, setUserUid] = useState("");
-  const [isEdit, setIsEdit] = useState(false)]
+  const [isEdit, setIsEdit] = useState(false)
 
   const SendToGet_Meal_Plan = {
     user_line_id: userUid,
