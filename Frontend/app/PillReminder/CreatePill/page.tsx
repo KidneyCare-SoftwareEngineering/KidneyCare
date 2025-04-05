@@ -206,7 +206,9 @@ export default function CreatePill() {
 				body: formData,
 			  });
 			  const data = await response.json();
-			  Swal.fire("✅ บันทึกสำเร็จ!", "ข้อมูลยาของคุณถูกบันทึกแล้ว", "success");
+			  if(response.ok){
+				Swal.fire("✅ บันทึกสำเร็จ!", "ข้อมูลยาของคุณถูกบันทึกแล้ว", "success");
+			  }
 			} catch (error) {
 				console.error('Error:', error);
 			} 
