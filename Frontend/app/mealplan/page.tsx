@@ -54,7 +54,14 @@ export default function MealPlan() {
     // ---------------------------------
   
 
-
+    if (!userUid) 
+        return (
+            <div className="flex w-screen h-screen flex-col justify-center items-center bg-sec"> 
+                <PuffLoader
+                  size={60}
+                />
+            </div>
+          )
 
   useEffect(() => {
     console.log("userUid", userUid);
