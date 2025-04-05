@@ -8,7 +8,7 @@ const Register1: React.FC<Register1Interface> = ({setSelectCondition, selectCond
 
   
   const handleSelection = (index: number) => {
-    setSelectCondition([index]); 
+    setSelectCondition([index + 1]); 
   };
 
 

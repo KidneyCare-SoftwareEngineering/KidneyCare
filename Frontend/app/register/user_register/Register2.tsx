@@ -51,44 +51,39 @@ const Register2: React.FC<Register2Interface> = (data_) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          user_line_id: data_.userUid,
-          richmenu_id:  process.env.NEXT_PUBLIC_LINE_CHANNEL_ACCESS_TOKEN
+          user_id: data_.userUid,
+          richmenu_id: process.env.NEXT_PUBLIC_RICH_MENU_MEMBER
         }),
       });
-  
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-        console.log("Error linking rich menu:", response.status);
+
+      if (response.ok) {
+        liff.closeWindow();
       }
       return response;
     } catch (error) {
       console.error("Error linking rich menu:", error);
       throw error;
-    } finally{
-      console.log("Rich menu linked successfully");
-      liff.closeWindow();
-    }
+    } 
   }
 
 
   const handleRegister = async () => {
-       
-    try{
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(datatoback),
-      }).then((response) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(datatoback),
+      });
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        throw new Error('Network response no ok');
       }
-      return response.json();
-    });} catch (error) {
-      console.error("Error sending data to backend:", error);
-      throw error
-    }finally{
+      
+    } catch (error) {
+        console.log("datatoback", datatoback)
+        console.error('Error:', error);
+    } finally{
       await RichMenu()
     }
     
