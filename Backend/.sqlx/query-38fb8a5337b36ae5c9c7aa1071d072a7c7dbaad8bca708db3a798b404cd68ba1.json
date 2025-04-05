@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT r.recipe_id, r.recipe_name, r.recipe_img_link,\n            COALESCE(SUM(rn.quantity), 0) as protein,\n            COALESCE(SUM(rn.quantity), 0) as carbs,\n            COALESCE(SUM(rn.quantity), 0) as fat,\n            COALESCE(SUM(rn.quantity), 0) as sodium,\n            COALESCE(SUM(rn.quantity), 0) as phosphorus,\n            COALESCE(SUM(rn.quantity), 0) as potassium,\n            COALESCE(SUM(rn.quantity), 0) as calories\n        FROM recipes r\n        LEFT JOIN recipes_nutrients rn ON r.recipe_id = rn.recipe_id\n        WHERE NOT EXISTS (\n            SELECT 1 \n            FROM recipes_ingredient_allergies ria\n            JOIN users_ingredient_allergies uia ON ria.ingredient_allergy_id = uia.ingredient_allergy_id\n            JOIN users u ON u.user_id = uia.user_id\n            WHERE u.user_id = $1 AND ria.recipe_id = r.recipe_id\n        )\n        GROUP BY r.recipe_id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "recipe_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "recipe_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "recipe_img_link",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 3,
+        "name": "protein",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 4,
+        "name": "carbs",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 5,
+        "name": "fat",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 6,
+        "name": "sodium",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "phosphorus",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 8,
+        "name": "potassium",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 9,
+        "name": "calories",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "38fb8a5337b36ae5c9c7aa1071d072a7c7dbaad8bca708db3a798b404cd68ba1"
+}

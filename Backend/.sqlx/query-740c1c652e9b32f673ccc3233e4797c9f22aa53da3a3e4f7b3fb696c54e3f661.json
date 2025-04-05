@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO user_take_medicines (user_id, user_medicine_id, user_take_medicine_time)\n        VALUES ($1, $2, $3)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Date"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "740c1c652e9b32f673ccc3233e4797c9f22aa53da3a3e4f7b3fb696c54e3f661"
+}
