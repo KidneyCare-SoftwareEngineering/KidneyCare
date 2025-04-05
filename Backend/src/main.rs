@@ -24,7 +24,7 @@ async fn main() {
     dotenvy::dotenv().ok();
 
     let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
-    let server_address = format!("0.0.0.0:{}", port);
+    let server_address = format!("127.0.0.1:{}", port);
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL is not set");
 
     let db_pool = PgPoolOptions::new()
