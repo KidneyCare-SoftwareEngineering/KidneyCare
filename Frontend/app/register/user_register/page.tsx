@@ -239,7 +239,7 @@ export default function Register() {
                             <input
                             type="number"
                             id="height"
-                            value={height}
+                            value={height === 0 ? "" : height}
                             onChange={(e) => setHeight(Number(e.target.value))}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
                             />
@@ -253,7 +253,7 @@ export default function Register() {
                             <input
                             type="number"
                             id="weight"
-                            value={weight}
+                            value={weight === 0 ? "" : weight}
                             onChange={(e) => setWeight(Number(e.target.value))}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
                             />

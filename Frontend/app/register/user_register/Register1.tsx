@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from "react";
+import React, {useState } from "react";
 import TitleBarStatePage from "@/Components/TitleBarStatePage";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { Register1Interface } from "@/Interfaces/RegisterInterface";
@@ -8,7 +8,7 @@ const Register1: React.FC<Register1Interface> = ({setSelectCondition, selectCond
 
   
   const handleSelection = (index: number) => {
-    setSelectCondition([index + 1]); 
+    setSelectCondition([index]); 
   };
 
 

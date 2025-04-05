@@ -4,11 +4,14 @@ import TitleBarStatePage from "@/Components/TitleBarStatePage";
 import Checkbox from '@mui/material/Checkbox';
 import { Register2Interface } from "@/Interfaces/RegisterInterface";
 import liff from "@line/liff";
+import { setLazyProp } from "next/dist/server/api-utils";
+import { set } from "date-fns";
+import PuffLoader from "react-spinners/PuffLoader";
 
 const Register2: React.FC<Register2Interface> = (data_) => {
   const [selectedDisease, setSelectedDisease] = useState<number[]>([]); 
   const [selectedAllergies, setSelectedAllergies] = useState<number[]>([]); 
-  const [userProfile, setUserProfile] = useState<string | null>("");
+  const [isLoading, setIsLoading] = useState(false);
 
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, value: number) => {
@@ -37,7 +40,7 @@ const Register2: React.FC<Register2Interface> = (data_) => {
     gender: data_.gender,
     kidney_level: data_.kidneyLevel,
     kidney_dialysis: data_.dialysis,
-    users_food_condition: data_.selectCondition,
+    users_food_condition: Array.isArray(data_.selectCondition) ? data_.selectCondition.map(condition => condition + 1) : data_.selectCondition + 1,
     user_disease:  selectedDisease, 
     users_ingredient_allergies: selectedAllergies
   }
@@ -57,6 +60,7 @@ const Register2: React.FC<Register2Interface> = (data_) => {
       });
 
       if (response.ok) {
+        setIsLoading(false)
         liff.closeWindow();
       }
       return response;
@@ -68,6 +72,7 @@ const Register2: React.FC<Register2Interface> = (data_) => {
 
 
   const handleRegister = async () => {
+    setIsLoading(true)
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
         method: 'POST',
@@ -91,9 +96,16 @@ const Register2: React.FC<Register2Interface> = (data_) => {
   };
   
     
-  
-    
-  
+
+  if (isLoading) 
+    return (
+        <div className="flex w-screen h-screen flex-col justify-center items-center bg-sec"> 
+            {/* <PuffLoader size={60} color="#FF5733" /> */}
+            <PuffLoader
+              size={60}
+            />
+        </div>
+      )
   
 
 
