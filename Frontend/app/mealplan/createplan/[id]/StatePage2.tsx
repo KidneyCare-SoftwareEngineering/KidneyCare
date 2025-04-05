@@ -102,7 +102,7 @@ const StatePage2 : React.FC<StatePage2Props> = ({
               >
                 <div className="flex w-11/12 justify-start items-center text-body1 font-bold">
                   <div className="flex justify-center items-center w-4/12">
-                    <img src={`${data.recipe_img_link[0]}`} alt="food" className="size-24 rounded-full p-2"/>
+                    <img src={`${data.recipe_img_link[0]}`} alt="food" className="size-24 rounded-full p-2 object-cover"/>
                   </div>
 
                   <div className="flex flex-col h-full justify-around py-3 ml-2">

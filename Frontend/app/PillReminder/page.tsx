@@ -12,7 +12,7 @@ export default function PillReminder() {
     const [dateSelected, setDateSelected] = useState<Date>();
     const formattedDate = dateSelected?.toISOString().split("T")[0] + "T12:00:00";
     const [pill, setPill] = useState<MedicineData>();
-    const [userUid, setUserUid] = useState("2025");
+    const [userUid, setUserUid] = useState("U5251e034b6d1a207df047bf7fb34e30a");
 
     // Line LIFF
     // useEffect(() => {

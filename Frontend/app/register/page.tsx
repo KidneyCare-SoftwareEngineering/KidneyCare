@@ -128,7 +128,6 @@ const TermsAndConditions = () => {
         </div>
         :
         <a
-          onClick={() => {liff.closeWindow();}}
           href='https://liff.line.me/2006794580-6ZGZ5Eja'
           className="flex w-full py-3 justify-center items-center rounded-lg transition-colors bg-orange300 text-white"
           >

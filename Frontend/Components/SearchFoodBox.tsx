@@ -16,7 +16,7 @@ const SearchFoodBox: React.FC<{food:FoodInterface; isEdit?:boolean; setChooseFoo
                     observer.disconnect(); 
                 }
             },
-            { rootMargin: "1000px" } 
+            { rootMargin: "100px" } 
         );
 
         if (imageRef.current) observer.observe(imageRef.current);
