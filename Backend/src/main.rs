@@ -15,6 +15,7 @@ use tower_http::cors::{Any, CorsLayer};
 use tokio::net::TcpListener;
 use backend::routes::recipe::*;
 use backend::routes::ingredient::*;
+use backend::routes::lineapi::*;
 
 use std::env;
 
@@ -23,7 +24,7 @@ async fn main() {
     dotenvy::dotenv().expect("Failed to load .env file");
 
     let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
-    let server_address = format!("0.0.0.0:{}", port);
+    let server_address = format!("127.0.0.1:{}", port);
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL is not set");
 
     let db_pool = PgPoolOptions::new()
@@ -57,6 +58,7 @@ async fn main() {
         .route("/chatbot/{user_id}", get(get_user_by_id))
         .route("/get_recipes", get(get_recipes))
         .route("/get_recipe", get(get_recipe))
+        .route("/lineapi", post(link_richmenu))
         .route("/create_recipe", post(create_recipe))
         // .route("/update_recipe/{recipe_id}", patch(update_recipe))
         .route("/delete_recipe/{recipe_id}", delete(delete_recipe))

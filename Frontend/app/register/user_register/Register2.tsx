@@ -43,33 +43,36 @@ const Register2: React.FC<Register2Interface> = (data_) => {
   }
 
 
-  const RichMenu = async () => {
-    const url = `https://api.line.me/v2/bot/user/${data_.userUid}/richmenu/${process.env.NEXT_PUBLIC_RICH_MENU_MEMBER}`;  
+  const RichMenu = async () => {  
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/lineapi`, {
         method: "POST",
-        headers:{
-          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_LINE_CHANNEL_ACCESS_TOKEN}`,
+        headers: {
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify({
+          user_line_id: data_.userUid,
+          richmenu_id:  process.env.NEXT_PUBLIC_LINE_CHANNEL_ACCESS_TOKEN
+        }),
       });
   
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
+        console.log("Error linking rich menu:", response.status);
       }
       return response;
     } catch (error) {
       console.error("Error linking rich menu:", error);
       throw error;
     } finally{
+      console.log("Rich menu linked successfully");
       liff.closeWindow();
     }
   }
 
 
   const handleRegister = async () => {
-    const url = `https://api.line.me/v2/bot/user/${data_.userUid}/richmenu/${process.env.NEXT_PUBLIC_RICH_MENU_MEMBER}`;  
-    
+       
     try{
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
       method: 'POST',
@@ -77,7 +80,13 @@ const Register2: React.FC<Register2Interface> = (data_) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(datatoback),
+      }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
     });} catch (error) {
+      console.error("Error sending data to backend:", error);
       throw error
     }finally{
       await RichMenu()
