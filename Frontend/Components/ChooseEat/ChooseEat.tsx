@@ -20,7 +20,7 @@ const ChooseEat: React.FC<{ dateSelected?: Date, desc: string, MealPlans: Meal_p
 
       {desc === "ยา" ? 
       (
-        <ChooseBar MealPlans={MealPlans as MedicineData} 
+        <ChooseBar MealPlans={MealPlans as Meal_planInterface}
           desc={desc} 
           isEdit={isEdit}
           setIsEdit={setIsEdit}

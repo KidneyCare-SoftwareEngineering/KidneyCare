@@ -47,7 +47,7 @@ const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFood
   
     const filtered = foodData.filter(food =>
       uniqueFilters.every(filter =>
-        food.ingredients.some(ingredient => ingredient.includes(filter)) ||
+        food.ingredients.some((ingredient: string | string[]) => ingredient.includes(filter)) ||
         (food.food_category && food.food_category.includes(filter))
       )
     );
@@ -81,13 +81,14 @@ const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFood
 
     try {
       const response = await fetch(
-        `https://detect.roboflow.com/se3-zhodg/1`, 
+        `https://3eb8-125-24-2-16.ngrok-free.app/`, 
         { method: "POST", body: formData }
       );
       const result = await response.json();
+      console.log(result)
 
-      if (result.predictions.length > 0) {
-        const detectedClasses = result.predictions.map((prediction: { class: string }) => prediction.class.toLowerCase());
+      if (result.ingredients_ai.length > 0) {
+        const detectedClasses = result.ingredients_ai.map((prediction: { ingredient_name: string }) => prediction.ingredient_name.toLowerCase());
         updateFilters([...activeFilters, ...detectedClasses]);
       }
     } catch (error) {

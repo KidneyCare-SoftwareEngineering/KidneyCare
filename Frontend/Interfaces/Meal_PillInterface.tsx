@@ -1,4 +1,6 @@
 export interface FoodInterface {
+    food_category: any
+    ingredients: any
     id: number
     recipe_name: string
     calories: number
@@ -83,7 +85,18 @@ export interface recipesInterface extends Medicine{
     recipe_name : string;
     recipe_img_link : string[];
     ischecked: boolean;
-    meal_plan_recipe_id: number;
+    meal_plan_recipe_id?: number; 
+    meal_time: number;
+    calories: number;
+    
+}
+
+export interface recipesInterface2 {
+    recipe_id : number;
+    recipe_name : string;
+    recipe_img_link : string[];
+    ischecked: boolean;
+    meal_plan_recipe_id: number; 
     meal_time: number;
     calories: number;
     

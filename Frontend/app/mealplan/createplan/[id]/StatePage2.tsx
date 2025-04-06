@@ -4,6 +4,7 @@ import { Icon } from '@iconify/react/dist/iconify.js'
 import TitleBarStatePage from '@/Components/TitleBarStatePage'
 import { MealplanInterface }  from '@/Interfaces/Meal_PillInterface'
 import { StatePage2Props } from '@/Interfaces/StatePage'
+import PuffLoader from 'react-spinners/PuffLoader'
 
 
 const StatePage2 : React.FC<StatePage2Props> = ({
@@ -18,6 +19,7 @@ const StatePage2 : React.FC<StatePage2Props> = ({
   const [selectedMenu, setSelectedMenu] = useState<number[]>([])
   const updatedMealplans = JSON.parse(JSON.stringify(mealPlan))
   const [newMealplans, setNewMealplans] = useState<MealplanInterface | Record<string, never>>({})
+  const [isLoading, setIsLoading] = useState(false)
   
 
   const toggleSelectMenu = (index: number) => {
@@ -35,6 +37,7 @@ const StatePage2 : React.FC<StatePage2Props> = ({
   }
 
   const handleCreateNewMealplans = async () => {
+
     await fetch (`${process.env.NEXT_PUBLIC_API_URL}/update_meal_plan`, {
       method: 'POST',
       headers: {
@@ -90,7 +93,7 @@ const StatePage2 : React.FC<StatePage2Props> = ({
         </div>
 
 
-        {(newMealplans?.mealplans?.[dayIndex] ?? mealPlan.mealplans[dayIndex]).map((data, index) => {
+        {(newMealplans?.mealplans?.[dayIndex] ?? mealPlan.mealplans?.[dayIndex] ?? []).map((data, index) => {
             const isSelected = selectedMenu.includes(index); 
             return (
               <div
@@ -129,12 +132,23 @@ const StatePage2 : React.FC<StatePage2Props> = ({
 
 
             {Object.keys(newMealplans).length === 0  ? (
-              <button
-                onClick={handleCreateNewMealplans}
-                className="flex bottom-24 w-10/12 justify-center items-center bg-orange300 text-white py-4 rounded-xl text-body1 font-bold"
-              >
-                สร้างใหม่
-              </button>
+              isLoading ? (
+                <button
+                  onClick={handleCreateNewMealplans}
+                  className="flex bottom-24 w-10/12 justify-center items-center bg-orange300 text-white py-4 rounded-xl text-body1 font-bold"
+                >
+                  <PuffLoader />
+                </button>
+                ) 
+                :
+                (
+                <button
+                  onClick={handleCreateNewMealplans}
+                  className="flex bottom-24 w-10/12 justify-center items-center bg-orange300 text-white py-4 rounded-xl text-body1 font-bold"
+                >
+                  สร้างใหม่
+                </button>
+                )
               ) 
               : 
               (

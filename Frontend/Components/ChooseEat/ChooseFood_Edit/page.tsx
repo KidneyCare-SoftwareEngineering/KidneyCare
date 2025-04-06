@@ -32,7 +32,7 @@ const ChooseFood: React.FC<{id: number; setChooseFood: (value: boolean) => void 
     if (isLoading || !food) return <div className='flex w-screen h-screen justify-center items-center bg-sec'> <PuffLoader /> </div>
 
     return (
-        <div className="flex justify-center flex-col items-center pb-10 z-[9999]">
+        <div className="flex justify-center flex-col items-center pb-10 ">
             <TitleBarRouter title={food.recipe_name} setChooseFood={setChooseFood} setIsSheetOpen={setIsSheetOpen}/>
             <div
                 className="flex w-full min-h-64 mt-1"

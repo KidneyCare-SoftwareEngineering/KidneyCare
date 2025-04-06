@@ -41,7 +41,6 @@ const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPl
             console.error('Error:', error);
         } finally {
             setLoading(false)
-
             router.push('/mealplan');
         }
       }
@@ -62,7 +61,7 @@ const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPl
             
             <div className="flex w-full px-6 pt-6 text-heading4 font-bold">แผนอาหารทั้งหมด {selectedValue} วัน</div>
             <div className="flex w-full px-6 pt-2 text-body2 text-grey300">สามารถดูและปรับแต่งเมนูในแต่ละวันได้</div>
-            {mealPlan?.mealplans.map((data,index) => (
+            {mealPlan?.mealplans?.map((data,index) => (
                 <motion.div 
                     variants={itemVariants} 
                     initial="hidden" 

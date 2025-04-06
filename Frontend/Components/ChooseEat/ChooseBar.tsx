@@ -44,9 +44,11 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
 
   // Food|Pill Check and status
   const isMedicine = desc === "ยา";
-  const allItems = isMedicine 
-    ? localMealPlans.medicines || [] 
-    : localMealPlans.meal_plans[0].recipes || [];
+  const [allItems, setAllItems] = useState<recipesInterface[]>(() => 
+    isMedicine 
+      ? localMealPlans.medicines || [] 
+      : localMealPlans.meal_plans[0].recipes || []
+  );
   const eatenItems = isMedicine 
     ? allItems.filter(item => item.ischecked) 
     : allItems.filter(item => item.ischecked);
@@ -108,6 +110,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
       setLocalMealPlans(MealPlans);
     } 
   };
+
 
 
  
@@ -178,7 +181,6 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
       recipe_name: foodChoosedData?.recipe_name || "",
       recipe_img_link: foodChoosedData?.image_url ? [foodChoosedData.image_url] : [],
       ischecked: false,
-      meal_plan_recipe_id: 123456789,
       meal_time: 1,
       calories: foodChoosedData?.calories || 0,
     }
@@ -193,9 +195,13 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   
 
   const handleDelete = (item: recipesInterface) => {
-    const updatedItems = mergeItems.filter(recipe => recipe.meal_plan_recipe_id !== item.meal_plan_recipe_id);
-    setMergeItems(updatedItems);
+    const updatedMergeItems = mergeItems.filter(recipe => recipe.meal_plan_recipe_id !== item.meal_plan_recipe_id);
+    const updatedAllItems = allItems.filter(recipe => recipe.meal_plan_recipe_id !== item.meal_plan_recipe_id);
+    const updatedEditItems = editItem.filter(recipe => recipe.meal_plan_recipe_id !== item.meal_plan_recipe_id);
 
+    setMergeItems(updatedMergeItems);
+    setAllItems(updatedAllItems);
+    setEditItem(updatedEditItems);
   };
   
   useEffect(() => {
@@ -220,6 +226,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
           body: JSON.stringify(dataforAPI),
       });
       const data = await response.json();
+      console.log("dataforedit",dataforAPI)
       console.log (data)
     }
     catch (error) {
@@ -233,12 +240,23 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
       ...prev,
       meal_plans: prev.meal_plans.map((mealPlan, index) =>
         index === 0 
-          ? { ...mealPlan, recipes: [...mealPlan.recipes, ...editItem] }
+          ? { 
+              ...mealPlan, 
+              recipes: [
+                ...mealPlan.recipes, 
+                ...editItem.map(item => ({
+                  ...item,
+                  meal_plan_recipe_id: item.meal_plan_recipe_id ?? 0 
+                }))
+              ] 
+            }
           : mealPlan
       )
     }));
     setIsEdit(false);
   };
+
+
 
   const renderItem = (item: recipesInterface, isEaten: boolean) => {
     if (isMedicine) {
@@ -289,7 +307,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
           exit="exit"
           className={`flex w-10/12 ${isEaten ? 'bg-grey200 border border-grey300' : 'bg-white'} min-h-24 drop-shadow-md rounded-xl mt-3`}
         >
-          {!isEaten || !isEdit ? (
+          {!isEdit ? (
             <Link href={`/fooddetail/${item.recipe_id}`} className="flex w-4/12 justify-center items-center">
               <img src={`${item.recipe_img_link}`} alt="food" className="size-24 rounded-full p-2 object-cover" />
             </Link>
@@ -302,7 +320,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
             <div className="flex text-body3 text-grey300">
               {mealTypes[item.meal_time - 1 ]}
             </div>
-            {!isEaten || !isEdit ? (
+            {!isEdit ? (
               <Link href={`/fooddetail/${item.recipe_id}`}
                 className="flex text-body1 font-bold text-black py-3 line-clamp-1">
                 {item.recipe_name}
@@ -415,13 +433,13 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
             <SheetTrigger className="flex justify-center items-center w-10/12 bg-white min-h-24 drop-shadow-md rounded-xl mt-3 z-0">
               <Icon icon="mdi:plus" className="text-black size-5" />
             </SheetTrigger>
-            <SheetContent side="bottom" className="flex w-full h-10/12 flex-col overflow-y-auto max-h-[70vh]">
+            <SheetContent side="bottom" className="flex w-full flex-col max-h-[70vh]">
               <SheetHeader>
                 <SheetTitle>ค้นหาเมนูอาหาร</SheetTitle>
               </SheetHeader>
 
 
-              <div className="flex flex-col w-full">
+              <div className="flex flex-col w-full overflow-y-auto">
                 <SearchBox
                   onSearch={handleSearch}
                   foodData={foodData}

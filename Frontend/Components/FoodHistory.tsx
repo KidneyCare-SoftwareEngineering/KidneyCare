@@ -165,9 +165,9 @@ const FoodHistory: React.FC<{mealPlans: Meal_planInterface; userUid: string; isS
             </p>
             {expandedMeal === index && meal.items.length > 0 && (
               <div className="mt-2 border-t border-gray-200">
-                {meal.items.map((item, idx) => (
+                {meal.items.map((item: { name: string; calories: string; recipe_id: number }, index: number) => (
                   <div
-                    key={idx}
+                    key={index}
                     className="flex justify-between items-center py-2"
                   >
                     <div>
