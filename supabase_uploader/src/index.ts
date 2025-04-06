@@ -68,6 +68,9 @@ const app = new Elysia()
       }),
     }
   )
+  .get('/', () => {
+    return 'hello kidneycare-supabase';
+  })
   .listen(3002);
 
 console.log(
