@@ -1,6 +1,7 @@
 use axum::{
     routing::{delete, get, patch, post}, Extension, Router
 };
+use tower_http::cors::{Any, CorsLayer};
 use dotenvy::dotenv;
 use serde::Serialize;
 use std::sync::Arc;
@@ -15,6 +16,9 @@ mod routes; // Declare the routes module
 use routes::ingredient::{get_ingredients, create_ingredient}; // Import create_ingredient
 use routes::recipe::{update_recipe, delete_recipe};
 use routes::mealplan::{create_meal_plan, get_meal_plan, user_already_eat, edit_meal_plan, ai_meal_plan, update_meal_plan}; // Import edit_meal_plan
+use routes::user::get_user_info;
+
+use std::env;
 
 // Define a struct to represent the ingredient table rows
 #[derive(Serialize, Queryable)]
@@ -28,10 +32,8 @@ struct Ingredient {
 async fn main() {
     dotenv().expect("Failed to load .env file");
 
-    let server_address = std::env::var("SERVER_ADDRESS").unwrap_or_else(|_| {
-        eprintln!("SERVER_ADDRESS not set, defaulting to 127.0.0.1:3005");
-        "127.0.0.1:3005".to_owned()
-    });
+    let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
+    let server_address = format!("0.0.0.0:{}", port);
 
     let database_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| {
         eprintln!("DATABASE_URL not set. Exiting.");
@@ -55,6 +57,17 @@ async fn main() {
     println!("Listening on {}", listener.local_addr().unwrap());
 
     let db_pool = Arc::new(db_pool);
+    
+    let cors = CorsLayer::new()
+        .allow_origin(Any)
+        .allow_methods([
+            http::Method::GET,
+            http::Method::POST,
+            http::Method::PATCH,
+            http::Method::DELETE,
+            http::Method::OPTIONS,
+        ])
+        .allow_headers(Any);
 
     let app = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
@@ -68,8 +81,10 @@ async fn main() {
         .route("/edit_meal_plan", patch(edit_meal_plan))
         .route("/ai_meal_plan", post(ai_meal_plan))
         .route("/update_meal_plan", post(update_meal_plan))
+        .route("/get_user_info", get(get_user_info))
         .fallback(fallback_handler) // Add a fallback route
-        .layer(Extension(db_pool));
+        .layer(Extension(db_pool))
+        .layer(cors);
 
     if let Err(err) = axum::serve(listener, app).await {
         eprintln!("Server error: {}", err);

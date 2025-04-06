@@ -1,12 +1,16 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 
-export default function DateSlider({ onDateSelect }) {
+interface DateSliderProps {
+    onDateSelect: (date: Date) => void;
+  }
+
+export default function DateSlider({ onDateSelect }: DateSliderProps) {
     
-    const [selectDate, setSelectDate] = useState(new Date())
-    const [dateRange, setDateRange] = useState([])
+    const [selectDate, setSelectDate] = useState<Date>(new Date())
+    const [dateRange, setDateRange] = useState<Date[]>([])
     const [isAnimating, setIsAnimating] = useState(false)
-    const [currentDate] = useState(new Date()) 
+    const [currentDate] = useState<Date>(new Date()) 
 
     const Days = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
 
@@ -14,7 +18,11 @@ export default function DateSlider({ onDateSelect }) {
         updateDateRange(selectDate)
     }, [selectDate])
 
-    const updateDateRange = (centerDate) => {
+    useEffect(() => {
+        onDateSelect(selectDate) 
+    }, [])
+
+    const updateDateRange = (centerDate: Date) => {
         const dates = []
         for (let i = -3; i <= 3; i++) {
             const date = new Date(centerDate)
@@ -24,7 +32,7 @@ export default function DateSlider({ onDateSelect }) {
         setDateRange(dates)
     }
 
-    const handleDateClick = (date) => {
+    const handleDateClick = (date: Date) => {
         if (isAnimating) return
         setIsAnimating(true)
         setTimeout(() => {
@@ -34,11 +42,11 @@ export default function DateSlider({ onDateSelect }) {
         }, 300)
     }
 
-    const isSelect = (date) => {
+    const isSelect = (date: Date) => {
         return date.toDateString() === selectDate.toDateString()
     }
 
-    const isCurrentDate = (date) => {
+    const isCurrentDate = (date: Date) => {
         return date.toDateString() === currentDate.toDateString()
     }
     return(
