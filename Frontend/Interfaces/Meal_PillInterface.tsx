@@ -20,7 +20,7 @@ export interface FoodInterface {
 }
 
 export interface MealplanInterface {
-    mealplans: Array<Array<{
+    mealplans?: Array<Array<{
         name: string;
         nutrition: {
             calories: number;
@@ -60,27 +60,6 @@ export interface Meal_planInterface {
     setIsEdit?: React.Dispatch<React.SetStateAction<boolean>>
 
 }
-// export interface Meal_planInterface {
-//     meal_plans: Array<Array<{
-//         name: string;
-//         nutrition: {
-//             calories: number;
-//             carbs: number;
-//             fat: number;
-//             phosphorus: number;
-//             potassium: number;
-//             protein: number;
-//             sodium: number;
-//         };
-//         recipe_id: string;
-//         recipe_img_link: string;
-//     }>>;
-//     userUid: string;
-//     medicines?: Array<any>
-//     isEdit?: boolean
-//     setIsEdit?: React.Dispatch<React.SetStateAction<boolean>>
-
-// }
 
 interface Medicine {
     user_medicine_id?: number;

@@ -1,16 +1,33 @@
 'use client'
 import { useState, useEffect, useRef } from "react";
 import { Icon } from "@iconify/react";
+import { UserInformation } from "@/Interfaces/UserInformation";
+import { format } from 'date-fns'
+import { th } from 'date-fns/locale'
 
 export const ProfileHistory: React.FC<{ userUid: string; userProfile: string; userDisplayname: any}> = ({ userUid, userProfile, userDisplayname }) => {
   const [isOptionsVisible, setIsOptionsVisible] = useState(false);
   const optionsRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const [userData, setUserData] = useState<UserInformation>();
 
   const toggleOptions = () => {
     setIsOptionsVisible(!isOptionsVisible);
   };
-  console.log(userProfile)
+  
+
+  useEffect(() => {
+      fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/get_user_info?user_line_id=${userUid}`)
+        .then(response => response.json())
+        .then(data => {
+          setUserData(data)
+        })
+        .catch(error => {
+          console.error('Error fetching user data:', error)
+        })
+    }, [])
+
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -85,15 +102,18 @@ export const ProfileHistory: React.FC<{ userUid: string; userProfile: string; us
               <div className="space-y-2">
                 <div className="flex">
                   <h2 className="mr-2">เพศ:</h2>
-                  <p>ชาย</p>
+                  <p>
+                    {userData && userData.gender === "Male" ? 
+                    (<>ชาย</>) : (<>หญิง</>)}
+                  </p>
                 </div>
                 <div className="flex">
                   <h2 className="mr-2">วันเกิด:</h2>
-                  <p>01/01/2000</p>
+                    <p>{userData?.birthdate ? format(userData?.birthdate, "d MMMM yyyy", { locale: th }) : <></>}</p>
                 </div>
                 <div className="flex">
                   <h2 className="mr-2">ส่วนสูง:</h2>
-                  <p>157 ซม.</p>
+                  <p>{userData?.height}</p>
                 </div>
               </div>
 
@@ -101,15 +121,15 @@ export const ProfileHistory: React.FC<{ userUid: string; userProfile: string; us
               <div className="space-y-2">
                 <div className="flex">
                   <h2 className="mr-2">ระดับโรคไต:</h2>
-                  <p>3</p>
+                  <p>{userData?.kidney_level}</p>
                 </div>
                 <div className="flex">
                   <h2 className="mr-2">อายุ:</h2>
-                  <p>21 ปี</p>
+                  <p>{userData?.age} ปี</p>
                 </div>
                 <div className="flex">
                   <h2 className="mr-2">น้ำหนัก:</h2>
-                  <p>46 กก.</p>
+                  <p>{userData?.weight} กก.</p>
                 </div>
               </div>
             </div>

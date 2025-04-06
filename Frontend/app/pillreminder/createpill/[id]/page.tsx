@@ -6,8 +6,10 @@ import Swal from "sweetalert2";
 import { FiPlus, FiMinus, FiTrash, FiX } from "react-icons/fi";
 import TimeInputPopup from "@/Components/Popup/TimeInputPopup";
 import { Icon } from "@iconify/react/dist/iconify.js";
+import { useParams } from "next/navigation";
 
 export default function CreatePill() {
+	const { id } = useParams();
 	const [showPopup, setShowPopup] = useState<boolean>(false);
 	const [pill_name, setpill_name] = useState<string>("");
 	const [pill_amount, setpill_amount] = useState<string>("");
@@ -189,12 +191,12 @@ export default function CreatePill() {
 
 		const formData = new FormData();
 		formData.append("medicine_name", pill_name);
-		formData.append("medicine_amount", pill_amount);
+		formData.append("medicine_amount", pill_amount.toString());
 		formData.append("medicine_per_times", pill_per_meal.toString());
 		formData.append("medicine_schedule", JSON.stringify(formattedPillReminderTime));
 		formData.append("medicine_note", pill_note);
 		formData.append("medicine_unit", "เม็ด");
-		formData.append("user_line_id", "U5251e034b6d1a207df047bf7fb34e30a"); // wait liff
+		formData.append("user_line_id", "U5251e034b6d1a207df047bf7fb34e30a"); 
 		pill_img_link.forEach((file) => {
 			formData.append("image", file);
 		});
@@ -206,16 +208,19 @@ export default function CreatePill() {
 				body: formData,
 			  });
 			  const data = await response.json();
-			  if(response.ok){
-				Swal.fire("✅ บันทึกสำเร็จ!", "ข้อมูลยาของคุณถูกบันทึกแล้ว", "success");
-			  }
+
+			  if (!response.ok) {
+				throw new Error(data.message || 'เกิดข้อผิดพลาดบางอย่าง');
+			}
+
+			Swal.fire("✅ บันทึกสำเร็จ!", "ข้อมูลยาของคุณถูกบันทึกแล้ว", "success");
+
 			} catch (error) {
 				console.error('Error:', error);
 			} 
 
 		
 	};
-
 
 	return (
 		<div className="flex flex-col items-center w-full min-h-screen bg-sec">

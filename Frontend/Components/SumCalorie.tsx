@@ -1,18 +1,69 @@
 import CalendarSide from "./CalendarSide";
 import { Chart, ArcElement } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
+import React, { useEffect, useState } from "react";
+import { Meal_planInterface } from "@/Interfaces/Meal_PillInterface";
+import { da } from "date-fns/locale";
+import { set } from "date-fns";
 
 Chart.register(ArcElement);
 
-const SumCalorie: React.FC = () => {
-  const totalCalories = 2000;
-  const consumedCalories = 200;
-  const remainingCalories = totalCalories - consumedCalories;
+const SumCalorie: React.FC<{userUid: string}> = (userUid) => {
+
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [mealPlans, setMealPlans] = useState<Meal_planInterface>();
+  const [totalCalories, setTotalCalories] = useState<number>(0);
+  const remainingCalories = 500 - totalCalories;
+  
+  const datatoback = {
+    user_line_id: userUid.userUid,
+    date: selectedDate.toISOString().split("T")[0]  
+  }
+
+
+  useEffect(() => {
+    const get_meal_plan = async () => {
+      // setIsLoading(true)
+      try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/get_meal_plan`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(datatoback),
+              });
+              const data = await response.json();
+              setMealPlans(data);
+              console.log("mealPlans", data);
+      } catch (error) {
+          console.log("error", error)
+      } finally{
+          // setIsLoading(false)
+
+      }
+      
+    }; 
+    get_meal_plan()
+  }, [userUid, selectedDate]);
+
+  useEffect(() => {
+      if (!mealPlans) return;
+
+      const total = mealPlans.meal_plans
+        .flatMap((mealPlan) => mealPlan.recipes)
+        .filter((recipe) => recipe.ischecked)
+        .reduce((sum, recipe) => sum + recipe.calories, 0);
+
+        setTotalCalories(total);
+    }, [mealPlans]);
+
+  
+  
 
   const data = {
     datasets: [
       {
-        data: [remainingCalories, consumedCalories],
+        data: [remainingCalories, totalCalories],
         backgroundColor: ["#FF7E2E", "#FAF5EF"],
       },
     ],
@@ -29,7 +80,7 @@ const SumCalorie: React.FC = () => {
       {/* ปฏิทิน */}
       <div className="w-full max-w-3xl mt-4 p-4 bg-white rounded-lg shadow-md">
         <div className="w-full mb-4">
-          <CalendarSide />
+          <CalendarSide onDateSelect={setSelectedDate} />
         </div>
 
         {/* แคลอรี่ข้อมูล */}
@@ -41,7 +92,7 @@ const SumCalorie: React.FC = () => {
               style={{ width: "140px" }}
             >
               <p className="text-lg">แคลอรี่ที่ได้รับ</p>
-              <p className="text-3xl font-bold">{consumedCalories}</p>
+              <p className="text-3xl font-bold">{totalCalories}</p>
               <p className="text-lg">แคลอรี่</p>
             </div>
 

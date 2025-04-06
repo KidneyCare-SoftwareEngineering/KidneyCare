@@ -10,6 +10,7 @@ export default function History() {
   const [userUid, setUserUid] = useState<string>("");
   const [userProfile, setUserProfile] = useState<string>("");
   const [userDisplayname, setUserDisplayname] = useState<string>("");
+
   // Line LIFF
       useEffect(() => {
           const initLiff = async () => {
@@ -47,7 +48,8 @@ export default function History() {
         userProfile={userProfile}
         userDisplayname={userDisplayname}
         />
-      <SumCalorie />
+      <SumCalorie 
+        userUid={userUid}/>
       <div className="flex justify-center items-center rounded-lg border border-gray-300 bg-white drop-shadow-lg p-2 mx-4 my-6">
         <p className="font-semibold text-gray-800">ประวัติการกิน</p>
       </div>

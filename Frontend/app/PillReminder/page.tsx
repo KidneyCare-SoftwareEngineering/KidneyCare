@@ -6,9 +6,11 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import ChooseEat from "@/Components/ChooseEat/ChooseEat";
 import liff from "@line/liff";
-import { MedicineData } from "@/Interfaces/Meal_PillInterface";
+import { Meal_planInterface, MedicineData } from "@/Interfaces/Meal_PillInterface";
+
 
 export default function PillReminder() {
+    
     const [dateSelected, setDateSelected] = useState<Date>();
     const formattedDate = dateSelected?.toISOString().split("T")[0] + "T12:00:00";
     const [pill, setPill] = useState<MedicineData>();
@@ -65,7 +67,8 @@ export default function PillReminder() {
         handlegetMedicine();
     },[formattedDate]);
 
-    console.log("date", formattedDate);
+    
+
     
     return (
         <>
@@ -79,12 +82,11 @@ export default function PillReminder() {
                         <div className="text-heading3 mt-8">ยังไม่มีการบันทึกยา</div>
                     </>
                 ) : (
-                    // <ChooseEat dateSelected={dateSelected} desc="ยา" MealPlans={pill} />
-                    <></>
+                    <ChooseEat dateSelected={dateSelected} desc="ยา" MealPlans={pill} />
                 )}
 
                 <Link
-                    href="/pillreminder/createpill"
+                    href={`/pillreminder/createpill/${userUid}`}
                     className="fixed size-12 bg-orange300 rounded-full right-3 bottom-6 flex justify-center items-center"
                 >
                     <Icon icon="ic:baseline-plus" height="32" className="text-white" />
