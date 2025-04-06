@@ -149,6 +149,7 @@ diesel::table! {
         user_id -> Nullable<Int4>,
         user_medicine_id -> Nullable<Int4>,
         user_take_medicine_time -> Nullable<Date>,
+        is_medicine_taken -> Nullable<Bool>,
     }
 }
 
