@@ -82,7 +82,7 @@ export default function MealPlan() {
 
   return (
     <>  
-        <div className="flex reltive flex-col w-full h-full pb-8 min-h-screen bg-sec items-center">
+        <div className="flex reltive flex-col w-full h-full min-h-screen bg-sec items-center">
             <Navbar/>
             <DateSlider onDateSelect={(date) => setDateSelected(date)} />
 

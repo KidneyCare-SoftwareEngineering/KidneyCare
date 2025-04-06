@@ -16,6 +16,7 @@ mod routes; // Declare the routes module
 use routes::ingredient::{get_ingredients, create_ingredient}; // Import create_ingredient
 use routes::recipe::{update_recipe, delete_recipe};
 use routes::mealplan::{create_meal_plan, get_meal_plan, user_already_eat, edit_meal_plan, ai_meal_plan, update_meal_plan}; // Import edit_meal_plan
+use routes::user::get_user_info;
 
 use std::env;
 
@@ -80,6 +81,7 @@ async fn main() {
         .route("/edit_meal_plan", patch(edit_meal_plan))
         .route("/ai_meal_plan", post(ai_meal_plan))
         .route("/update_meal_plan", post(update_meal_plan))
+        .route("/get_user_info", get(get_user_info))
         .fallback(fallback_handler) // Add a fallback route
         .layer(Extension(db_pool))
         .layer(cors);
