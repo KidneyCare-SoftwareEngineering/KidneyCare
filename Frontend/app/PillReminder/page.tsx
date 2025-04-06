@@ -78,7 +78,7 @@ export default function PillReminder() {
 
                 {!pill || !pill.medicines || pill.medicines.length === 0 ? (
                     <>
-                        <img src="NoFood.png" className="size-48 mt-32" />
+                        <img src="Nopill.png" width={300} height={300} className=" mt-16" />
                         <div className="text-heading3 mt-8">ยังไม่มีการบันทึกยา</div>
                     </>
                 ) : (

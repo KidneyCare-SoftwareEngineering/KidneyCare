@@ -23,7 +23,6 @@ const SearchFoodBox: React.FC<{food:FoodInterface; isEdit?:boolean; setChooseFoo
         return () => observer.disconnect();
     }, [food.image_url]);
 
-    console.log("ง่วง", food)
 
 
     return(

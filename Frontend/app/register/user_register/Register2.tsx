@@ -4,8 +4,6 @@ import TitleBarStatePage from "@/Components/TitleBarStatePage";
 import Checkbox from '@mui/material/Checkbox';
 import { Register2Interface } from "@/Interfaces/RegisterInterface";
 import liff from "@line/liff";
-import { setLazyProp } from "next/dist/server/api-utils";
-import { set } from "date-fns";
 import PuffLoader from "react-spinners/PuffLoader";
 
 const Register2: React.FC<Register2Interface> = (data_) => {
@@ -183,42 +181,42 @@ const Register2: React.FC<Register2Interface> = (data_) => {
                     color="success"
                     checked={selectedAllergies.includes(1)}
                     onChange={(e) => handleCheckboxChange2(e, 1)}
-                  /> โรคติดเชื้อระบบทางเดินปัสสาวะส่วนบน
+                  /> ผลิตภัณฑ์จากนม
                 </div>
                 <div className="flex w-full justify-start items-center text-body2">
                   <Checkbox
                     color="success"
                     checked={selectedAllergies.includes(2)}
                     onChange={(e) => handleCheckboxChange2(e, 2)}
-                  /> โรคทางเดินหัวใจ และหลอดเลือด
+                  /> กลูเตน
                 </div>
                 <div className="flex w-full justify-start items-center text-body2">
                   <Checkbox
                     color="success"
                     checked={selectedAllergies.includes(3)}
                     onChange={(e) => handleCheckboxChange2(e, 3)}
-                  /> โรคติดเชื้อในระบบต่างๆ
+                  /> ข้าวสาลี
                 </div>
                 <div className="flex w-full justify-start items-center text-body2">
                   <Checkbox
                     color="success"
                     checked={selectedAllergies.includes(4)}
                     onChange={(e) => handleCheckboxChange2(e, 4)}
-                  /> โรคความดันโรหิตสูง
+                  /> ไข่
                 </div>
                 <div className="flex w-full justify-start items-center text-body2">
                   <Checkbox
                     color="success"
                     checked={selectedAllergies.includes(5)}
                     onChange={(e) => handleCheckboxChange2(e, 5)}
-                  /> โรคแพ้ภูมิตัวเอง
+                  /> อาหารตระกูลถั่ว
                 </div>
                 <div className="flex w-full justify-start items-center text-body2">
                   <Checkbox
                     color="success"
                     checked={selectedAllergies.includes(6)}
                     onChange={(e) => handleCheckboxChange2(e, 6)}
-                  /> โรคเบาหวาน
+                  /> อาหารทะเล
                 </div>
                 <div className="flex w-full justify-start items-center text-body2">
                   <Checkbox

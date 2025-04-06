@@ -5,28 +5,16 @@ import { UserInformation } from "@/Interfaces/UserInformation";
 import { format } from 'date-fns'
 import { th } from 'date-fns/locale'
 
-export const ProfileHistory: React.FC<{ userUid: string; userProfile: string; userDisplayname: any}> = ({ userUid, userProfile, userDisplayname }) => {
+export const ProfileHistory: React.FC<{ userUid: string; userProfile: string; userDisplayname: any; userData: UserInformation;}> = ({ userUid, userProfile, userDisplayname, userData }) => {
   const [isOptionsVisible, setIsOptionsVisible] = useState(false);
   const optionsRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [userData, setUserData] = useState<UserInformation>();
+
 
   const toggleOptions = () => {
     setIsOptionsVisible(!isOptionsVisible);
   };
   
-
-  useEffect(() => {
-      fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/get_user_info?user_line_id=${userUid}`)
-        .then(response => response.json())
-        .then(data => {
-          setUserData(data)
-        })
-        .catch(error => {
-          console.error('Error fetching user data:', error)
-        })
-    }, [])
-
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -64,25 +52,6 @@ export const ProfileHistory: React.FC<{ userUid: string; userProfile: string; us
               src={`${userProfile}`}
               alt="Profile Banner"
             />
-            {/* ปุ่มสามจุด */}
-            <button
-              ref={buttonRef}
-              onClick={toggleOptions}
-              className="absolute top-2 right-2 p-2 rounded-full bg-black bg-opacity-50 text-white"
-            >
-              <Icon icon="mdi:dots-vertical" />
-            </button>
-            {isOptionsVisible && (
-              <div
-                ref={optionsRef}
-                className="absolute top-10 right-2 p-2 bg-white rounded-lg shadow-lg"
-              >
-                <button className="flex items-center text-sm text-gray-700">
-                  <Icon icon="material-symbols:edit-outline" className="mr-2" />
-                  แก้ไข
-                </button>
-              </div>
-            )}
           </div>
 
           {/* โปรไฟล์ */}

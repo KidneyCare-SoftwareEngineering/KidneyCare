@@ -39,11 +39,10 @@ const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPl
           }
         } catch (error) {
             console.error('Error:', error);
-            console.log("mealplan", mealPlan)
         } finally {
             setLoading(false)
-            console.log("mealplan", mealPlan)
-            // router.push('/mealplan');
+
+            router.push('/mealplan');
         }
       }
     if (loading) 

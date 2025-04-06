@@ -17,6 +17,10 @@ const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFood
   const [isLoading, setIsLoading] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
+  const categoryList = ["ทั่วไป",
+    "ฮาลาล",
+    "มังสวิรัติ",
+    "วีแกน"];
   const ingredientsList = [
     "ไข่", "นม", "หมู", "เนื้อ", "ปลา", "กุ้ง", "หมึก", "เห็ด",
     "หัวหอม", "กระเทียม", "กะเพรา", "ตับไก่", "เต้าหู้",
@@ -35,17 +39,22 @@ const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFood
   const updateFilters = (newFilters: string[]) => {
     const uniqueFilters = [...new Set(newFilters)];
     setActiveFilters(uniqueFilters);
-
+  
+    if (uniqueFilters.length === 0) {
+      setFilteredFoodData(foodData);
+      return;
+    }
+  
     const filtered = foodData.filter(food =>
       uniqueFilters.every(filter =>
-        food.recipe_name.toLowerCase().includes(filter.toLowerCase()) || 
-        (Array.isArray(food.ingredients_eng) && food.ingredients_eng.some(ingredient => ingredient.toLowerCase() === filter.toLowerCase()))
-        // food.ingredients_eng.some(ingredient => ingredient.toLowerCase() === filter.toLowerCase())
+        food.ingredients.some(ingredient => ingredient.includes(filter)) ||
+        (food.food_category && food.food_category.includes(filter))
       )
     );
-
+  
     setFilteredFoodData(filtered);
   };
+
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value); 
@@ -129,7 +138,26 @@ const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFood
               <SheetTitle>ตัวเลือกการค้นหา</SheetTitle>
             </SheetHeader>
 
+            <div className="flex w-screen justify-start items-center font-bold text-body1">ประเภทอาหาร</div>
+            <div className="flex flex-wrap gap-2 mt-4 px-4">
+              
+              {categoryList.map((category) => (
+                <button
+                  key={category}
+                  className={`px-3 py-1 border rounded-full text-sm font-bold ${
+                    activeFilters.includes(category)
+                      ? "bg-orange-400 text-white border-orange-500"
+                      : "bg-white text-gray-700 border-gray-300"
+                  }`}
+                  onClick={() => toggleIngredientFilter(category)}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+
             {/* แสดงรายการวัตถุดิบ */}
+            <div className="flex w-screen justify-start items-center font-bold text-body1">วัตถุดิบ</div>
             <div className="flex flex-wrap gap-2 mt-4 px-4">
               {ingredientsList.map((ingredient) => (
                 <button

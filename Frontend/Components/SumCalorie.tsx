@@ -3,58 +3,26 @@ import { Chart, ArcElement } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import React, { useEffect, useState } from "react";
 import { Meal_planInterface } from "@/Interfaces/Meal_PillInterface";
-import { da } from "date-fns/locale";
-import { set } from "date-fns";
+import { UserInformation } from "@/Interfaces/UserInformation";
 
 Chart.register(ArcElement);
 
-const SumCalorie: React.FC<{userUid: string}> = (userUid) => {
+const SumCalorie: React.FC<{userUid: string; userData: UserInformation; setSelectedDate: (value: Date) => void; selectedDate: Date; mealPlans: Meal_planInterface}> = ({userUid, userData, setSelectedDate, selectedDate, mealPlans}) => {
 
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [mealPlans, setMealPlans] = useState<Meal_planInterface>();
+  
   const [totalCalories, setTotalCalories] = useState<number>(0);
   const remainingCalories = 500 - totalCalories;
-  
-  const datatoback = {
-    user_line_id: userUid.userUid,
-    date: selectedDate.toISOString().split("T")[0]  
-  }
-
+  console.log("meal", mealPlans)
 
   useEffect(() => {
-    const get_meal_plan = async () => {
-      // setIsLoading(true)
-      try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/get_meal_plan`, {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(datatoback),
-              });
-              const data = await response.json();
-              setMealPlans(data);
-              console.log("mealPlans", data);
-      } catch (error) {
-          console.log("error", error)
-      } finally{
-          // setIsLoading(false)
+    if (mealPlans.length === 0 || !mealPlans.meal_plans) return;
 
-      }
-      
-    }; 
-    get_meal_plan()
-  }, [userUid, selectedDate]);
+    const total = mealPlans.meal_plans
+      .flatMap((mealPlan) => mealPlan.recipes)
+      .filter((recipe) => recipe.ischecked)
+      .reduce((sum, recipe) => sum + recipe.calories, 0);
 
-  useEffect(() => {
-      if (!mealPlans) return;
-
-      const total = mealPlans.meal_plans
-        .flatMap((mealPlan) => mealPlan.recipes)
-        .filter((recipe) => recipe.ischecked)
-        .reduce((sum, recipe) => sum + recipe.calories, 0);
-
-        setTotalCalories(total);
+    setTotalCalories(total);
     }, [mealPlans]);
 
   
@@ -74,6 +42,7 @@ const SumCalorie: React.FC<{userUid: string}> = (userUid) => {
     responsive: true,
     maintainAspectRatio: false,
   };
+
 
   return (
     <div className="flex flex-col items-center w-full px-4 drop-shadow-lg rounded-lg relative">
@@ -114,13 +83,13 @@ const SumCalorie: React.FC<{userUid: string}> = (userUid) => {
               <p>โปรตีน</p>
               <p>คาร์โบไฮเดรต</p>
               <p>ไขมัน</p>
-              <p>เกลือแร่</p>
+              <p>โซเดียม</p>
             </div>
             <div className="flex flex-col text-right">
-              <p>35 / 75 กรัม</p>
-              <p>150 / 350 กรัม</p>
-              <p>25 / 44 กรัม</p>
-              <p>6 / 10 มิลกรัม</p>
+              <p>xx / {Math.floor(userData.nutrients_limit.protein)} กรัม</p>
+              <p>150 กรัม</p>
+              <p>25 กรัม</p>
+              <p>6 / {Math.floor(userData.nutrients_limit.sodium)} มิลกรัม</p>
             </div>
           </div>
         </div>

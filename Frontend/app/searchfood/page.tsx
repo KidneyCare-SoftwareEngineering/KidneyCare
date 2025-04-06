@@ -1,50 +1,12 @@
-import React from 'react'
+'use client'
+import React, { useEffect, useState } from 'react'
 import Navbar from '@/Components/Navbar'
 import SearchFoodBox from '@/Components/SearchFoodBox'
 import SearchBox from '@/Components/SearchBox'
-
-
-const foodData = [
-  {
-    id: 1,
-    name: "สลัดอกไก่ย่าง",
-    calories: 150,
-    protein: 13,
-    carbs: 4,
-    fat: 4,
-    sodium: 4,
-    phosphorus: 4,
-    potassium: 4,
-    ingredient:{
-      
-    },
-    imageUrl: "https://i.ibb.co/7XbLcFh/IMG.png"
-  },
-  {
-    id: 2,
-    name: "ผัดผัก",
-    calories: 200,
-    protein: 20,
-    carbs: 25,
-    fat: 6,
-    sodium: 10,
-    phosphorus: 5,
-    potassium: 5,
-    imageUrl: "https://i.ibb.co/K2T8yKy/IMG2.png"
-  },
-  {
-    id: 3,
-    name: "ข้าวซอยไก่",
-    calories: 200,
-    protein: 20,
-    carbs: 25,
-    fat: 6,
-    sodium: 10,
-    phosphorus: 5,
-    potassium: 5,
-    imageUrl: "https://i.ibb.co/FwJJN0W/IMG3.png"
-  },
-]
+import liff from '@line/liff'
+import { FoodInterface } from '@/Interfaces/Meal_PillInterface'
+import PuffLoader from "react-spinners/PuffLoader";
+import { motion } from "framer-motion";
 
 
 export default function SearchFood() {
@@ -52,6 +14,7 @@ export default function SearchFood() {
   const [foodData, setFoodData] = useState<FoodInterface[]>([]);
   const [filteredFoodData, setFilteredFoodData] = useState<FoodInterface[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false)
   const itemsPerPage = 12;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -124,16 +87,23 @@ export default function SearchFood() {
   
 
   useEffect(() => {
+    setIsLoading(true)
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/food_cards`)
       .then(response => response.json())
       .then(data => {
         setFoodData(data)
         setFilteredFoodData(data);
+        setIsLoading(false)
       })
       .catch(error => {
         console.error('Error fetching user data:', error)
-      })
+      } 
+    )
   }, [])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  },[filteredFoodData])
 
   const handleSearch = (searchTerm: string) => {
     if (foodData) {
@@ -160,11 +130,11 @@ export default function SearchFood() {
     }),
   };
 
-  // if(!foodData) return <div className='flex w-screen h-screen justify-center items-center'> <PuffLoader /> </div>
+  if(isLoading) return <div className='flex w-screen h-screen justify-center items-center'> <PuffLoader /> </div>
 
   return (
     <>
-      <div className="flex h-full max-w-3/6 justify-start gap-5 items-center flex-col bg-background min-h-screen pb-8">
+      <div className="flex h-full max-w-3/6 justify-start gap-5 items-center flex-col bg-sec min-h-screen pb-8">
         <Navbar />
         <SearchBox 
           onSearch={handleSearch}
@@ -186,8 +156,9 @@ export default function SearchFood() {
             </motion.div>
           ))
         ) : (
-          <div className="text-center text-gray-500 mt-8">
-            <PuffLoader />
+          <div className="text-center text-gray-500">
+            <img src="Nofoodsearch.png" width={300} height={300} className=" mt-16" />
+            <div className="text-heading3">ไม่พบเมนูอาหาร</div>
           </div>
         )}
 
@@ -217,6 +188,5 @@ export default function SearchFood() {
         </div>
       </div>
     </>
-
   )
 }

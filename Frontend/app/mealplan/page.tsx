@@ -53,6 +53,12 @@ export default function MealPlan() {
       }, []);
     // ---------------------------------
   
+
+
+
+  useEffect(() => {
+    console.log("userUid", userUid);
+  },[userUid])
   
   useEffect(() => {
       const get_meal_plan = async () => {
@@ -82,7 +88,7 @@ export default function MealPlan() {
 
   return (
     <>  
-        <div className="flex reltive flex-col w-full h-full min-h-screen bg-sec items-center">
+        <div className="flex reltive flex-col w-full h-full pb-8 min-h-screen bg-sec items-center">
             <Navbar/>
             <DateSlider onDateSelect={(date) => setDateSelected(date)} />
 
@@ -107,9 +113,9 @@ export default function MealPlan() {
                 )
             }
             
-            {userUid != "" ? (
-            <>
-                { !userUid || !mealPlans?.meal_plans || mealPlans.meal_plans.length === 0 ? (
+
+
+            {!mealPlans?.meal_plans || mealPlans.meal_plans.length === 0 ? (
                     <Link 
                     href={`mealplan/createplan/${userUid}`} 
                     className="fixed size-12 bg-orange300 rounded-full right-3 bottom-6 flex justify-center items-center"
@@ -195,12 +201,8 @@ export default function MealPlan() {
                     )}
                     
                 </AnimatePresence>
-            )}
-            </>) : (
-            <>
-            </>)}
-
-            
+            )
+            }
             
 
         </div>

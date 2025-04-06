@@ -39,6 +39,7 @@ export interface MealplanInterface {
 }
 
 export interface Meal_planInterface {
+    length: number
     meal_plans: Array<{
         meal_plan_id: number;
         user_id: number;

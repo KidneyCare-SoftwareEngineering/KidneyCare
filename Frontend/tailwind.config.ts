@@ -37,6 +37,7 @@ export default {
   			sec: '#FAF5EF',
   			searchcalories: '#BD4B04',
   			fillstrock: '#FFE6D7',
+			orange75: '#FFE6D7',
   			orange300: '#FF7E2E',
   			orange400: '#CD6525',
   			grey200: '#CCCCCC',
