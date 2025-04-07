@@ -130,7 +130,7 @@ export default function History() {
         console.log("error", error)
       } finally{
         // setIsLoading(false)
-        // window.location.reload()
+        window.location.reload()
     }
   }
 
