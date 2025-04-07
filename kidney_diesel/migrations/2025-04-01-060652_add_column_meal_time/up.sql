@@ -1,2 +1,3 @@
 -- Your SQL goes here
-ALTER TABLE meal_plan_recipes ADD COLUMN meal_time INTEGER;
+ALTER TABLE meal_plan_recipes
+ADD COLUMN IF NOT EXISTS meal_time INTEGER;
