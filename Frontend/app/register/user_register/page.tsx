@@ -154,6 +154,7 @@ export default function Register() {
                                     <option value={0} >
                                     เลือกระดับโรคไต
                                     </option>
+                                    <option value={1}>ไม่เป็นโรคไต</option>
                                     <option value={1}>ระยะที่ 1</option>
                                     <option value={2}>ระยะที่ 2</option>
                                     <option value={3}>ระยะที่ 3</option>
@@ -178,26 +179,29 @@ export default function Register() {
 
 
                         {/* ฟอกไต */}
-                        <div className="flex text-[#BD4B04] font-bold text-body1 mb-1">เคยฟอกไตหรือไม่</div>
-                        <div className="flex relative w-full flex-col mb-20">
-                            <div className="flex absolute w-full min-h-16 rounded-xl border border-grey300 bg-sec">
-                                <div 
-                                    className={`flex w-1/2 rounded-xl m-1  justify-center items-center text-body1 ${
-                                        !dialysis ? "bg-orange300 text-white drop-shadow-xl transition-colors duration-300 ease-in-out" : "bg-sec text-gray-800 transition-colors duration-300 ease-in-out"
-                                        }`}
-                                    onClick={() => setDialysis(false)}>
-                                ยังไม่ฟอก
+                        {kidneyLevel !== 1 && (
+                            <>
+                                <div className="flex text-[#BD4B04] font-bold text-body1 mb-1">เคยฟอกไตหรือไม่</div>
+                                <div className="flex relative w-full flex-col mb-20">
+                                    <div className="flex absolute w-full min-h-16 rounded-xl border border-grey300 bg-sec">
+                                        <div 
+                                            className={`flex w-1/2 rounded-xl m-1  justify-center items-center text-body1 ${
+                                                !dialysis ? "bg-orange300 text-white drop-shadow-xl transition-colors duration-300 ease-in-out" : "bg-sec text-gray-800 transition-colors duration-300 ease-in-out"
+                                                }`}
+                                            onClick={() => setDialysis(false)}>
+                                        ยังไม่ฟอก
+                                        </div>
+                                        <div 
+                                            className={`flex w-1/2 rounded-xl m-1 justify-center items-center text-body1 ${
+                                                dialysis  ? "bg-orange300 text-white drop-shadow-xl transition-colors duration-300 ease-in-out" : "bg-sec text-gray-800 transition-colors duration-300 ease-in-out"
+                                                }`}
+                                            onClick={() => setDialysis(true)}>
+                                        ฟอกแล้ว
+                                        </div>
+                                    </div>
                                 </div>
-                                <div 
-                                    className={`flex w-1/2 rounded-xl m-1 justify-center items-center text-body1 ${
-                                        dialysis  ? "bg-orange300 text-white drop-shadow-xl transition-colors duration-300 ease-in-out" : "bg-sec text-gray-800 transition-colors duration-300 ease-in-out"
-                                        }`}
-                                    onClick={() => setDialysis(true)}>
-                                ฟอกแล้ว
-                                </div>
-                            </div>
-                        </div>
-
+                            </>
+                        )}
 
 
                         {/* วันเดือนปีเกิด */}

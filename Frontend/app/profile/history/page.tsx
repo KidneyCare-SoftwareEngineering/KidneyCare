@@ -41,7 +41,6 @@ export default function History() {
   };
 
 
-
   // Line LIFF
       useEffect(() => {
           const initLiff = async () => {
@@ -116,7 +115,7 @@ export default function History() {
           meal_plan_recipe_id: id,
           ischecked: true
         }
-        console.log(body) // log ตรงนี้
+        console.log(body) 
     
         await fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/user_already_eat`, {
           method: 'PATCH',
@@ -145,49 +144,65 @@ export default function History() {
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent side="bottom" className="flex w-screen flex-col justify-start items-center overflow-y-auto min-h-[70vh] bg-sec rounded-t-xl">
             <SheetHeader>
-              <SheetTitle>เพิ่มอาหารมื้อเช้า</SheetTitle>
+              <SheetTitle>บันทึกการรับประทานอาหาร</SheetTitle>
             </SheetHeader>
 
 
-              <div className="flex w-screen justify-start items-start text-body1 font-bold ml-8 mt-8">แผนอาหารของฉัน</div>
+              
               {mealPlans?.meal_plans[0]?.recipes
-                ?.filter((data) => data.ischecked === false)
-                .sort((a, b) => a.meal_time - b.meal_time)
-                .map((data, index) => (
-                <motion.div
-                  layout
-                  variants={itemVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  key={index}
-                  className={`flex w-10/12 justify-center items-center bg-white min-h-24 drop-shadow-md rounded-xl mt-3`}
-                >
-                  <div className="flex w-4/12 justify-center items-center">
-                    <img src={data.recipe_img_link[0]} className="size-24 rounded-full p-2 object-cover"  />
-                  </div>
-                  <div className="flex w-6/12 p-2 justify-center flex-col">
-                    <div className="flex text-body3 text-grey300">{mealTypes[data.meal_time - 1 ]}</div>
-                    <div
-                      className="flex text-body1 font-bold text-black py-3">
-                      {data.recipe_name}
-                    </div>
-                    <div className="flex text-body3 text-black">
-                      {data.calories} กิโลแคลอรี่
-                    </div>
-                  </div>
-                  <div className="flex w-2/12 items-center justify-center">
-                    <div
-                      onClick={() => handleAlreadyEat(data.meal_plan_recipe_id)}
-                      className="flex space-x-2flex items-center size-10 rounded-full justify-center bg-orange75 p-2">
-                      <Icon
-                        icon="ic:baseline-plus"
-                        className="text-orange300 w-5 h-5"
-                      />
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+                ?.filter((data) => !data.ischecked) == undefined ? (
+                <div className="flex flex-col justify-center items-center font-body1 pt-12">
+                  <p className="mb-6">ไม่พบมื้ออาหาร กรุณาสร้างมื้ออาหาร</p>
+                  <a className="flex justify-center items-center bg-orange300 text-white font-bold rounded-lg drop-shadow-lg p-2 text-body2" href='/mealplan'>
+                    ไปยังหน้าวางแผนมื้ออาหาร
+                  </a>
+
+                </div>
+                ) 
+                : 
+                (
+                  mealPlans?.meal_plans[0]?.recipes
+                  ?.filter((data) => data.ischecked === false)
+                  .sort((a, b) => a.meal_time - b.meal_time)
+                  .map((data, index) => (
+                    <>
+                    <div className="flex w-screen justify-start items-start text-body1 font-bold ml-8 mt-8">แผนอาหารของฉัน</div>
+                    <motion.div
+                      layout
+                      variants={itemVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      key={index}
+                      className={`flex w-10/12 justify-center items-center bg-white min-h-24 drop-shadow-md rounded-xl mt-3`}
+                    >
+                      <div className="flex w-4/12 justify-center items-center">
+                        <img src={data.recipe_img_link[0]} className="size-24 rounded-full p-2 object-cover"  />
+                      </div>
+                      <div className="flex w-6/12 p-2 justify-center flex-col">
+                        <div className="flex text-body3 text-grey300">{mealTypes[data.meal_time - 1 ]}</div>
+                        <div
+                          className="flex text-body1 font-bold text-black py-3">
+                          {data.recipe_name}
+                        </div>
+                        <div className="flex text-body3 text-black">
+                          {data.calories} กิโลแคลอรี่
+                        </div>
+                      </div>
+                      <div className="flex w-2/12 items-center justify-center">
+                        <div
+                          onClick={() => handleAlreadyEat(data.meal_plan_recipe_id)}
+                          className="flex space-x-2flex items-center size-10 rounded-full justify-center bg-orange75 p-2">
+                          <Icon
+                            icon="ic:baseline-plus"
+                            className="text-orange300 w-5 h-5"
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  </>
+                )))}
+
             
             
         </SheetContent>

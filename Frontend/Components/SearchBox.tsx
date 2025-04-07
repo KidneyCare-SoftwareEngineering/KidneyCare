@@ -9,6 +9,7 @@ import {
   SheetTrigger,
 } from "@/Components/ui/sheet";
 import { FaSpinner } from "react-icons/fa";
+import Swal from "sweetalert2";
 
 
 const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFoodData }) => {
@@ -84,12 +85,35 @@ const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFood
         `https://ai-detect-1025044834972.us-central1.run.app/detect-ingredients/`, 
         { method: "POST", body: formData }
       );
+
+      if (response.status === 400) {
+        Swal.fire({
+          title: 'ตรวจไม่พบวัตถุดิบ',
+          text: 'กรุณาลองถ่ายใหม่อีกครั้ง',
+          imageUrl: '/NoFood.png',  
+          imageWidth: 200,
+          imageHeight: 200,
+          confirmButtonColor: '#FF7E2E',
+        })
+        return
+      }
+
+      if (!response.ok) {
+        Swal.fire({
+          title: 'เกิดข้อผิดพลาด',
+          text: 'เซิฟเวอร์มีปัญหา กรุณาลองใหม่อีกครั้ง',
+        })
+        return
+      }
+
       const result = await response.json();
 
+      
       if (result.ingredients_ai.length > 0) {
         const detectedClasses = result.ingredients_ai.map((prediction: { ingredient_name: string }) => prediction.ingredient_name.toLowerCase());
         updateFilters([...activeFilters, ...detectedClasses]);
       }
+
     } catch (error) {
       console.error("Error uploading image:", error);
     } finally {
@@ -139,42 +163,42 @@ const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFood
             </SheetHeader>
 
             <div className="flex w-screen justify-start items-center font-bold text-body1">ประเภทอาหาร</div>
-            <div className="flex flex-wrap gap-2 mt-4 px-4">
-              
-              {categoryList.map((category) => (
-                <button
-                  key={category}
-                  className={`px-3 py-1 border rounded-full text-sm font-bold ${
-                    activeFilters.includes(category)
-                      ? "bg-orange-400 text-white border-orange-500"
-                      : "bg-white text-gray-700 border-gray-300"
-                  }`}
-                  onClick={() => toggleIngredientFilter(category)}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
+              <div className="flex flex-wrap gap-2 mt-4 px-4">
+                
+                {categoryList.map((category) => (
+                  <button
+                    key={category}
+                    className={`px-3 py-1 border rounded-full text-sm font-bold ${
+                      activeFilters.includes(category)
+                        ? "bg-orange-400 text-white border-orange-500"
+                        : "bg-white text-gray-700 border-gray-300"
+                    }`}
+                    onClick={() => toggleIngredientFilter(category)}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
 
             {/* แสดงรายการวัตถุดิบ */}
-            <div className="flex w-screen justify-start items-center font-bold text-body1">วัตถุดิบ</div>
-            <div className="flex flex-wrap gap-2 mt-4 px-4">
-              {ingredientsList.map((ingredient) => (
-                <button
-                  key={ingredient}
-                  className={`px-3 py-1 border rounded-full text-sm font-bold ${
-                    activeFilters.includes(ingredient)
-                      ? "bg-orange-400 text-white border-orange-500"
-                      : "bg-white text-gray-700 border-gray-300"
-                  }`}
-                  onClick={() => toggleIngredientFilter(ingredient)}
-                >
-                  {ingredient}
-                </button>
-              ))}
-            </div>
-          </SheetContent>
-        </Sheet>
+              <div className="flex w-screen justify-start items-center font-bold text-body1">วัตถุดิบ</div>
+              <div className="flex flex-wrap gap-2 mt-4 px-4">
+                {ingredientsList.map((ingredient) => (
+                  <button
+                    key={ingredient}
+                    className={`px-3 py-1 border rounded-full text-sm font-bold ${
+                      activeFilters.includes(ingredient)
+                        ? "bg-orange-400 text-white border-orange-500"
+                        : "bg-white text-gray-700 border-gray-300"
+                    }`}
+                    onClick={() => toggleIngredientFilter(ingredient)}
+                  >
+                    {ingredient}
+                  </button>
+                ))}
+              </div>
+            </SheetContent>
+          </Sheet>
           </div>
 
 

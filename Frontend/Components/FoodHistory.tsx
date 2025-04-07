@@ -153,6 +153,7 @@ const FoodHistory: React.FC<{mealPlans: Meal_planInterface; userUid: string; isS
                     className="text-orange300 w-5 h-5"
                   />
                 </SheetTrigger>
+                {/* Popup อยู่ page.tsx */}
               </Sheet>
               
             </div>

@@ -11,7 +11,7 @@ const SumCalorie: React.FC<{userUid: string; userData: UserInformation; setSelec
 
   
   const [totalCalories, setTotalCalories] = useState<number>(0);
-  const remainingCalories = 500 - totalCalories;
+  const remainingCalories = userData.calories_limit - totalCalories;
   console.log("meal", mealPlans)
 
   useEffect(() => {

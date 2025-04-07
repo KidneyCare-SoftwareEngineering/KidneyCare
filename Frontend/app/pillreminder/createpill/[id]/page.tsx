@@ -228,7 +228,7 @@ export default function CreatePill() {
 
 	return (
 		<div className="flex flex-col items-center w-full min-h-screen bg-sec">
-			<TitleBar title="เพิ่มยาที่ต้องทาน" href="/pillreminder" />
+			<TitleBar title="เพิ่มยาที่ต้องทาน" href="/PillReminder" />
 
 			{/* ชื่อยา */}
 			<div className="w-10/12 mt-10">

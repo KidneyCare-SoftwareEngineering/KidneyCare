@@ -26,6 +26,9 @@ export default function MealPlan() {
   
 
 
+  useEffect(() => {
+    setIsEdit(false)
+  },[dateSelected])
   // Line LIFF
     useEffect(() => {
         const initLiff = async () => {
@@ -86,6 +89,10 @@ export default function MealPlan() {
     }, [formattedDate, dateSelected, userUid]);
 
 
+    useEffect(() => {
+        console.log("date",formattedDate)
+        console.log("date")
+    },[dateSelected])
   return (
     <>  
         <div className="flex reltive flex-col w-full h-full pb-8 min-h-screen bg-sec items-center">

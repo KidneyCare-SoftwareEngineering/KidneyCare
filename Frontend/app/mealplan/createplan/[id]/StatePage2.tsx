@@ -85,9 +85,6 @@ const StatePage2 : React.FC<StatePage2Props> = ({
       <div className="flex w-full h-screen flex-col  items-center bg-sec">
         <TitleBarStatePage title="รายการอาหารของคุณ" statePage={statePage} setStatePage={setStatePage}/>
 
-        <div className="flex w-11/12 text-heading4 font-bold mt-16">
-            วันจันทร์ที่ 9 ธันวาคม 2567
-        </div>
         <div className="flex w-11/12 text-body2 text-grey300 mt-4">
             หากท่านไม่พอใจกับรายการที่มีอยู่ ท่านสามารถเลือกรายการที่ต้องการแก้ไขและคำการสร้างแผนใหม่ได้
         </div>
