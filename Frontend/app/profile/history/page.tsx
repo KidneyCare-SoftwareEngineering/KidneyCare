@@ -76,6 +76,7 @@ export default function History() {
           .then(response => response.json())
           .then(data => {
             setUserData(data)
+            console.log("userinfo",data)
           })
           .catch(error => {
             console.error('Error fetching user data:', error)
