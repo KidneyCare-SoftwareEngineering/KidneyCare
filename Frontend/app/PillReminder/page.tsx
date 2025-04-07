@@ -87,7 +87,7 @@ export default function PillReminder() {
                 )}
 
                 <Link
-                    href={`/pillreminder/createpill/${userUid}`}
+                    href={`/PillReminder/Createpill/${userUid}`}
                     className="fixed size-12 bg-orange300 rounded-full right-3 bottom-6 flex justify-center items-center"
                 >
                     <Icon icon="ic:baseline-plus" height="32" className="text-white" />
