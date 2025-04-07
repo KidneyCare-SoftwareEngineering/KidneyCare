@@ -14,33 +14,33 @@ export default function PillReminder() {
     const [dateSelected, setDateSelected] = useState<Date>();
     const formattedDate = dateSelected?.toISOString().split("T")[0] + "T12:00:00";
     const [pill, setPill] = useState<MedicineData>();
-    const [userUid, setUserUid] = useState("U5251e034b6d1a207df047bf7fb34e30a");
+    const [userUid, setUserUid] = useState("");
 
     // Line LIFF
-    // useEffect(() => {
-    //     const initLiff = async () => {
-    //         try {
-    //         await liff.init({ liffId: "2006794580-MOmlA13n" });
-    //         if (!liff.isLoggedIn()) {
-    //             liff.login(); 
-    //         }
-    //         else{
-    //             console.log("User is logged in", liff.isLoggedIn());
-    //         }
-    //         } catch (error) {
-    //         console.error("Error initializing LIFF: ", error);
-    //         }
+    useEffect(() => {
+        const initLiff = async () => {
+            try {
+            await liff.init({ liffId: "2006794580-MOmlA13n" });
+            if (!liff.isLoggedIn()) {
+                liff.login(); 
+            }
+            else{
+                console.log("User is logged in", liff.isLoggedIn());
+            }
+            } catch (error) {
+            console.error("Error initializing LIFF: ", error);
+            }
             
-    //         try {
-    //             const profile = await liff.getProfile();
-    //             setUserUid(profile.userId);
+            try {
+                const profile = await liff.getProfile();
+                setUserUid(profile.userId);
     
-    //         } catch (error) {
-    //             console.error("Error fetching profile: ", error);
-    //         }
-    //     }; 
-    //     initLiff();
-    //     }, []);
+            } catch (error) {
+                console.error("Error fetching profile: ", error);
+            }
+        }; 
+        initLiff();
+        }, []);
     // ---------------------------------
     
     useEffect(() => {

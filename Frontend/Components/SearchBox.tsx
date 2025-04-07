@@ -47,7 +47,7 @@ const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFood
   
     const filtered = foodData.filter(food =>
       uniqueFilters.every(filter =>
-        food.ingredients.some((ingredient: string | string[]) => ingredient.includes(filter)) ||
+        food.ingredients.some(ingredient => ingredient.includes(filter)) ||
         (food.food_category && food.food_category.includes(filter))
       )
     );
@@ -81,11 +81,10 @@ const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFood
 
     try {
       const response = await fetch(
-        `https://3eb8-125-24-2-16.ngrok-free.app/`, 
+        `https://ai-detect-1025044834972.us-central1.run.app/detect-ingredients/`, 
         { method: "POST", body: formData }
       );
       const result = await response.json();
-      console.log(result)
 
       if (result.ingredients_ai.length > 0) {
         const detectedClasses = result.ingredients_ai.map((prediction: { ingredient_name: string }) => prediction.ingredient_name.toLowerCase());

@@ -10,6 +10,7 @@ import { useParams } from "next/navigation";
 
 export default function CreatePill() {
 	const { id } = useParams();
+	const userUid = id;
 	const [showPopup, setShowPopup] = useState<boolean>(false);
 	const [pill_name, setpill_name] = useState<string>("");
 	const [pill_amount, setpill_amount] = useState<string>("");
@@ -18,7 +19,9 @@ export default function CreatePill() {
 	const [pill_img_link, setpill_img_link] = useState<File[]>([]);
 	const [pill_note, setpill_note] = useState<string>("");
 	const [newTime, setNewTime] = useState<string>("");
-
+	useEffect (() => {
+		console.log("id", userUid)
+	})
 	const confirmDelete = (type: "time" | "image", index: number) => {
 		let message = "";
 		if (type === "time") {
@@ -187,7 +190,8 @@ export default function CreatePill() {
 		const formattedPillReminderTime = pill_reminder_time.map(time => `${getCurrentDate()}T${time}:00`);
 
 		
-
+	
+		
 
 		const formData = new FormData();
 		formData.append("medicine_name", pill_name);
@@ -196,7 +200,7 @@ export default function CreatePill() {
 		formData.append("medicine_schedule", JSON.stringify(formattedPillReminderTime));
 		formData.append("medicine_note", pill_note);
 		formData.append("medicine_unit", "เม็ด");
-		formData.append("user_line_id", "U5251e034b6d1a207df047bf7fb34e30a"); 
+		formData.append("user_line_id", String(userUid)); 
 		pill_img_link.forEach((file) => {
 			formData.append("image", file);
 		});
