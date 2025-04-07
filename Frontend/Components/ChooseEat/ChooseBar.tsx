@@ -454,7 +454,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
                   foodData={foodData}
                   setFilteredFoodData={setFilteredFoodData}
                 />
-              <div className="flex flex-col w-screen justify-center items-center h-full">
+              <div className="flex flex-col justify-center items-center h-full">
                 
                 {filteredFoodData.length > 0 ? (
                   filteredFoodData.map((food, index) => (

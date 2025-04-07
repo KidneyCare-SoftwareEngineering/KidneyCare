@@ -146,8 +146,10 @@ export default function History() {
             <SheetHeader>
               <SheetTitle>บันทึกการรับประทานอาหาร</SheetTitle>
             </SheetHeader>
-
-
+            {mealPlans?.meal_plans[0]?.recipes
+                ?.filter((data) => !data.ischecked) == undefined ? (
+              <div className="flex w-screen justify-start items-start text-body1 font-bold ml-8 mt-8">แผนอาหารของฉัน</div>
+                ):(<></>)}
               
               {mealPlans?.meal_plans[0]?.recipes
                 ?.filter((data) => !data.ischecked) == undefined ? (
@@ -166,7 +168,7 @@ export default function History() {
                   .sort((a, b) => a.meal_time - b.meal_time)
                   .map((data, index) => (
                     <>
-                    <div className="flex w-screen justify-start items-start text-body1 font-bold ml-8 mt-8">แผนอาหารของฉัน</div>
+                    
                     <motion.div
                       layout
                       variants={itemVariants}
