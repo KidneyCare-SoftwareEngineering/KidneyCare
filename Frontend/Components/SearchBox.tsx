@@ -47,7 +47,7 @@ const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFood
   
     const filtered = foodData.filter(food =>
       uniqueFilters.every(filter =>
-        food.ingredients.some(ingredient => ingredient.includes(filter)) ||
+        food.ingredients.some((ingredient: string | string[]) => ingredient.includes(filter)) ||
         (food.food_category && food.food_category.includes(filter))
       )
     );
