@@ -181,16 +181,20 @@ pub async fn update_meal_plan(
     // Fetch food menus that the user is not allergic to
     let filtered_recipes = sqlx::query!(
         r#"
-        SELECT r.recipe_id, r.recipe_name, r.recipe_img_link,
-            COALESCE(SUM(rn.quantity), 0) as protein,
-            COALESCE(SUM(rn.quantity), 0) as carbs,
-            COALESCE(SUM(rn.quantity), 0) as fat,
-            COALESCE(SUM(rn.quantity), 0) as sodium,
-            COALESCE(SUM(rn.quantity), 0) as phosphorus,
-            COALESCE(SUM(rn.quantity), 0) as potassium,
-            COALESCE(SUM(rn.quantity), 0) as calories
+        SELECT 
+            r.recipe_id, 
+            r.recipe_name,
+            r.recipe_img_link,
+            COALESCE(SUM(CASE WHEN n.name = 'protein' THEN rn.quantity ELSE 0 END), 0) AS protein,
+            COALESCE(SUM(CASE WHEN n.name = 'carbs' THEN rn.quantity ELSE 0 END), 0) AS carbs,
+            COALESCE(SUM(CASE WHEN n.name = 'fat' THEN rn.quantity ELSE 0 END), 0) AS fat,
+            COALESCE(SUM(CASE WHEN n.name = 'sodium' THEN rn.quantity ELSE 0 END), 0) AS sodium,
+            COALESCE(SUM(CASE WHEN n.name = 'phosphorus' THEN rn.quantity ELSE 0 END), 0) AS phosphorus,
+            COALESCE(SUM(CASE WHEN n.name = 'potassium' THEN rn.quantity ELSE 0 END), 0) AS potassium,
+            COALESCE(r.calories, 0) AS calories
         FROM recipes r
         LEFT JOIN recipes_nutrients rn ON r.recipe_id = rn.recipe_id
+        LEFT JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
         WHERE NOT EXISTS (
             SELECT 1 
             FROM recipes_ingredient_allergies ria
@@ -198,7 +202,7 @@ pub async fn update_meal_plan(
             JOIN users u ON u.user_id = uia.user_id
             WHERE u.user_id = $1 AND ria.recipe_id = r.recipe_id
         )
-        GROUP BY r.recipe_id
+        GROUP BY r.recipe_id;
         "#,
         user.user_id
     )
