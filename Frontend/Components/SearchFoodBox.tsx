@@ -32,7 +32,7 @@ const SearchFoodBox: React.FC<{food:FoodInterface; isEdit?:boolean; setChooseFoo
                 <div
                 onClick={() => setChooseFood && setChooseFood(food.id)}
                 data-testid="food-card"
-                className="flex justify-center rounded-xl bg-white w-11/12 h-full drop-shadow-lg  p-2">
+                className="flex justify-center rounded-xl bg-white w-11/12 h-full drop-shadow-lg p-2 z-50">
     
                     <div 
                         ref={imageRef}

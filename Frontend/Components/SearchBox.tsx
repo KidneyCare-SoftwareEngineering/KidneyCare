@@ -129,7 +129,7 @@ const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFood
   
 
   return (
-    <div className="flex flex-col w-full gap-4 px-5">
+    <div className="flex flex-col w-full gap-4 px-5 pb-4">
       <div className="flex justify-center items-center gap-4">
         <div className="relative flex justify-center items-start flex-col w-8/12">
           <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2" icon="material-symbols:search" />

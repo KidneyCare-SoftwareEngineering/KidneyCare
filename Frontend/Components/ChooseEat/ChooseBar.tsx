@@ -24,12 +24,18 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   const [filteredFoodData, setFilteredFoodData] = useState<FoodInterface[]>([]);
   const [chooseFood, setChooseFood] = useState<boolean>(false);
   const [foodChoosed, setFoodChoosed] = useState<number>();
+  const [currentPage, setCurrentPage] = useState(1);
   const [foodChoosedData, setFoodChoosedData] = useState<FoodInterface | null>(null);
   const [totalCalories, setTotalCalories] = useState<number>(0);
   const [localMealPlans, setLocalMealPlans] = useState<Meal_planInterface>(MealPlans);
   const [editItem, setEditItem] = useState<recipesInterface[]>([]);
   const [mergeItems, setMergeItems] = useState<recipesInterface[]>([]);
   const [userData, setUserData] = useState<UserInformation>()
+  const itemsPerPage = 12;
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredFoodData.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredFoodData.length / itemsPerPage);
 
   // Aniamtion
   const transition = { type: "spring", stiffness: 200, damping: 20 };
@@ -42,7 +48,9 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
     exit: { opacity: 0, y: -20, scale: 0.95, transition },
   };
 
-
+ useEffect(() => {
+    setCurrentPage(1)
+  },[filteredFoodData])
 
   // Food|Pill Check and status
   const isMedicine = desc === "ยา";
@@ -156,6 +164,40 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
     } 
   };
 
+  const genNum = () => {
+    const maxVisible = 5;
+    const pages = [];
+    const half = Math.floor(maxVisible / 2);
+
+    let start = Math.max(1, currentPage - half);
+    let end = Math.min(totalPages, currentPage + half);
+
+    if (currentPage <= half) {
+      end = Math.min(totalPages, maxVisible);
+    }
+
+    if (currentPage + half >= totalPages) {
+      start = Math.max(1, totalPages - maxVisible + 1);
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (start > 1) {
+      if (start > 2) pages.unshift('...');
+      pages.unshift(1);
+    }
+
+    if (end < totalPages) {
+      if (end < totalPages - 1) pages.push('...');
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
+
+  const pageNumbers = genNum();
 
   const handleSearch = (searchTerm: string) => {
     if (foodData) {
@@ -316,7 +358,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
           initial="hidden"
           animate="visible"
           exit="exit"
-          className={`flex w-10/12 ${isEaten ? 'bg-grey200 border border-grey300' : 'bg-white'} min-h-24 drop-shadow-md rounded-xl mt-3`}
+          className={`flex w-10/12 ${isEaten ? 'bg-grey200 border border-grey300' : 'bg-white'} min-h-24 drop-shadow-md rounded-xl mt-3 z-1`} //มันบัคซ้อนหน้าอื่นตอน Deploy
         >
           {!isEdit ? (
             <Link href={`/fooddetail/${item.recipe_id}`} className="flex w-4/12 justify-center items-center">
@@ -439,67 +481,91 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
 
       {/* edit popup */}
       {isEdit && (
-        <>
+        
+          <>
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-            <SheetTrigger className="flex border border-grey300 justify-center items-center w-10/12 bg-white min-h-24 drop-shadow-md rounded-xl mt-3 z-0">
-              <Icon icon="mdi:plus" className="text-black size-5" />
-            </SheetTrigger>
-            <SheetContent side="bottom" className="w-full h-10/12 max-h-screen overflow-y-auto">
+          <SheetTrigger className="flex border border-grey300 justify-center items-center w-10/12 bg-white min-h-24 drop-shadow-md rounded-xl mt-3 z-1">
+            <Icon icon="mdi:plus" className="text-black size-5" />
+          </SheetTrigger>
+
+            <SheetContent side="bottom" className="h-3/4 max-h-screen justify-center items-center">
               <SheetHeader>
-                <SheetTitle>ค้นหาเมนูอาหาร</SheetTitle>
+                <SheetTitle className="flex pb-4 justify-center items-center">ค้นหาเมนูอาหาร</SheetTitle>
               </SheetHeader>
 
               <SearchBox
-                  onSearch={handleSearch}
-                  foodData={foodData}
-                  setFilteredFoodData={setFilteredFoodData}
-                />
-              <div className="flex flex-col justify-center items-center h-full">
-                
-                {filteredFoodData.length > 0 ? (
-                  filteredFoodData.map((food, index) => (
-                    <motion.div
-                      key={food.id}
-                      variants={itemVariants}
-                      initial="hidden"
-                      animate="visible"
-                      custom={index}
-                      className='flex w-full h-full items-center justify-center my-1'
+                onSearch={handleSearch}
+                foodData={foodData}
+                setFilteredFoodData={setFilteredFoodData} />
+
+              <div className="flex flex-col w-screen justify-start items-center h-full pt-4 pb-24 pr-4">
+
+                <div className="flex flex-col w-full h-full overflow-y-auto gap-4">
+                  {filteredFoodData.length > 0 ? (
+                    currentItems.map((food, index) => (
+                      <motion.div
+                        key={food.id}
+                        variants={itemVariants}
+                        initial="hidden"
+                        animate="visible"
+                        custom={index}
+                        className='flex w-full h-full justify-start '
+                      >
+                        <SearchFoodBox key={food.id} food={food} isEdit={isEdit} setChooseFood={handleChooseFood} />
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="text-center w-full text-gray-500">
+                      <img src="Nofoodsearch.png" width={300} height={300} className=" mt-16" />
+                      <div className="text-heading3">ไม่พบเมนูอาหาร</div>
+                    </div>
+                  )}
+                </div>
+
+
+                <div className="flex flex-wrap w-11/12 justify-center items-center gap-2 mb-6 h-16">
+                  {pageNumbers.map((page, idx) => page === '...' ? (
+                    <span key={`ellipsis-${idx}`} className="px-3 py-1 text-gray-500">...</span>
+                  ) : (
+                    <button
+                      key={page}
+                      onClick={() => {
+                        setCurrentPage(page as number);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      } }
+                      className={`px-3 py-1 rounded ${currentPage === page
+                          ? 'bg-orange300 text-white'
+                          : 'bg-gray-200 text-gray-700'}`}
                     >
-                      <SearchFoodBox key={food.id} food={food} isEdit={isEdit} setChooseFood={handleChooseFood} />
-                    </motion.div>
-                  ))
-                ) : (
-                  <div className="text-center text-gray-500 mt-8">
-                    <PuffLoader />
-                  </div>
-                )}
+                      {page}
+                    </button>
+                  )
+                  )}
+                </div>
               </div>
+
+
             </SheetContent>
-          </Sheet>
 
-
-          <button
-            onClick={() => {
-              handleSaveMealPlan_Edit()
-              setEditItem([])
-            }}
-            className="flex bottom-24 w-10/12 justify-center items-center my-4 bg-orange300 text-white py-4 rounded-xl text-body1 font-bold"
-          >
+        </Sheet><button
+          onClick={() => {
+            handleSaveMealPlan_Edit();
+            setEditItem([]);
+          } }
+          className="flex bottom-24 w-10/12 justify-center items-center my-4 bg-orange300 text-white py-4 rounded-xl text-body1 font-bold"
+        >
             บันทึก
-          </button>
-
-          <button
+          </button><button
             onClick={() => {
-              setIsEdit(false)
-              setEditItem([])
-              setMergeItems([...allItems])
-            }}
+              setIsEdit(false);
+              setEditItem([]);
+              setMergeItems([...allItems]);
+            } }
             className="flex bottom-24 w-10/12 justify-center items-center border border-orange300 text-orange300 py-4 rounded-xl text-body1 font-bold"
           >
             ยกเลิก
           </button>
-        </>
+          </>
       )}
 
 
