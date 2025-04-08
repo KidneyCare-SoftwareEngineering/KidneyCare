@@ -1,10 +1,10 @@
 use crate::schema::{user_medicines, user_take_medicines, users};
-use diesel::prelude::*;
-use serde::{Deserialize, Serialize};
-use axum::{Extension, Json};
 use axum::http::StatusCode;
-use std::sync::Arc;
+use axum::{Extension, Json};
+use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool};
+use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 
@@ -16,10 +16,11 @@ pub struct GetMedicineRequest {
 
 #[derive(Serialize)]
 pub struct GetMedicineResponse {
-    pub medicines: Vec<MedicineInfo>,
+    pub medicines: Vec<Medicine>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Queryable, Selectable)]
+#[diesel(table_name = user_medicines)]
 pub struct MedicineInfo {
     pub user_medicine_id: i32,
     pub user_id: i32,
@@ -30,8 +31,21 @@ pub struct MedicineInfo {
     pub medicine_unit: Option<String>,
     pub medicine_name: Option<String>,
     pub medicine_note: Option<String>,
+}
+
+#[derive(Serialize, Queryable, Selectable)]
+#[diesel(table_name = user_take_medicines)]
+pub struct UserTakeMedicine {
     pub is_medicine_taken: Option<bool>,
 }
+
+#[derive(Serialize)]
+pub struct Medicine {
+    pub info: MedicineInfo,
+    pub taken: UserTakeMedicine,
+}
+
+type MedicineRow = (MedicineInfo, UserTakeMedicine);
 
 #[axum::debug_handler]
 pub async fn get_medicine(
@@ -69,34 +83,14 @@ pub async fn get_medicine(
     // 3. Fetch user medicines and join with user_take_medicines
     let results = user_medicines::table
         .left_join(
-            user_take_medicines::table.on(user_medicines::user_medicine_id.nullable().eq(user_take_medicines::user_medicine_id)),
+            user_take_medicines::table.on(user_medicines::user_medicine_id
+                .nullable()
+                .eq(user_take_medicines::user_medicine_id)
+                .and(user_take_medicines::user_take_medicine_time.eq(Some(date)))),
         )
         .filter(user_medicines::user_id.eq(user_id))
-        .filter(user_take_medicines::user_take_medicine_time.eq(Some(date)))
-        .select((
-            user_medicines::user_medicine_id,
-            user_medicines::user_id,
-            user_medicines::medicine_schedule,
-            user_medicines::medicine_amount,
-            user_medicines::medicine_per_times,
-            user_medicines::user_medicine_img_link,
-            user_medicines::medicine_unit,
-            user_medicines::medicine_name,
-            user_medicines::medicine_note,
-            user_take_medicines::is_medicine_taken.nullable(),
-        ))
-        .load::<(
-            i32,
-            i32,
-            Option<Vec<Option<chrono::NaiveTime>>>,
-            Option<i32>,
-            f64,
-            Option<Vec<Option<String>>>,
-            Option<String>,
-            Option<String>,
-            Option<String>,
-            Option<bool>,
-        )>(&mut conn)
+        .select((MedicineInfo::as_select(), UserTakeMedicine::as_select()))
+        .load::<MedicineRow>(&mut conn)
         .map_err(|err| {
             eprintln!("Database error fetching medicines: {}", err);
             (
@@ -105,46 +99,12 @@ pub async fn get_medicine(
             )
         })?;
 
-    // 4. Organize the data into the desired structure
-    let medicines: Vec<MedicineInfo> = results
+    let medicines: Vec<Medicine> = results
         .into_iter()
-        .map(
-            |(
-                user_medicine_id,
-                user_id,
-                medicine_schedule,
-                medicine_amount,
-                medicine_per_times,
-                user_medicine_img_link,
-                medicine_unit,
-                medicine_name,
-                medicine_note,
-                is_medicine_taken,
-            )| {
-                let schedule_strings: Vec<String> = medicine_schedule
-                    .unwrap_or_default()
-                    .into_iter()
-                    .filter_map(|time_option| time_option.map(|time| time.format("%H:%M").to_string()))
-                    .collect();
-
-                let img_links: Option<Vec<String>> = user_medicine_img_link.map(|links| {
-                    links.into_iter().filter_map(|link| link).collect()
-                });
-
-                MedicineInfo {
-                    user_medicine_id,
-                    user_id,
-                    medicine_schedule: schedule_strings,
-                    medicine_amount,
-                    medicine_per_times,
-                    user_medicine_img_link: img_links,
-                    medicine_unit,
-                    medicine_name,
-                    medicine_note,
-                    is_medicine_taken,
-                }
-            },
-        )
+        .map(|row| Medicine {
+            info: row.info,
+            taken: row.taken,
+        })
         .collect();
 
     Ok(Json(GetMedicineResponse { medicines }))

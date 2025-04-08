@@ -66,7 +66,7 @@ async fn main() {
         .route("/delete_ingredient/{ingredient_id}", delete(delete_ingredient))
         .route("/get_medicine", post(get_medicine))
         .route("/get_meal_plan", post(get_meal_plan))
-        .route("/take_medicine", post(take_medicine))
+        // .route("/take_medicine", post(take_medicine))
         // .route("/get_pills", get(get_pill_by_user_line_id)) // Change to GET and use query
         .layer(Extension(db_pool.clone()))
         .layer(cors);

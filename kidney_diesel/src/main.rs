@@ -82,6 +82,7 @@ async fn main() {
         .route("/ai_meal_plan", post(ai_meal_plan))
         .route("/update_meal_plan", post(update_meal_plan))
         .route("/get_user_info", get(get_user_info))
+        .route("/get_medicine", get(routes::medicine::get_medicine)) // Add route for get_medicine
         .fallback(fallback_handler) // Add a fallback route
         .layer(Extension(db_pool))
         .layer(cors);
