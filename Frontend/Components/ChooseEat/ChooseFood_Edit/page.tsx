@@ -50,7 +50,7 @@ const ChooseFood: React.FC<{id: number; setChooseFood: (value: boolean) => void 
 
             <div className="flex fixed justify-center items-center w-screen h-20 bg-white bottom-0 rounded-t-xl z-10"
                 style={{ boxShadow: "0px -4px 10px rgba(0, 0, 0, 0.1)" }}>
-                <div className="flex absolute h-4/6 w-9/12 bg-orange300 rounded-xl text-body1 font-bold text-white justify-center items-center z-[9999]"
+                <div className="flex absolute h-4/6 w-9/12 bg-orange300 rounded-xl text-body1 font-bold text-white justify-center items-center"
                     onClick={() => {
                         setFoodChoosedData(food)
                         setChooseFood(false);}

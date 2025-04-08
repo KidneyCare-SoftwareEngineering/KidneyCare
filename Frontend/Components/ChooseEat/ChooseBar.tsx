@@ -16,6 +16,7 @@ import PuffLoader from "react-spinners/PuffLoader";
 import SearchBox from "@/Components/SearchBox";
 import ChooseFood from "./ChooseFood_Edit/page";
 import { UserInformation } from "@/Interfaces/UserInformation";
+import Portal from "./Portal";
 
 
 const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: boolean, setIsEdit: React.Dispatch<React.SetStateAction<boolean>>; userUid: string; setIsLoading: (value: boolean) => void}> = ({ MealPlans, desc, isEdit, setIsEdit, userUid, setIsLoading}) => {
@@ -24,18 +25,12 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   const [filteredFoodData, setFilteredFoodData] = useState<FoodInterface[]>([]);
   const [chooseFood, setChooseFood] = useState<boolean>(false);
   const [foodChoosed, setFoodChoosed] = useState<number>();
-  const [currentPage, setCurrentPage] = useState(1);
   const [foodChoosedData, setFoodChoosedData] = useState<FoodInterface | null>(null);
   const [totalCalories, setTotalCalories] = useState<number>(0);
   const [localMealPlans, setLocalMealPlans] = useState<Meal_planInterface>(MealPlans);
   const [editItem, setEditItem] = useState<recipesInterface[]>([]);
   const [mergeItems, setMergeItems] = useState<recipesInterface[]>([]);
   const [userData, setUserData] = useState<UserInformation>()
-  const itemsPerPage = 12;
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredFoodData.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredFoodData.length / itemsPerPage);
 
   // Aniamtion
   const transition = { type: "spring", stiffness: 200, damping: 20 };
@@ -48,9 +43,6 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
     exit: { opacity: 0, y: -20, scale: 0.95, transition },
   };
 
- useEffect(() => {
-    setCurrentPage(1)
-  },[filteredFoodData])
 
   // Food|Pill Check and status
   const isMedicine = desc === "ยา";
@@ -164,40 +156,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
     } 
   };
 
-  const genNum = () => {
-    const maxVisible = 5;
-    const pages = [];
-    const half = Math.floor(maxVisible / 2);
-
-    let start = Math.max(1, currentPage - half);
-    let end = Math.min(totalPages, currentPage + half);
-
-    if (currentPage <= half) {
-      end = Math.min(totalPages, maxVisible);
-    }
-
-    if (currentPage + half >= totalPages) {
-      start = Math.max(1, totalPages - maxVisible + 1);
-    }
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-
-    if (start > 1) {
-      if (start > 2) pages.unshift('...');
-      pages.unshift(1);
-    }
-
-    if (end < totalPages) {
-      if (end < totalPages - 1) pages.push('...');
-      pages.push(totalPages);
-    }
-
-    return pages;
-  };
-
-  const pageNumbers = genNum();
+  
 
   const handleSearch = (searchTerm: string) => {
     if (foodData) {
@@ -439,9 +398,11 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
 
 
       {chooseFood && foodChoosed !== undefined && (
-        <div className="fixed w-screen h-screen inset-0 bg-white z-[10000]">
-          <ChooseFood id={foodChoosed} setChooseFood={setChooseFood} setFoodChoosedData={setFoodChoosedData} setIsSheetOpen={setIsSheetOpen} />
-        </div>
+        <Portal>
+          <div className="fixed w-screen h-screen inset-0 bg-white z-50">
+            <ChooseFood id={foodChoosed} setChooseFood={setChooseFood} setFoodChoosedData={setFoodChoosedData} setIsSheetOpen={setIsSheetOpen} />
+          </div>
+        </Portal>
       )}
 
       
@@ -500,9 +461,9 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
 
               <div className="flex flex-col w-screen justify-start items-center h-full pt-4 pb-24 pr-4">
 
-                <div className="flex flex-col w-full h-full overflow-y-auto gap-4">
+                <div className="flex flex-col w-full h-full overflow-y-auto gap-4 pb-8">
                   {filteredFoodData.length > 0 ? (
-                    currentItems.map((food, index) => (
+                    filteredFoodData.map((food, index) => (
                       <motion.div
                         key={food.id}
                         variants={itemVariants}
@@ -522,26 +483,6 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
                   )}
                 </div>
 
-
-                <div className="flex flex-wrap w-11/12 justify-center items-center gap-2 mb-6 h-16">
-                  {pageNumbers.map((page, idx) => page === '...' ? (
-                    <span key={`ellipsis-${idx}`} className="px-3 py-1 text-gray-500">...</span>
-                  ) : (
-                    <button
-                      key={page}
-                      onClick={() => {
-                        setCurrentPage(page as number);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                      } }
-                      className={`px-3 py-1 rounded ${currentPage === page
-                          ? 'bg-orange300 text-white'
-                          : 'bg-gray-200 text-gray-700'}`}
-                    >
-                      {page}
-                    </button>
-                  )
-                  )}
-                </div>
               </div>
 
 

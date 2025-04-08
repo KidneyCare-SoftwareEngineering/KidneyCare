@@ -84,19 +84,58 @@ export default function CreatePill() {
 		if (!event.target.files) return;
 		const files = Array.from(event.target.files);
 
-		// ตรวจสอบขนาดไฟล์ก่อนการอัปโหลด
-		const newImages = files.map((file) => {
-			if (file.size > 1024 * 1024) {
-				Swal.fire("⚠️ ข้อผิดพลาด", "ขนาดรูปภาพต้องไม่เกิน 1 MB", "warning");
-				return null; // ไม่ให้เพิ่มไฟล์ที่มีขนาดเกิน 1MB
-			} else if (file instanceof File) {
-				return file; // กรณีไฟล์ปกติ
-			} else {
-				return new File([], "invalid");
-			}
-		}).filter(Boolean); // กำจัด null หรือ invalid ไฟล์ที่ไม่ต้องการ
+		const compressImage = (file: File): Promise<File> => {
+			return new Promise((resolve) => {
+				const img = new Image();
+				const reader = new FileReader();
 
-		setpill_img_link((prev) => [...prev, ...newImages.filter((img): img is File => img !== null)]);
+				reader.onload = (e) => {
+					if (!e.target) return;
+					img.src = e.target.result as string;
+				};
+
+				img.onload = () => {
+					const canvas = document.createElement("canvas");
+					const maxWidth = 1024;
+					const scaleSize = maxWidth / img.width;
+					canvas.width = maxWidth;
+					canvas.height = img.height * scaleSize;
+
+					const ctx = canvas.getContext("2d");
+					if (ctx) {
+						ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+						canvas.toBlob(
+							(blob) => {
+								if (blob) {
+									resolve(new File([blob], file.name, { type: file.type }));
+								}
+							},
+							file.type,
+							0.7
+						);
+					}
+				};
+
+				reader.readAsDataURL(file);
+			});
+		};
+
+		Promise.all(
+			files.map(async (file) => {
+				if (file.size > 1024 * 1024) {
+					const compressedFile = await compressImage(file);
+					if (compressedFile.size > 1024 * 1024) {
+						Swal.fire("⚠️ ข้อผิดพลาด", "บีบอัดแล้วยังเกิน 1MB", "warning");
+						return null;
+					}
+					return compressedFile;
+				}
+				return file;
+			})
+		).then((newImages) => {
+			const validImages = newImages.filter((img): img is File => img !== null);
+			setpill_img_link((prev) => [...prev, ...validImages]);
+		});
 	};
 
 	// const handleSavePill = async () => {
@@ -164,7 +203,7 @@ export default function CreatePill() {
 		if (pill_img_link.length > 4) return "รูปภาพต้องไม่เกิน 4 รูป";
 		if (pill_img_link.some(img => img.size > 1024 * 1024)) return "ขนาดรูปภาพต้องไม่เกิน 1 MB";
 		if (pill_note.length > 200) return "โน้ตเพิ่มเติมต้องไม่เกิน 200 ตัวอักษร";
-		if (!pill_note.trim()) return "กรุณากรอกโน้ตเพิ่มเติม";
+		// if (!pill_note.trim()) return "กรุณากรอกโน้ตเพิ่มเติม"; 
 		return null; // ผ่านการตรวจสอบ
 	};
 
