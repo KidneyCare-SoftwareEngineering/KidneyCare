@@ -78,7 +78,7 @@ export const ProfileHistory: React.FC<{ userUid: string; userProfile: string; us
                 </div>
                 <div className="flex">
                   <h2 className="mr-2">วันเกิด:</h2>
-                    <p>{userData?.birthdate ? `${userData.birthdate.slice(8, 10)}/${userData.birthdate.slice(5, 7)}/${Number(userData.birthdate.slice(2, 4) + 543)}` : <></>}</p>
+                    <p>{userData?.birthdate ? `${userData.birthdate.slice(8, 10)}/${userData.birthdate.slice(5, 7)}/${userData.birthdate.slice(2, 4)}` : <></>}</p>
                 </div>
                 <div className="flex">
                   <h2 className="mr-2">ส่วนสูง:</h2>
