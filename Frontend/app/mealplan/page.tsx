@@ -115,7 +115,9 @@ export default function MealPlan() {
             
 
 
-            {!mealPlans?.meal_plans || mealPlans.meal_plans.length === 0 ? (
+            {userUid != "" ? (
+            <>
+                { !userUid || !mealPlans?.meal_plans || mealPlans.meal_plans.length === 0 ? (
                     <Link 
                     href={`mealplan/createplan/${userUid}`} 
                     className="fixed size-12 bg-orange300 rounded-full right-3 bottom-6 flex justify-center items-center"
@@ -201,8 +203,10 @@ export default function MealPlan() {
                     )}
                     
                 </AnimatePresence>
-            )
-            }
+            )}
+            </>) : (
+            <>
+            </>)}
             
 
         </div>

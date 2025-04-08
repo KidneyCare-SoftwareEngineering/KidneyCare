@@ -83,7 +83,7 @@ const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPl
             ))}
             
             {/* loading component */}
-            <div className="flex w-11/12 h-14 rounded-xl drop-shadow-xl bg-white mt-6 px-4 "> 
+            {/* <div className="flex w-11/12 h-14 rounded-xl drop-shadow-xl bg-white mt-6 px-4 "> 
                 <div className="flex w-11/12 animate-pulse justify-start items-center text-body1 font-bold"> 
                     
                 <div className="flex bg-slate-300 rounded-full size-8 mr-4"/>
@@ -93,7 +93,7 @@ const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPl
                 <div className="flex w-1/12 animate-pulse justify-center items-center">
                     <Icon icon="weui:arrow-filled" height="24px"/>
                 </div>
-            </div>
+            </div> */}
 
             <button
                 onClick={() => handleCreateNewMealplans()}
