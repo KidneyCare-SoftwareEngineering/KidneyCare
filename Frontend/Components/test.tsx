@@ -53,7 +53,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   const notEatenItems = isMedicine 
     ? allItems.filter(item => !item.ischecked) 
     : allItems.filter(item => !item.ischecked);
-  const mealTypes = ["อาหารเช้า", "อาหารกลางวัน", "อาหารเย็น", "ของว่าง"];
+  const mealTypes = ["อาหารเช้า", "อาหารกลางวัน", "อาหารเย็น", "มื้ออาหารเพิ่มเติม"];
 
 
   useEffect(() => {

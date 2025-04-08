@@ -14,7 +14,7 @@ const MEAL_TIMES = {
   1: { title: "อาหารเช้า", icon: "vaadin:morning"},
   2: { title: "อาหารกลางวัน", icon: "mdi:food-ramen" },
   3: { title: "อาหารเย็น", icon: "ph:bowl-food-fill" },
-  4: { title: "ของว่าง", icon: "mdi:food-apple" }
+  4: { title: "มื้ออาหารเพิ่มเติม", icon: "mdi:food-apple" }
 };
 
 const FoodHistory: React.FC<{mealPlans: Meal_planInterface; userUid: string; isSheetOpen: boolean; setIsSheetOpen: (value: boolean) => void ;}> = ({mealPlans, userUid, setIsSheetOpen, isSheetOpen}) => {
@@ -52,7 +52,7 @@ const FoodHistory: React.FC<{mealPlans: Meal_planInterface; userUid: string; isS
         },
         {
           mealTime: 4,
-          title: "ของว่าง",
+          title: "มื้ออาหารเพิ่มเติม",
           icon: "mdi:food-apple",
           highlight: false,
           items: [] as { name: string; calories: string; recipe_id: number }[],
@@ -117,7 +117,7 @@ const FoodHistory: React.FC<{mealPlans: Meal_planInterface; userUid: string; isS
         },
         {
           mealTime: 4,
-          title: "ของว่าง",
+          title: "มื้ออาหารเพิ่มเติม",
           icon: "mdi:food-apple",
           highlight: false,
           items: [],

@@ -26,7 +26,7 @@ export default function History() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [mealPlans, setMealPlans] = useState<Meal_planInterface>();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const mealTypes = ["อาหารเช้า", "อาหารกลางวัน", "อาหารเย็น", "ของว่าง"];
+  const mealTypes = ["อาหารเช้า", "อาหารกลางวัน", "อาหารเย็น", "มื้ออาหารเพิ่มเติม"];
 
   const datatoback = {
     user_line_id: userUid,

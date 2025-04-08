@@ -115,7 +115,7 @@ export default function MealPlan() {
             
 
 
-            {userUid != "" ? (
+            {userUid !== "" && !isEdit ? (
             <>
                 { !userUid || !mealPlans?.meal_plans || mealPlans.meal_plans.length === 0 ? (
                     <Link 
@@ -124,8 +124,8 @@ export default function MealPlan() {
                     >
                         <Icon icon="ic:baseline-plus" height="32" className="text-white"/>
                     </Link>
-            ) : 
-            (
+                ) : 
+                (
                 <AnimatePresence>
                     {isMenuOpen ? (
                         <motion.div 

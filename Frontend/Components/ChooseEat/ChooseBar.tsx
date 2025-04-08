@@ -62,7 +62,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   const notEatenItems = isMedicine 
     ? allItems.filter(item => !item.ischecked) 
     : allItems.filter(item => !item.ischecked);
-  const mealTypes = ["อาหารเช้า", "อาหารกลางวัน", "อาหารเย็น", "ของว่าง"];
+  const mealTypes = ["อาหารเช้า", "อาหารกลางวัน", "อาหารเย็น", "มื้ออาหารเพิ่มเติม"];
 
 
   useEffect(() => {
@@ -185,7 +185,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
       recipe_name: foodChoosedData?.recipe_name || "",
       recipe_img_link: foodChoosedData?.image_url ? [foodChoosedData.image_url] : [],
       ischecked: false,
-      meal_time: 1,
+      meal_time: foodChoosedData?.meal_time || 0,
       calories: foodChoosedData?.calories || 0,
     }
 
@@ -384,6 +384,13 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   },[])
 
 
+  useEffect(() => {
+    if (chooseFood) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'auto'
+    }
+  }, [chooseFood])
 
 
 
@@ -396,10 +403,10 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
       </div>
     )}
 
-
+      {/* เปิด popup detail screen */}
       {chooseFood && foodChoosed !== undefined && (
         <Portal>
-          <div className="fixed w-screen h-screen inset-0 bg-white z-50">
+          <div className="fixed w-screen h-screen inset-0 bg-white z-50 overflow-y-auto">
             <ChooseFood id={foodChoosed} setChooseFood={setChooseFood} setFoodChoosedData={setFoodChoosedData} setIsSheetOpen={setIsSheetOpen} />
           </div>
         </Portal>
