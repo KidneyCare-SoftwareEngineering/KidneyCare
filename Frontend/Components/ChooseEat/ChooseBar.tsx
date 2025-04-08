@@ -451,7 +451,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="flex flex-col w-full items-center"
+          className="flex flex-col w-full items-center z-1"
         >
           
           {isEdit ? 
