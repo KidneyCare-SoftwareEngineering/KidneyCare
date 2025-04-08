@@ -52,8 +52,8 @@ async fn main() {
         .route("/meal_plan", post(create_meal_plan))
         .route("/update_meal_plan", post(update_meal_plan))
         .route("/users", post(create_user))
-        .route("/add_pill", post(handle_image_upload))
-        .route("/get_pill_by_id", get(get_pill_by_user_line_id))
+        // .route("/add_pill", post(handle_image_upload))
+        // .route("/get_pill_by_id", get(get_pill_by_user_line_id))
         .route("/admin_login", post(admin_login))
         .route("/chatbot/{user_id}", get(get_user_by_id))
         .route("/get_recipes", get(get_recipes))
@@ -66,9 +66,9 @@ async fn main() {
         .route("/create_ingredient", post(create_ingredient))
         .route("/update_ingredient/{ingredient_id}", patch(update_ingredient))
         .route("/delete_ingredient/{ingredient_id}", delete(delete_ingredient))
-        .route("/get_medicine", post(get_medicine))
+        // .route("/get_medicine", post(get_medicine))
         .route("/get_meal_plan", post(get_meal_plan))
-        .route("/take_medicine", post(take_medicine))
+        // .route("/take_medicine", post(take_medicine))
         // .route("/get_pills", get(get_pill_by_user_line_id)) // Change to GET and use query
         .layer(Extension(db_pool.clone()))
         .layer(cors);
