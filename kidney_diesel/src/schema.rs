@@ -146,7 +146,6 @@ diesel::table! {
 diesel::table! {
     user_take_medicines (user_take_medicines_id) {
         user_take_medicines_id -> Int4,
-        user_id -> Nullable<Int4>,
         user_medicine_id -> Nullable<Int4>,
         user_take_medicine_time -> Nullable<Date>,
         is_medicine_taken -> Nullable<Bool>,
@@ -215,7 +214,6 @@ diesel::joinable!(user_medicines -> users (user_id));
 diesel::joinable!(user_nutrient_tracking -> nutrients (nutrient_id));
 diesel::joinable!(user_nutrient_tracking -> users (user_id));
 diesel::joinable!(user_take_medicines -> user_medicines (user_medicine_id));
-diesel::joinable!(user_take_medicines -> users (user_id));
 diesel::joinable!(users_diseases -> disease (disease_id));
 diesel::joinable!(users_diseases -> users (user_id));
 diesel::joinable!(users_food_condition_types -> food_condition_types (food_condition_type_id));

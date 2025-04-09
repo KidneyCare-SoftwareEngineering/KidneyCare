@@ -27,6 +27,7 @@ use std::sync::Arc;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Recipe {
     pub recipe_id: Option<i32>, // Change recipe_id to Option<i32>
+    pub ischecked: Option<bool>, // Add ischecked field
 }
 
 #[derive(Deserialize, Debug)]
@@ -498,7 +499,7 @@ pub async fn edit_meal_plan(
                         meal_plan_recipes::meal_plan_id.eq(meal_plan_id),
                         meal_plan_recipes::recipe_id.eq(recipe.recipe_id
                             .ok_or_else(|| diesel::result::Error::RollbackTransaction)?),
-                        meal_plan_recipes::ischecked.eq(false),
+                        meal_plan_recipes::ischecked.eq(recipe.ischecked.unwrap_or(false)), // Use recipe.ischecked
                         meal_plan_recipes::meal_time.eq(Some(meal_time)),
                     ))
                     .execute(conn)?;
