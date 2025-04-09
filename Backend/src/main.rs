@@ -59,7 +59,6 @@ async fn main() {
         .route("/get_recipe", get(get_recipe))
         .route("/get_recipe_by_id/{recipe_id}", get(get_recipe_by_id))
         .route("/create_recipe", post(create_recipe))
-        .route("/get_recipe_by_id/{recipe_id}", get(get_recipe_by_id))
         // .route("/update_recipe/{recipe_id}", patch(update_recipe))
         .route("/delete_recipe/{recipe_id}", delete(delete_recipe))
         .route("/ingredients", get(get_ingredients)) // Add this line

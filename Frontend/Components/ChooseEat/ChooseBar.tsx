@@ -55,7 +55,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
       setAllItems(isMedicine 
         ? localMealPlans.medicines || [] 
         : localMealPlans?.meal_plans?.[0].recipes || []);
-    }, [localMealPlans, isMedicine]);
+    }, [localMealPlans, isMedicine, MealPlans]);
   const eatenItems = isMedicine 
     ? allItems.filter(item => item.ischecked) 
     : allItems.filter(item => item.ischecked);
@@ -67,6 +67,10 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   useEffect(() => {
     console.log("allitems",allItems)
   },[allItems])
+
+  useEffect(() => {
+    console.log("localMealPlans updated:", localMealPlans);
+  }, [localMealPlans]);
   
   useEffect(() => {
     if (!isMedicine) {
@@ -247,8 +251,8 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   useEffect(() => {
     if (desc != "ยา")
       fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/get_user_info?user_line_id=${userUid}`)
-        .then((response) => response.json())
-        .then((data) => {
+        .then(response => response.json())
+        .then(data => {
           setUserData(data)
         })
         .catch(error => {
