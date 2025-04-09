@@ -100,7 +100,21 @@ pub async fn get_user_info(
 #[derive(Deserialize)]
 pub struct SumNutrientsByDateParams {
     pub user_line_id: String,
+    #[serde(deserialize_with = "naive_date_to_naive_datetime")] // Updated deserialization function
     pub date: NaiveDateTime,
+}
+
+// Helper function for deserializing NaiveDate and converting to NaiveDateTime
+fn naive_date_to_naive_datetime<'de, D>(deserializer: D) -> Result<NaiveDateTime, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let s: &str = Deserialize::deserialize(deserializer)?;
+    chrono::NaiveDate::parse_from_str(s, "%Y-%m-%d")
+        .map(|date| date.and_hms(0, 0, 0)) // Convert NaiveDate to NaiveDateTime with time set to 00:00:00
+        .or_else(|_| NaiveDateTime::parse_from_str(s, "%Y-%m-%dT%H:%M:%S")) // Handle ISO 8601 format
+        .or_else(|_| NaiveDateTime::parse_from_str(s, "%Y-%m-%d %H:%M:%S")) // Handle datetime with space
+        .map_err(|_| serde::de::Error::custom("Invalid date format. Use 'YYYY-MM-DD', 'YYYY-MM-DD HH:MM:SS', or 'YYYY-MM-DDTHH:MM:SS'."))
 }
 
 #[derive(Serialize)]
@@ -112,6 +126,11 @@ pub async fn sum_nutrients_by_date(
     Extension(db_pool): Extension<Arc<DbPool>>,
     Json(params): Json<SumNutrientsByDateParams>,
 ) -> Result<Json<NutrientsSummaryResponse>, StatusCode> {
+    // Validate user_line_id
+    if params.user_line_id.trim().is_empty() {
+        return Err(StatusCode::UNPROCESSABLE_ENTITY);
+    }
+
     let mut conn = db_pool.get().map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
     // Get user_id from user_line_id
@@ -126,7 +145,7 @@ pub async fn sum_nutrients_by_date(
         .inner_join(meal_plan_recipes::table.on(meal_plans::meal_plan_id.eq(meal_plan_recipes::meal_plan_id)))
         .inner_join(recipes_nutrients::table.on(meal_plan_recipes::recipe_id.eq(recipes_nutrients::recipe_id)))
         .filter(meal_plans::user_id.eq(user_id_value))
-        .filter(meal_plans::date.eq(params.date.date()))
+        .filter(meal_plans::date.eq(params.date.date())) // Ensure date is properly parsed
         .filter(meal_plan_recipes::ischecked.eq(true)) // Only include checked meal plan recipes
         .group_by(recipes_nutrients::nutrient_id)
         .select((recipes_nutrients::nutrient_id, diesel::dsl::sum(recipes_nutrients::quantity)))
