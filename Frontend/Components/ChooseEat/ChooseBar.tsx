@@ -32,6 +32,8 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   const [mergeItems, setMergeItems] = useState<recipesInterface[]>([]);
   const [userData, setUserData] = useState<UserInformation>()
 
+
+  
   // Aniamtion
   const transition = { type: "spring", stiffness: 200, damping: 20 };
   const containerVariants = {
@@ -65,12 +67,19 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   const mealTypes = ["อาหารเช้า", "อาหารกลางวัน", "อาหารเย็น", "มื้ออาหารเพิ่มเติม"];
 
   useEffect(() => {
+    setLocalMealPlans(MealPlans)
+  }, [MealPlans])
+  
+  useEffect(() => {
     console.log("allitems",allItems)
   },[allItems])
 
   useEffect(() => {
-    console.log("localMealPlans updated:", localMealPlans);
-  }, [localMealPlans]);
+    console.log('localMealPlans', localMealPlans)
+    console.log('allItems', allItems)
+    console.log('eatenItems', eatenItems)
+    console.log("mealplan22",MealPlans)
+  });
   
   useEffect(() => {
     if (!isMedicine) {
@@ -80,6 +89,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   }, [eatenItems, isMedicine]);
 
   useEffect(() => {
+    if (!isMedicine)
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/food_cards`)
       .then(response => response.json())
       .then(data => {
@@ -583,9 +593,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
           className="flex flex-col w-full items-center"
         >
           
-          
-          
-          {!isEdit && eatenItems
+          {!isEdit && eatenItems 
             .sort((a, b) => a.meal_time - b.meal_time)
             .map((item, index) => (
             <React.Fragment key={index}>

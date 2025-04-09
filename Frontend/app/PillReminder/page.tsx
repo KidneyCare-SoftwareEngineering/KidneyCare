@@ -42,7 +42,7 @@ export default function PillReminder() {
               };
             });
       
-            console.log("mergedData", mergedData);
+            
             setMapPill({ medicines: mergedData });
       
           } catch (error) {
@@ -52,6 +52,8 @@ export default function PillReminder() {
       
         fetchMedicineData();
       }, [formattedDate, userUid])
+
+      
 
     // Line LIFF
     // useEffect(() => {

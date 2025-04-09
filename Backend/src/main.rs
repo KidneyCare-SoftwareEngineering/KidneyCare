@@ -20,7 +20,7 @@ use std::env;
 
 #[tokio::main]
 async fn main() {
-    dotenvy::dotenv().expect("Failed to load .env file");
+    dotenvy::dotenv().ok();
 
     let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let server_address = format!("0.0.0.0:{}", port);
