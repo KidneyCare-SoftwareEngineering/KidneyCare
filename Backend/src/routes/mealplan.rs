@@ -2,15 +2,13 @@ use axum::{http::StatusCode, Extension, Json};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
-use sqlx::Row;
 use sqlx::PgPool;
+use sqlx::Row;
 use std::collections::HashMap;
 // use sqlx::types::chrono::NaiveDate;
 use chrono::NaiveDate;
 // use crate::models::user::UserData;
 use crate::models::mealplan::*;
-
-
 
 #[axum::debug_handler]
 pub async fn create_meal_plan(
@@ -23,35 +21,49 @@ pub async fn create_meal_plan(
     )
     .fetch_optional(&pg_pool)
     .await
-    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Error fetching user".to_string()))?
+    .map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Error fetching user".to_string(),
+        )
+    })?
     .ok_or((StatusCode::NOT_FOUND, "User not found".to_string()))?;
 
     let filtered_recipes = sqlx::query!(
         r#"
-        SELECT r.recipe_id, r.recipe_name, r.recipe_img_link,
-            COALESCE(SUM(rn.quantity), 0) as protein,
-            COALESCE(SUM(rn.quantity), 0) as carbs,
-            COALESCE(SUM(rn.quantity), 0) as fat,
-            COALESCE(SUM(rn.quantity), 0) as sodium,
-            COALESCE(SUM(rn.quantity), 0) as phosphorus,
-            COALESCE(SUM(rn.quantity), 0) as potassium,
-            COALESCE(SUM(rn.quantity), 0) as calories
-        FROM recipes r
-        LEFT JOIN recipes_nutrients rn ON r.recipe_id = rn.recipe_id
-        WHERE NOT EXISTS (
-            SELECT 1 
-            FROM recipes_ingredient_allergies ria
-            JOIN users_ingredient_allergies uia ON ria.ingredient_allergy_id = uia.ingredient_allergy_id
-            JOIN users u ON u.user_id = uia.user_id
-            WHERE u.user_id = $1 AND ria.recipe_id = r.recipe_id
-        )
-        GROUP BY r.recipe_id
+        SELECT 
+        r.recipe_id, 
+        r.recipe_name,
+        r.recipe_img_link, -- Include recipe_img_link in the SELECT clause
+        COALESCE(SUM(CASE WHEN n.name = 'protein' THEN rn.quantity ELSE 0 END), 0) AS protein,
+        COALESCE(SUM(CASE WHEN n.name = 'carbs' THEN rn.quantity ELSE 0 END), 0) AS carbs,
+        COALESCE(SUM(CASE WHEN n.name = 'fat' THEN rn.quantity ELSE 0 END), 0) AS fat,
+        COALESCE(SUM(CASE WHEN n.name = 'sodium' THEN rn.quantity ELSE 0 END), 0) AS sodium,
+        COALESCE(SUM(CASE WHEN n.name = 'phosphorus' THEN rn.quantity ELSE 0 END), 0) AS phosphorus,
+        COALESCE(SUM(CASE WHEN n.name = 'potassium' THEN rn.quantity ELSE 0 END), 0) AS potassium,
+        COALESCE(r.calories, 0) AS calories
+    FROM recipes r
+    LEFT JOIN recipes_nutrients rn ON r.recipe_id = rn.recipe_id
+    LEFT JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
+    WHERE NOT EXISTS (
+        SELECT 1 
+        FROM recipes_ingredient_allergies ria
+        JOIN users_ingredient_allergies uia ON ria.ingredient_allergy_id = uia.ingredient_allergy_id
+        JOIN users u ON u.user_id = uia.user_id
+        WHERE u.user_id = $1 AND ria.recipe_id = r.recipe_id
+    )
+    GROUP BY r.recipe_id, r.recipe_name, r.recipe_img_link, r.calories
         "#,
         user_id.user_id
     )
     .fetch_all(&pg_pool)
     .await
-    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Error fetching filtered recipes".to_string()))?;
+    .map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Error fetching filtered recipes".to_string(),
+        )
+    })?;
 
     let nutrition_limit = sqlx::query!(
         "SELECT nutrient_id, nutrient_limit FROM users_nutrients_limit_per_day WHERE user_id = $1",
@@ -59,27 +71,32 @@ pub async fn create_meal_plan(
     )
     .fetch_all(&pg_pool)
     .await
-    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Error fetching nutrition limits".to_string()))?;
+    .map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Error fetching nutrition limits".to_string(),
+        )
+    })?;
 
     let mut nutrition_map = NutritionLimit {
-        calories: 0.0,
+        protein: 0.0,
         carbs: 0.0,
         fat: 0.0,
+        sodium: 0.0,
         phosphorus: 0.0,
         potassium: 0.0,
-        protein: 0.0,
-        sodium: 0.0,
+        calories: 0.0,
     };
 
     for limit in nutrition_limit {
         match limit.nutrient_id {
-            Some(1) => nutrition_map.calories = limit.nutrient_limit.unwrap_or(0.0) as f32,
-            Some(2) => nutrition_map.carbs = limit.nutrient_limit.unwrap_or(0.0) as f32,
-            Some(3) => nutrition_map.fat = limit.nutrient_limit.unwrap_or(0.0) as f32,
-            Some(4) => nutrition_map.phosphorus = limit.nutrient_limit.unwrap_or(0.0) as f32,
-            Some(5) => nutrition_map.potassium = limit.nutrient_limit.unwrap_or(0.0) as f32,
-            Some(6) => nutrition_map.protein = limit.nutrient_limit.unwrap_or(0.0) as f32,
-            Some(7) => nutrition_map.sodium = limit.nutrient_limit.unwrap_or(0.0) as f32,
+                Some(1) => nutrition_map.protein = limit.nutrient_limit.unwrap_or(0.0) as f32,
+                Some(2) => nutrition_map.carbs = limit.nutrient_limit.unwrap_or(0.0) as f32,
+                Some(3) => nutrition_map.fat = limit.nutrient_limit.unwrap_or(0.0) as f32,
+                Some(4) => nutrition_map.sodium = limit.nutrient_limit.unwrap_or(0.0) as f32,
+                Some(5) => nutrition_map.phosphorus = limit.nutrient_limit.unwrap_or(0.0) as f32,
+                Some(6) => nutrition_map.potassium = limit.nutrient_limit.unwrap_or(0.0) as f32,
+                Some(7) => nutrition_map.calories = limit.nutrient_limit.unwrap_or(0.0) as f32,
             _ => (),
         }
     }
@@ -119,10 +136,20 @@ pub async fn create_meal_plan(
         .json(&response_data)
         .send()
         .await
-        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Failed to send request".to_string()))?
+        .map_err(|_| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Failed to send request".to_string(),
+            )
+        })?
         .json::<serde_json::Value>()
         .await
-        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Failed to parse response".to_string()))?;
+        .map_err(|_| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Failed to parse response".to_string(),
+            )
+        })?;
 
     // Return the response from the external API
     Ok(Json(response))
@@ -139,24 +166,35 @@ pub async fn update_meal_plan(
     )
     .fetch_optional(&pg_pool)
     .await
-    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Error fetching user".to_string()))?
+    .map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Error fetching user".to_string(),
+        )
+    })?
     .ok_or((StatusCode::NOT_FOUND, "User not found".to_string()))?;
 
-    let user_line_id = user.user_line_id.ok_or((StatusCode::NOT_FOUND, "User LINE ID not found".to_string()))?;
+    let user_line_id = user
+        .user_line_id
+        .ok_or((StatusCode::NOT_FOUND, "User LINE ID not found".to_string()))?;
 
     // Fetch food menus that the user is not allergic to
     let filtered_recipes = sqlx::query!(
         r#"
-        SELECT r.recipe_id, r.recipe_name, r.recipe_img_link,
-            COALESCE(SUM(rn.quantity), 0) as protein,
-            COALESCE(SUM(rn.quantity), 0) as carbs,
-            COALESCE(SUM(rn.quantity), 0) as fat,
-            COALESCE(SUM(rn.quantity), 0) as sodium,
-            COALESCE(SUM(rn.quantity), 0) as phosphorus,
-            COALESCE(SUM(rn.quantity), 0) as potassium,
-            COALESCE(SUM(rn.quantity), 0) as calories
+        SELECT 
+            r.recipe_id, 
+            r.recipe_name,
+            r.recipe_img_link,
+            COALESCE(SUM(CASE WHEN n.name = 'protein' THEN rn.quantity ELSE 0 END), 0) AS protein,
+            COALESCE(SUM(CASE WHEN n.name = 'carbs' THEN rn.quantity ELSE 0 END), 0) AS carbs,
+            COALESCE(SUM(CASE WHEN n.name = 'fat' THEN rn.quantity ELSE 0 END), 0) AS fat,
+            COALESCE(SUM(CASE WHEN n.name = 'sodium' THEN rn.quantity ELSE 0 END), 0) AS sodium,
+            COALESCE(SUM(CASE WHEN n.name = 'phosphorus' THEN rn.quantity ELSE 0 END), 0) AS phosphorus,
+            COALESCE(SUM(CASE WHEN n.name = 'potassium' THEN rn.quantity ELSE 0 END), 0) AS potassium,
+            COALESCE(r.calories, 0) AS calories
         FROM recipes r
         LEFT JOIN recipes_nutrients rn ON r.recipe_id = rn.recipe_id
+        LEFT JOIN nutrients n ON rn.nutrient_id = n.nutrient_id
         WHERE NOT EXISTS (
             SELECT 1 
             FROM recipes_ingredient_allergies ria
@@ -164,7 +202,7 @@ pub async fn update_meal_plan(
             JOIN users u ON u.user_id = uia.user_id
             WHERE u.user_id = $1 AND ria.recipe_id = r.recipe_id
         )
-        GROUP BY r.recipe_id
+        GROUP BY r.recipe_id;
         "#,
         user.user_id
     )
@@ -179,28 +217,33 @@ pub async fn update_meal_plan(
     )
     .fetch_all(&pg_pool)
     .await
-    .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Error fetching nutrition limits".to_string()))?;
+    .map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Error fetching nutrition limits".to_string(),
+        )
+    })?;
 
     // Process the nutrition limits
     let mut nutrition_map = NutritionLimit {
-        calories: 0.0,
+        protein: 0.0,
         carbs: 0.0,
         fat: 0.0,
+        sodium: 0.0,
         phosphorus: 0.0,
         potassium: 0.0,
-        protein: 0.0,
-        sodium: 0.0,
+        calories: 0.0,
     };
 
     for limit in nutrition_limit {
         match limit.nutrient_id {
-            Some(1) => nutrition_map.calories = limit.nutrient_limit.unwrap_or(0.0) as f32,
+            Some(1) => nutrition_map.protein = limit.nutrient_limit.unwrap_or(0.0) as f32,
             Some(2) => nutrition_map.carbs = limit.nutrient_limit.unwrap_or(0.0) as f32,
             Some(3) => nutrition_map.fat = limit.nutrient_limit.unwrap_or(0.0) as f32,
-            Some(4) => nutrition_map.phosphorus = limit.nutrient_limit.unwrap_or(0.0) as f32,
-            Some(5) => nutrition_map.potassium = limit.nutrient_limit.unwrap_or(0.0) as f32,
-            Some(6) => nutrition_map.protein = limit.nutrient_limit.unwrap_or(0.0) as f32,
-            Some(7) => nutrition_map.sodium = limit.nutrient_limit.unwrap_or(0.0) as f32,
+            Some(4) => nutrition_map.sodium = limit.nutrient_limit.unwrap_or(0.0) as f32,
+            Some(5) => nutrition_map.phosphorus = limit.nutrient_limit.unwrap_or(0.0) as f32,
+            Some(6) => nutrition_map.potassium = limit.nutrient_limit.unwrap_or(0.0) as f32,
+            Some(7) => nutrition_map.calories = limit.nutrient_limit.unwrap_or(0.0) as f32,
             _ => (),
         }
     }
@@ -246,15 +289,28 @@ pub async fn update_meal_plan(
         .json(&response_data)
         .send()
         .await
-        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Failed to send request".to_string()))?
+        .map_err(|_| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Failed to send request".to_string(),
+            )
+        })?
         .json::<serde_json::Value>()
         .await
-        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Failed to parse response".to_string()))?;
+        .map_err(|_| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Failed to parse response".to_string(),
+            )
+        })?;
 
     // Rename `user_id` to `user_line_id` in the AI response
     if let Some(user_id) = ai_response.get("user_id").cloned() {
         ai_response.as_object_mut().unwrap().remove("user_id");
-        ai_response.as_object_mut().unwrap().insert("user_line_id".to_string(), user_id);
+        ai_response
+            .as_object_mut()
+            .unwrap()
+            .insert("user_line_id".to_string(), user_id);
     }
 
     // Return the modified AI response
@@ -283,7 +339,7 @@ pub struct RecipeInfo {
     pub recipe_id: i32,
     pub recipe_name: String,
     pub recipe_img_link: Vec<String>,
-    pub ischecked: bool
+    pub ischecked: bool,
 }
 
 // Define the overall response structure
@@ -350,7 +406,8 @@ pub async fn get_meal_plan(
             recipes r ON mpr.recipe_id = r.recipe_id
         WHERE
             mp.user_id = $1
-    "#.to_string();
+    "#
+    .to_string();
     let mut query_builder = sqlx::query(&query);
 
     if let Some(date_str) = payload.date {
@@ -391,15 +448,15 @@ pub async fn get_meal_plan(
         let recipe_img_link: Vec<String> = row.get("recipe_img_link");
         let ischecked: bool = row.get("ischecked"); // Get ischecked
 
-        let meal_plan_entry = meal_plans_map.entry(meal_plan_id).or_insert_with(|| {
-            MealPlanEntry {
+        let meal_plan_entry = meal_plans_map
+            .entry(meal_plan_id)
+            .or_insert_with(|| MealPlanEntry {
                 meal_plan_id: row.get("meal_plan_id"),
                 user_id: row.get("user_id"),
                 name: row.get("name"),
                 date: row.get("date"),
                 recipes: Vec::new(),
-            }
-        });
+            });
 
         meal_plan_entry.recipes.push(RecipeInfo {
             recipe_id,

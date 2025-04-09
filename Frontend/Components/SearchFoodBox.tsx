@@ -16,14 +16,13 @@ const SearchFoodBox: React.FC<{food:FoodInterface; isEdit?:boolean; setChooseFoo
                     observer.disconnect(); 
                 }
             },
-            { rootMargin: "1000px" } 
+            { rootMargin: "100px" } 
         );
 
         if (imageRef.current) observer.observe(imageRef.current);
         return () => observer.disconnect();
     }, [food.image_url]);
 
-    console.log("ง่วง", food)
 
 
     return(
@@ -33,7 +32,7 @@ const SearchFoodBox: React.FC<{food:FoodInterface; isEdit?:boolean; setChooseFoo
                 <div
                 onClick={() => setChooseFood && setChooseFood(food.id)}
                 data-testid="food-card"
-                className="flex justify-center rounded-xl bg-white w-11/12 h-full drop-shadow-lg  p-2">
+                className="flex justify-center rounded-xl bg-white w-11/12 h-full drop-shadow-lg p-2 z-50">
     
                     <div 
                         ref={imageRef}

@@ -4,11 +4,12 @@ import TitleBarStatePage from "@/Components/TitleBarStatePage";
 import Checkbox from '@mui/material/Checkbox';
 import { Register2Interface } from "@/Interfaces/RegisterInterface";
 import liff from "@line/liff";
+import PuffLoader from "react-spinners/PuffLoader";
 
 const Register2: React.FC<Register2Interface> = (data_) => {
   const [selectedDisease, setSelectedDisease] = useState<number[]>([]); 
   const [selectedAllergies, setSelectedAllergies] = useState<number[]>([]); 
-  const [userProfile, setUserProfile] = useState<string | null>("");
+  const [isLoading, setIsLoading] = useState(false);
 
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, value: number) => {
@@ -37,49 +38,55 @@ const Register2: React.FC<Register2Interface> = (data_) => {
     gender: data_.gender,
     kidney_level: data_.kidneyLevel,
     kidney_dialysis: data_.dialysis,
-    users_food_condition: data_.selectCondition,
+    users_food_condition: Array.isArray(data_.selectCondition) ? data_.selectCondition.map(condition => condition + 1) : data_.selectCondition + 1,
     user_disease:  selectedDisease, 
     users_ingredient_allergies: selectedAllergies
   }
 
 
-  const RichMenu = async () => {
-    const url = `https://api.line.me/v2/bot/user/${data_.userUid}/richmenu/${process.env.NEXT_PUBLIC_RICH_MENU_MEMBER}`;  
+  const RichMenu = async () => {  
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/lineapi`, {
         method: "POST",
-        headers:{
-          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_LINE_CHANNEL_ACCESS_TOKEN}`,
+        headers: {
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify({
+          user_id: data_.userUid,
+          richmenu_id: process.env.NEXT_PUBLIC_RICH_MENU_MEMBER
+        }),
       });
-  
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+
+      if (response.ok) {
+        setIsLoading(false)
+        liff.closeWindow();
       }
       return response;
     } catch (error) {
       console.error("Error linking rich menu:", error);
       throw error;
-    } finally{
-      liff.closeWindow();
-    }
+    } 
   }
 
 
   const handleRegister = async () => {
-    const url = `https://api.line.me/v2/bot/user/${data_.userUid}/richmenu/${process.env.NEXT_PUBLIC_RICH_MENU_MEMBER}`;  
-    
-    try{
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(datatoback),
-    });} catch (error) {
-      throw error
-    }finally{
+    setIsLoading(true)
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(datatoback),
+      });
+      if (!response.ok) {
+        throw new Error('Network response no ok');
+      }
+      
+    } catch (error) {
+        console.log("datatoback", datatoback)
+        console.error('Error:', error);
+    } finally{
       await RichMenu()
     }
     
@@ -87,9 +94,16 @@ const Register2: React.FC<Register2Interface> = (data_) => {
   };
   
     
-  
-    
-  
+
+  if (isLoading) 
+    return (
+        <div className="flex w-screen h-screen flex-col justify-center items-center bg-sec"> 
+            {/* <PuffLoader size={60} color="#FF5733" /> */}
+            <PuffLoader
+              size={60}
+            />
+        </div>
+      )
   
 
 
@@ -101,7 +115,7 @@ const Register2: React.FC<Register2Interface> = (data_) => {
           <header className="mb-6">
             <h1 className="text-heading3 font-bold text-gray-800">ระบุข้อมูลสุขภาพของคุณ</h1>
             <h1 className="text-body1 font-bold text-orange400 mt-4">โรคหรืออาการที่เป็นอยู่</h1>
-            <h1 className="text-body3 text-grey300">หากไม่มีโรคหรืออาการอื่นๆสามารถเว้นว่างได้</h1>
+            <h1 className="text-body2 mt-2 text-grey300">หากไม่มีโรคหรืออาการอื่นๆสามารถเว้นว่างได้</h1>
           </header>
 
               <form>
@@ -159,7 +173,7 @@ const Register2: React.FC<Register2Interface> = (data_) => {
 
                 <div className="mb-6">
                   <h1 className="text-body1 font-bold text-orange400 mt-4">อาหารหรือของกินที่แพ้</h1>
-                  <h1 className="text-body3 text-grey300">หากไม่มีอาหารที่แพ้สามารถเว้นว่างได้</h1>
+                  <h1 className="text-body2 mt-2 text-grey300">หากไม่มีอาหารที่แพ้สามารถเว้นว่างได้</h1>
                 </div>
 
                 <div className="flex w-full justify-start items-center text-body2">
@@ -167,49 +181,42 @@ const Register2: React.FC<Register2Interface> = (data_) => {
                     color="success"
                     checked={selectedAllergies.includes(1)}
                     onChange={(e) => handleCheckboxChange2(e, 1)}
-                  /> โรคติดเชื้อระบบทางเดินปัสสาวะส่วนบน
+                  /> ผลิตภัณฑ์จากนม
                 </div>
                 <div className="flex w-full justify-start items-center text-body2">
                   <Checkbox
                     color="success"
                     checked={selectedAllergies.includes(2)}
                     onChange={(e) => handleCheckboxChange2(e, 2)}
-                  /> โรคทางเดินหัวใจ และหลอดเลือด
+                  /> กลูเตน
                 </div>
                 <div className="flex w-full justify-start items-center text-body2">
                   <Checkbox
                     color="success"
                     checked={selectedAllergies.includes(3)}
                     onChange={(e) => handleCheckboxChange2(e, 3)}
-                  /> โรคติดเชื้อในระบบต่างๆ
+                  /> ข้าวสาลี
                 </div>
                 <div className="flex w-full justify-start items-center text-body2">
                   <Checkbox
                     color="success"
                     checked={selectedAllergies.includes(4)}
                     onChange={(e) => handleCheckboxChange2(e, 4)}
-                  /> โรคความดันโรหิตสูง
+                  /> ไข่
                 </div>
                 <div className="flex w-full justify-start items-center text-body2">
                   <Checkbox
                     color="success"
                     checked={selectedAllergies.includes(5)}
                     onChange={(e) => handleCheckboxChange2(e, 5)}
-                  /> โรคแพ้ภูมิตัวเอง
+                  /> อาหารตระกูลถั่ว
                 </div>
                 <div className="flex w-full justify-start items-center text-body2">
                   <Checkbox
                     color="success"
                     checked={selectedAllergies.includes(6)}
                     onChange={(e) => handleCheckboxChange2(e, 6)}
-                  /> โรคเบาหวาน
-                </div>
-                <div className="flex w-full justify-start items-center text-body2">
-                  <Checkbox
-                    color="success"
-                    checked={selectedAllergies.includes(7)}
-                    onChange={(e) => handleCheckboxChange2(e, 7)}
-                  /> โรคเก๊าท์
+                  /> อาหารทะเล
                 </div>
 
                 {/* ปุ่มบันทึก */}

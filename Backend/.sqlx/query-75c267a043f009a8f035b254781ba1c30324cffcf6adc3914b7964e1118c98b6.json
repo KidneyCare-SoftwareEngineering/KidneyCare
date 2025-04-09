@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT \n            r.recipe_id, \n            r.recipe_name,\n            r.recipe_img_link,\n            COALESCE(SUM(CASE WHEN n.name = 'protein' THEN rn.quantity ELSE 0 END), 0) AS protein,\n            COALESCE(SUM(CASE WHEN n.name = 'carbs' THEN rn.quantity ELSE 0 END), 0) AS carbs,\n            COALESCE(SUM(CASE WHEN n.name = 'fat' THEN rn.quantity ELSE 0 END), 0) AS fat,\n            COALESCE(SUM(CASE WHEN n.name = 'sodium' THEN rn.quantity ELSE 0 END), 0) AS sodium,\n            COALESCE(SUM(CASE WHEN n.name = 'phosphorus' THEN rn.quantity ELSE 0 END), 0) AS phosphorus,\n            COALESCE(SUM(CASE WHEN n.name = 'potassium' THEN rn.quantity ELSE 0 END), 0) AS potassium,\n            COALESCE(r.calories, 0) AS calories\n        FROM recipes r\n        LEFT JOIN recipes_nutrients rn ON r.recipe_id = rn.recipe_id\n        LEFT JOIN nutrients n ON rn.nutrient_id = n.nutrient_id\n        WHERE NOT EXISTS (\n            SELECT 1 \n            FROM recipes_ingredient_allergies ria\n            JOIN users_ingredient_allergies uia ON ria.ingredient_allergy_id = uia.ingredient_allergy_id\n            JOIN users u ON u.user_id = uia.user_id\n            WHERE u.user_id = $1 AND ria.recipe_id = r.recipe_id\n        )\n        GROUP BY r.recipe_id;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "recipe_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "recipe_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "recipe_img_link",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 3,
+        "name": "protein",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 4,
+        "name": "carbs",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 5,
+        "name": "fat",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 6,
+        "name": "sodium",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "phosphorus",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 8,
+        "name": "potassium",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 9,
+        "name": "calories",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "75c267a043f009a8f035b254781ba1c30324cffcf6adc3914b7964e1118c98b6"
+}

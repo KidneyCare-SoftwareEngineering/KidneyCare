@@ -6,8 +6,11 @@ import Swal from "sweetalert2";
 import { FiPlus, FiMinus, FiTrash, FiX } from "react-icons/fi";
 import TimeInputPopup from "@/Components/Popup/TimeInputPopup";
 import { Icon } from "@iconify/react/dist/iconify.js";
+import { useParams } from "next/navigation";
 
 export default function CreatePill() {
+	const { id } = useParams();
+	const userUid = id;
 	const [showPopup, setShowPopup] = useState<boolean>(false);
 	const [pill_name, setpill_name] = useState<string>("");
 	const [pill_amount, setpill_amount] = useState<string>("");
@@ -16,7 +19,9 @@ export default function CreatePill() {
 	const [pill_img_link, setpill_img_link] = useState<File[]>([]);
 	const [pill_note, setpill_note] = useState<string>("");
 	const [newTime, setNewTime] = useState<string>("");
-
+	useEffect (() => {
+		console.log("id", userUid)
+	})
 	const confirmDelete = (type: "time" | "image", index: number) => {
 		let message = "";
 		if (type === "time") {
@@ -79,19 +84,58 @@ export default function CreatePill() {
 		if (!event.target.files) return;
 		const files = Array.from(event.target.files);
 
-		// ตรวจสอบขนาดไฟล์ก่อนการอัปโหลด
-		const newImages = files.map((file) => {
-			if (file.size > 1024 * 1024) {
-				Swal.fire("⚠️ ข้อผิดพลาด", "ขนาดรูปภาพต้องไม่เกิน 1 MB", "warning");
-				return null; // ไม่ให้เพิ่มไฟล์ที่มีขนาดเกิน 1MB
-			} else if (file instanceof File) {
-				return file; // กรณีไฟล์ปกติ
-			} else {
-				return new File([], "invalid");
-			}
-		}).filter(Boolean); // กำจัด null หรือ invalid ไฟล์ที่ไม่ต้องการ
+		const compressImage = (file: File): Promise<File> => {
+			return new Promise((resolve) => {
+				const img = new Image();
+				const reader = new FileReader();
 
-		setpill_img_link((prev) => [...prev, ...newImages.filter((img): img is File => img !== null)]);
+				reader.onload = (e) => {
+					if (!e.target) return;
+					img.src = e.target.result as string;
+				};
+
+				img.onload = () => {
+					const canvas = document.createElement("canvas");
+					const maxWidth = 1024;
+					const scaleSize = maxWidth / img.width;
+					canvas.width = maxWidth;
+					canvas.height = img.height * scaleSize;
+
+					const ctx = canvas.getContext("2d");
+					if (ctx) {
+						ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+						canvas.toBlob(
+							(blob) => {
+								if (blob) {
+									resolve(new File([blob], file.name, { type: file.type }));
+								}
+							},
+							file.type,
+							0.7
+						);
+					}
+				};
+
+				reader.readAsDataURL(file);
+			});
+		};
+
+		Promise.all(
+			files.map(async (file) => {
+				if (file.size > 1024 * 1024) {
+					const compressedFile = await compressImage(file);
+					if (compressedFile.size > 1024 * 1024) {
+						Swal.fire("⚠️ ข้อผิดพลาด", "บีบอัดแล้วยังเกิน 1MB", "warning");
+						return null;
+					}
+					return compressedFile;
+				}
+				return file;
+			})
+		).then((newImages) => {
+			const validImages = newImages.filter((img): img is File => img !== null);
+			setpill_img_link((prev) => [...prev, ...validImages]);
+		});
 	};
 
 	// const handleSavePill = async () => {
@@ -159,7 +203,7 @@ export default function CreatePill() {
 		if (pill_img_link.length > 4) return "รูปภาพต้องไม่เกิน 4 รูป";
 		if (pill_img_link.some(img => img.size > 1024 * 1024)) return "ขนาดรูปภาพต้องไม่เกิน 1 MB";
 		if (pill_note.length > 200) return "โน้ตเพิ่มเติมต้องไม่เกิน 200 ตัวอักษร";
-		if (!pill_note.trim()) return "กรุณากรอกโน้ตเพิ่มเติม";
+		// if (!pill_note.trim()) return "กรุณากรอกโน้ตเพิ่มเติม"; 
 		return null; // ผ่านการตรวจสอบ
 	};
 
@@ -185,16 +229,17 @@ export default function CreatePill() {
 		const formattedPillReminderTime = pill_reminder_time.map(time => `${getCurrentDate()}T${time}:00`);
 
 		
-
+	
+		
 
 		const formData = new FormData();
 		formData.append("medicine_name", pill_name);
-		formData.append("medicine_amount", pill_amount);
+		formData.append("medicine_amount", pill_amount.toString());
 		formData.append("medicine_per_times", pill_per_meal.toString());
 		formData.append("medicine_schedule", JSON.stringify(formattedPillReminderTime));
 		formData.append("medicine_note", pill_note);
 		formData.append("medicine_unit", "เม็ด");
-		formData.append("user_line_id", "U5251e034b6d1a207df047bf7fb34e30a"); // wait liff
+		formData.append("user_line_id", String(userUid)); 
 		pill_img_link.forEach((file) => {
 			formData.append("image", file);
 		});
@@ -206,7 +251,13 @@ export default function CreatePill() {
 				body: formData,
 			  });
 			  const data = await response.json();
-			  Swal.fire("✅ บันทึกสำเร็จ!", "ข้อมูลยาของคุณถูกบันทึกแล้ว", "success");
+
+			  if (!response.ok) {
+				throw new Error(data.message || 'เกิดข้อผิดพลาดบางอย่าง');
+			}
+
+			Swal.fire("✅ บันทึกสำเร็จ!", "ข้อมูลยาของคุณถูกบันทึกแล้ว", "success");
+
 			} catch (error) {
 				console.error('Error:', error);
 			} 
@@ -214,10 +265,9 @@ export default function CreatePill() {
 		
 	};
 
-
 	return (
 		<div className="flex flex-col items-center w-full min-h-screen bg-sec">
-			<TitleBar title="เพิ่มยาที่ต้องทาน" href="/pillreminder" />
+			<TitleBar title="เพิ่มยาที่ต้องทาน" href="/PillReminder" />
 
 			{/* ชื่อยา */}
 			<div className="w-10/12 mt-10">

@@ -53,7 +53,7 @@ pub struct MedicineEntry {
 }
 
 const MAX_IMAGE_SIZE: usize = 30 * 1024 * 1024;
-const UPLOAD_URL: &str = "http://localhost:3000/image";
+const UPLOAD_URL: &str = "http://localhost:3002/image";
 
 fn parse_schedule_to_timestamps(schedule: Vec<String>) -> Result<Vec<NaiveDateTime>, ParseError> {
     schedule
@@ -133,30 +133,32 @@ pub async fn insert_medicine_to_db(
     medicine_note: &str,
     medicine_unit: &str,
 ) -> Result<(), String> {
-    let query = r#"
-        INSERT INTO user_medicines (
-            user_id, medicine_schedule, medicine_amount, 
-            medicine_per_times, user_medicine_img_link, 
-            medicine_unit, medicine_name, medicine_note
-        )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-    "#;
+    for schedule in medicine_schedule {
+        let query = r#"
+            INSERT INTO user_medicines (
+                user_id, medicine_schedule, medicine_amount, 
+                medicine_per_times, user_medicine_img_link, 
+                medicine_unit, medicine_name, medicine_note
+            )
+            VALUES ($1, ARRAY[$2]::timestamp[], $3, $4, $5, $6, $7, $8)
+        "#;
 
-    let result = sqlx::query(query)
-        .bind(user_id)
-        .bind(medicine_schedule)
-        .bind(medicine_amount)
-        .bind(medicine_per_times)
-        .bind(image_urls)
-        .bind(medicine_unit)
-        .bind(medicine_name)
-        .bind(medicine_note)
-        .execute(db_pool)
-        .await
-        .map_err(|e| format!("Error inserting into user_medicines: {}", e))?;
+        let result = sqlx::query(query)
+            .bind(user_id)
+            .bind(schedule) // Wrap the schedule in an array using ARRAY[$2]::timestamp[]
+            .bind(medicine_amount)
+            .bind(medicine_per_times)
+            .bind(image_urls)
+            .bind(medicine_unit)
+            .bind(medicine_name)
+            .bind(medicine_note)
+            .execute(db_pool)
+            .await
+            .map_err(|e| format!("Error inserting into user_medicines: {}", e))?;
 
-    if result.rows_affected() == 0 {
-        return Err("No rows affected in database".to_string());
+        if result.rows_affected() == 0 {
+            return Err("No rows affected in database".to_string());
+        }
     }
 
     Ok(())
@@ -437,96 +439,95 @@ pub struct GetTakeMedicineResponse {
     pub user_take_medicine_time: NaiveDate,
 }
 
-#[axum::debug_handler]
-pub async fn take_medicine(
-    Extension(db_pool): Extension<PgPool>,
-    Json(payload): Json<TakeMedicineRequest>,
-) -> Result<Json<TakeMedicineResponse>, (StatusCode, Json<ErrorResponse>)> {
-    // 1. Find user_id from user_line_id
-    let user_id_result = sqlx::query!(
-        "SELECT user_id FROM users WHERE user_line_id = $1",
-        payload.user_line_id
-    )
-    .fetch_optional(&db_pool)
-    .await
-    .map_err(|e| {
-        eprintln!("Database error fetching user_id: {}", e);
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(ErrorResponse {
-                error: "Error fetching user".to_string(),
-            }),
-        )
-    })?;
+// #[axum::debug_handler]
+// pub async fn take_medicine(
+//     Extension(db_pool): Extension<PgPool>,
+//     Json(payload): Json<TakeMedicineRequest>,
+// ) -> Result<Json<TakeMedicineResponse>, (StatusCode, Json<ErrorResponse>)> {
+//     // 1. Find user_id from user_line_id
+//     let user_id_result = sqlx::query!(
+//         "SELECT user_id FROM users WHERE user_line_id = $1",
+//         payload.user_line_id
+//     )
+//     .fetch_optional(&db_pool)
+//     .await
+//     .map_err(|e| {
+//         eprintln!("Database error fetching user_id: {}", e);
+//         (
+//             StatusCode::INTERNAL_SERVER_ERROR,
+//             Json(ErrorResponse {
+//                 error: "Error fetching user".to_string(),
+//             }),
+//         )
+//     })?;
 
-    let user_id = match user_id_result {
-        Some(user) => user.user_id,
-        None => {
-            return Err((
-                StatusCode::NOT_FOUND,
-                Json(ErrorResponse {
-                    error: "User not found".to_string(),
-                }),
-            ));
-        }
-    };
+//     let user_id = match user_id_result {
+//         Some(user) => user.user_id,
+//         None => {
+//             return Err((
+//                 StatusCode::NOT_FOUND,
+//                 Json(ErrorResponse {
+//                     error: "User not found".to_string(),
+//                 }),
+//             ));
+//         }
+//     };
 
-    // 2. Parse the date string
-    let chrono_date = chrono::NaiveDate::parse_from_str(&payload.user_take_medicine_time, "%Y-%m-%d")
-    .map_err(|e| {
-        eprintln!("Error parsing date: {}", e);
-        (
-            StatusCode::BAD_REQUEST,
-            Json(ErrorResponse {
-                error: "Invalid date format. Use YYYY-MM-DD".to_string(),
-            })
-        )
-    })?;
+//     // 2. Parse the date string
+//     let chrono_date = chrono::NaiveDate::parse_from_str(&payload.user_take_medicine_time, "%Y-%m-%d")
+//     .map_err(|e| {
+//         eprintln!("Error parsing date: {}", e);
+//         (
+//             StatusCode::BAD_REQUEST,
+//             Json(ErrorResponse {
+//                 error: "Invalid date format. Use YYYY-MM-DD".to_string(),
+//             })
+//         )
+//     })?;
 
-    // Convert chrono::NaiveDate to time::Date
-    let take_medicine_date = time::Date::from_calendar_date(
-        chrono_date.year(),
-        time::Month::try_from(chrono_date.month() as u8).unwrap(),
-        chrono_date.day() as u8
-    ).map_err(|e| {
-        eprintln!("Error converting date: {:?}", e);
-        (
-            StatusCode::BAD_REQUEST,
-            Json(ErrorResponse {
-                error: "Error converting date".to_string(),
-            })
-        )
-    })?;
+//     // Convert chrono::NaiveDate to time::Date
+//     let take_medicine_date = time::Date::from_calendar_date(
+//         chrono_date.year(),
+//         time::Month::try_from(chrono_date.month() as u8).unwrap(),
+//         chrono_date.day() as u8
+//     ).map_err(|e| {
+//         eprintln!("Error converting date: {:?}", e);
+//         (
+//             StatusCode::BAD_REQUEST,
+//             Json(ErrorResponse {
+//                 error: "Error converting date".to_string(),
+//             })
+//         )
+//     })?;
 
 
-    // 3. Insert into user_take_medicines
-    let insert_result = sqlx::query!(
-        r#"
-        INSERT INTO user_take_medicines (user_id, user_medicine_id, user_take_medicine_time)
-        VALUES ($1, $2, $3)
-        "#,
-        user_id,
-        payload.user_medicine_id,
-        take_medicine_date
-    )
-    .execute(&db_pool)
-    .await;
+//     // 3. Insert into user_take_medicines
+//     let insert_result = sqlx::query!(
+//         r#"
+//         INSERT INTO user_take_medicines (user_medicine_id, user_take_medicine_time)
+//         VALUES ($1, $2, $3)
+//         "#,
+//         payload.user_medicine_id,
+//         take_medicine_date
+//     )
+//     .execute(&db_pool)
+//     .await;
 
-    match insert_result {
-        Ok(_) => Ok(Json(TakeMedicineResponse {
-            message: "Medicine taken record added successfully".to_string(),
-        })),
-        Err(e) => {
-            eprintln!("Database error inserting medicine taken record: {}", e);
-            Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ErrorResponse {
-                    error: "Error adding medicine taken record".to_string(),
-                })
-            ))
-        }
-    }
-}
+//     match insert_result {
+//         Ok(_) => Ok(Json(TakeMedicineResponse {
+//             message: "Medicine taken record added successfully".to_string(),
+//         })),
+//         Err(e) => {
+//             eprintln!("Database error inserting medicine taken record: {}", e);
+//             Err((
+//                 StatusCode::INTERNAL_SERVER_ERROR,
+//                 Json(ErrorResponse {
+//                     error: "Error adding medicine taken record".to_string(),
+//                 })
+//             ))
+//         }
+//     }
+// }
 
 // New struct for the request body
 #[derive(Deserialize)]
@@ -540,200 +541,3 @@ pub struct EditMedicineRequest {
     pub user_medicine_img_link: Option<Vec<String>>,
     pub user_line_id: String,
 }
-
-// #[axum::debug_handler]
-// pub async fn edit_medicine(
-//     Extension(db_pool): Extension<PgPool>,
-//     Path(user_medicine_id): Path<i32>,
-//     mut multipart: Multipart,
-// ) -> Result<Json<Value>, (StatusCode, Json<ErrorResponse>)> {
-//     let mut edit_medicine_request: EditMedicineRequest = EditMedicineRequest {
-//         medicine_name: None,
-//         medicine_amount: None,
-//         medicine_per_times: None,
-//         medicine_schedule: None,
-//         medicine_note: None,
-//         medicine_unit: None,
-//         user_medicine_img_link: None,
-//         user_line_id: String::new(),
-//     };
-//     let mut image_urls = Vec::new();
-
-//     while let Some(field) = multipart.next_field().await.unwrap() {
-//         match field.name() {
-//             Some("image") => {
-//                 let file_name = field.file_name().unwrap_or("image.jpg").to_string();
-//                 let data = field.bytes().await.unwrap();
-
-//                 if data.len() > MAX_IMAGE_SIZE {
-//                     return Err((
-//                         StatusCode::PAYLOAD_TOO_LARGE,
-//                         Json(ErrorResponse {
-//                             error: "Image size exceeds 30MB limit".to_string(),
-//                         }),
-//                     ));
-//                 }
-
-//                 if let Err(e) = ImageReader::new(Cursor::new(&data)).with_guessed_format() {
-//                     return Err((
-//                         StatusCode::BAD_REQUEST,
-//                         Json(ErrorResponse {
-//                             error: format!("Invalid file type: {}", e),
-//                         }),
-//                     ));
-//                 }
-
-//                 let image_data = data.to_vec();
-//                 match upload_image_to_supabase(image_data, &file_name).await {
-//                     Ok(urls) => image_urls.extend(urls),
-//                     Err(e) => {
-//                         return Err((
-//                             StatusCode::INTERNAL_SERVER_ERROR,
-//                             Json(ErrorResponse { error: e }),
-//                         ))
-//                     }
-//                 }
-//             }
-//             Some("medicine_name") => edit_medicine_request.medicine_name = Some(field.text().await.unwrap()),
-//             Some("medicine_amount") => {
-//                 edit_medicine_request.medicine_amount = Some(field.text().await.unwrap().parse().unwrap_or(0))
-//             }
-//             Some("medicine_per_times") => {
-//                 edit_medicine_request.medicine_per_times = Some(field.text().await.unwrap().parse().unwrap_or(0.0))
-//             }
-//             Some("medicine_schedule") => {
-//                 edit_medicine_request.medicine_schedule =
-//                     Some(serde_json::from_str(&field.text().await.unwrap()).unwrap_or_default())
-//             }
-//             Some("medicine_note") => edit_medicine_request.medicine_note = Some(field.text().await.unwrap()),
-//             Some("medicine_unit") => edit_medicine_request.medicine_unit = Some(field.text().await.unwrap()),
-//             Some("user_line_id") => edit_medicine_request.user_line_id = field.text().await.unwrap(),
-//             _ => {}
-//         }
-//     }
-//     if !image_urls.is_empty() {
-//         edit_medicine_request.user_medicine_img_link = Some(image_urls);
-//     }
-
-//     let user_id = get_user_id_by_line_id(&db_pool, &edit_medicine_request.user_line_id)
-//         .await
-//         .map_err(|e| (StatusCode::BAD_REQUEST, Json(ErrorResponse { error: e })))?;
-
-//     let mut updates = Vec::new();
-//     let mut values: Vec<Value> = Vec::new();
-
-//     if let Some(medicine_name) = edit_medicine_request.medicine_name {
-//         updates.push("medicine_name = $".to_string() + &(values.len() + 1).to_string());
-//         values.push(Value::String(medicine_name));
-//     }
-//     if let Some(medicine_amount) = edit_medicine_request.medicine_amount {
-//         updates.push("medicine_amount = $".to_string() + &(values.len() + 1).to_string());
-//         values.push(Value::from(medicine_amount));
-//     }
-//     if let Some(medicine_per_times) = edit_medicine_request.medicine_per_times {
-//         updates.push("medicine_per_times = $".to_string() + &(values.len() + 1).to_string());
-//         values.push(Value::from(medicine_per_times));
-//     }
-//     if let Some(medicine_schedule) = edit_medicine_request.medicine_schedule {
-//         let parsed_schedule = parse_schedule_to_timestamps(medicine_schedule).map_err(|e| {
-//             (
-//                 StatusCode::BAD_REQUEST,
-//                 Json(ErrorResponse {
-//                     error: format!("Failed to parse schedule: {}", e),
-//                 }),
-//             )
-//         })?;
-//         updates.push("medicine_schedule = $".to_string() + &(values.len() + 1).to_string());
-//         values.push(Value::Array(parsed_schedule.into_iter().map(Value::from).collect()));
-//     }
-//     if let Some(medicine_note) = edit_medicine_request.medicine_note {
-//         updates.push("medicine_note = $".to_string() + &(values.len() + 1).to_string());
-//         values.push(Value::String(medicine_note));
-//     }
-//     if let Some(medicine_unit) = edit_medicine_request.medicine_unit {
-//         updates.push("medicine_unit = $".to_string() + &(values.len() + 1).to_string());
-//         values.push(Value::String(medicine_unit));
-//     }
-//     if let Some(user_medicine_img_link) = edit_medicine_request.user_medicine_img_link {
-//         updates.push("user_medicine_img_link = $".to_string() + &(values.len() + 1).to_string());
-//         values.push(Value::Array(user_medicine_img_link.into_iter().map(Value::String).collect()));
-//     }
-
-//     if updates.is_empty() {
-//         return Err((
-//             StatusCode::BAD_REQUEST,
-//             Json(ErrorResponse {
-//                 error: "No fields to update".to_string(),
-//             }),
-//         ));
-//     }
-
-//     let mut query = "UPDATE user_medicines SET ".to_string();
-//     query.push_str(&updates.join(", "));
-//     query.push_str(" WHERE user_medicine_id = $");
-//     query.push_str(&(values.len() + 1).to_string());
-//     query.push_str(" AND user_id = $");
-//     query.push_str(&(values.len() + 2).to_string());
-
-//     values.push(Value::from(user_medicine_id));
-//     values.push(Value::from(user_id));
-
-//     let mut sqlx_query = sqlx::query(&query);
-//     for value in values {
-//         sqlx_query = match value {
-//             Value::String(s) => sqlx_query.bind(s),
-//             Value::Number(n) => {
-//                 if let Some(i) = n.as_i64() {
-//                     sqlx_query.bind(i)
-//                 } else if let Some(f) = n.as_f64() {
-//                     sqlx_query.bind(f)
-//                 } else {
-//                     sqlx_query
-//                 }
-//             },
-//             Value::Array(arr) => {
-//                 if let Some(first) = arr.first() {
-//                     match first {
-//                         Value::String(_) => {
-//                             let string_vec: Vec<String> = arr.into_iter().map(|v| v.as_str().unwrap_or_default().to_string()).collect();
-//                             sqlx_query.bind(string_vec)
-//                         },
-//                         _ => {
-//                             let naive_date_time_vec: Vec<NaiveDateTime> = arr.into_iter().filter_map(|v| {
-//                                 if let Value::String(s) = v {
-//                                     NaiveDateTime::parse_from_str(s, "%Y-%m-%dT%H:%M:%S").ok()
-//                                 } else {
-//                                     None
-//                                 }
-//                             }).collect();
-//                             sqlx_query.bind(naive_date_time_vec)
-//                         }
-//                     }
-//                 } else {
-//                     sqlx_query
-//                 }
-//             },
-//             _ => sqlx_query,
-//         };
-//     }
-
-//     let result = sqlx_query.execute(&db_pool).await.map_err(|e| {
-//         (
-//             StatusCode::INTERNAL_SERVER_ERROR,
-//             Json(ErrorResponse {
-//                 error: format!("Database error: {}", e),
-//             }),
-//         )
-//     })?;
-
-//     if result.rows_affected() == 0 {
-//         return Err((
-//             StatusCode::NOT_FOUND,
-//             Json(ErrorResponse {
-//                 error: "Medicine not found".to_string(),
-//             }),
-//         ));
-//     }
-
-//     Ok(Json(json!({ "message": "Medicine updated successfully" })))
-// }

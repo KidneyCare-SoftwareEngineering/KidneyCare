@@ -26,6 +26,9 @@ export default function MealPlan() {
   
 
 
+  useEffect(() => {
+    setIsEdit(false)
+  },[dateSelected])
   // Line LIFF
     useEffect(() => {
         const initLiff = async () => {
@@ -56,9 +59,6 @@ export default function MealPlan() {
 
 
 
-  useEffect(() => {
-    console.log("userUid", userUid);
-  },[userUid])
   
   useEffect(() => {
       const get_meal_plan = async () => {
@@ -115,15 +115,26 @@ export default function MealPlan() {
             
 
 
-            {!mealPlans?.meal_plans || mealPlans.meal_plans.length === 0 ? (
-                    <Link 
-                    href={`mealplan/createplan/${userUid}`} 
-                    className="fixed size-12 bg-orange300 rounded-full right-3 bottom-6 flex justify-center items-center"
-                    >
-                        <Icon icon="ic:baseline-plus" height="32" className="text-white"/>
-                    </Link>
-            ) : 
-            (
+            {userUid !== "" && !isEdit ? (
+            <>
+                { !userUid || !mealPlans?.meal_plans || mealPlans.meal_plans.length === 0 ? (
+                    <>
+                        <div className='flex fixed right-16 bottom-12 justify-end'>
+                            <p className='mb-2'>
+                                กดเพื่อสร้างแผนมื้ออาหาร
+                            </p> 
+                                <img src="Arrow.png" className='mt-3 ml-2'/>
+                            
+                        </div>
+                        <Link 
+                        href={`mealplan/createplan/${userUid}`} 
+                        className="fixed size-12 bg-orange300 rounded-full right-3 bottom-6 flex justify-center items-center"
+                        >
+                            <Icon icon="ic:baseline-plus" height="32" className="text-white"/>
+                        </Link>
+                    </>
+                ) : 
+                (
                 <AnimatePresence>
                     {isMenuOpen ? (
                         <motion.div 
@@ -201,8 +212,10 @@ export default function MealPlan() {
                     )}
                     
                 </AnimatePresence>
-            )
-            }
+            )}
+            </>) : (
+            <>
+            </>)}
             
 
         </div>

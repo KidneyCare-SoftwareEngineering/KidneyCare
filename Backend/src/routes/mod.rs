@@ -6,3 +6,4 @@ pub mod admin;
 pub mod chatbot;
 pub mod ingredient;
 pub mod recipe;
+pub mod lineapi;

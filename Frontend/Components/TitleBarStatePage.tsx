@@ -6,7 +6,7 @@ const TitleBarStatePage:React.FC<Pick<TitleBar, 'title' | 'statePage' | 'setStat
 
     return(
         <>
-           <div className="relative flex justify-center items-center bg-white w-screen h-20 rounded-b-xl drop-shadow-lg text-heading4 font-extrabold ">
+           <div className="relative flex justify-center items-center bg-white w-screen  min-h-20 rounded-b-xl drop-shadow-lg text-heading4 font-extrabold ">
                 <div className="absolute left-4" onClick={() => setStatePage(statePage - 1)}>
                     <Icon
                         icon="majesticons:arrow-left"

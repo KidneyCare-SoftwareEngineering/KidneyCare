@@ -68,10 +68,13 @@ const app = new Elysia()
       }),
     }
   )
+  .get('/', () => {
+    return 'hello kidneycare-supabase';
+  })
   .listen(3002);
 
 console.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
 );
 
-export const api = treaty<typeof app>('localhost:3002');
+export const api = treaty<typeof app>('0.0.0.0:3002');

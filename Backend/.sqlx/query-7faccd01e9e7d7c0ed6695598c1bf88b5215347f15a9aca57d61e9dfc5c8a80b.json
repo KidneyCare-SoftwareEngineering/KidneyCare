@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO users_food_condition_types (user_id, food_condition_type_id) VALUES ($1, $2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7faccd01e9e7d7c0ed6695598c1bf88b5215347f15a9aca57d61e9dfc5c8a80b"
+}

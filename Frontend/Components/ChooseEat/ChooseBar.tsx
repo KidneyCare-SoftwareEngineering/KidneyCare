@@ -15,6 +15,8 @@ import SearchFoodBox from "@/Components/SearchFoodBox";
 import PuffLoader from "react-spinners/PuffLoader";
 import SearchBox from "@/Components/SearchBox";
 import ChooseFood from "./ChooseFood_Edit/page";
+import { UserInformation } from "@/Interfaces/UserInformation";
+import Portal from "./Portal";
 
 
 const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: boolean, setIsEdit: React.Dispatch<React.SetStateAction<boolean>>; userUid: string; setIsLoading: (value: boolean) => void}> = ({ MealPlans, desc, isEdit, setIsEdit, userUid, setIsLoading}) => {
@@ -28,6 +30,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   const [localMealPlans, setLocalMealPlans] = useState<Meal_planInterface>(MealPlans);
   const [editItem, setEditItem] = useState<recipesInterface[]>([]);
   const [mergeItems, setMergeItems] = useState<recipesInterface[]>([]);
+  const [userData, setUserData] = useState<UserInformation>()
 
   // Aniamtion
   const transition = { type: "spring", stiffness: 200, damping: 20 };
@@ -41,19 +44,25 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   };
 
 
-
   // Food|Pill Check and status
   const isMedicine = desc === "ยา";
-  const allItems = isMedicine 
-    ? localMealPlans.medicines || [] 
-    : localMealPlans.meal_plans[0].recipes || [];
+  const [allItems, setAllItems] = useState<recipesInterface[]>(() => 
+    isMedicine 
+      ? localMealPlans.medicines || [] 
+      : localMealPlans.meal_plans[0].recipes || []
+  );
+  useEffect(() => {
+      setAllItems(isMedicine 
+        ? localMealPlans.medicines || [] 
+        : localMealPlans.meal_plans[0].recipes || []);
+    }, [localMealPlans, isMedicine]);
   const eatenItems = isMedicine 
     ? allItems.filter(item => item.ischecked) 
     : allItems.filter(item => item.ischecked);
   const notEatenItems = isMedicine 
     ? allItems.filter(item => !item.ischecked) 
     : allItems.filter(item => !item.ischecked);
-  const mealTypes = ["อาหารเช้า", "อาหารกลางวัน", "อาหารเย็น", "ของว่าง"];
+  const mealTypes = ["อาหารเช้า", "อาหารกลางวัน", "อาหารเย็น", "มื้ออาหารเพิ่มเติม"];
 
 
   useEffect(() => {
@@ -110,6 +119,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   };
 
 
+
  
 
   // ทำเครื่องหมายว่ายังไม่กิน
@@ -146,6 +156,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
     } 
   };
 
+  
 
   const handleSearch = (searchTerm: string) => {
     if (foodData) {
@@ -167,10 +178,6 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
     setIsSheetOpen(false);
   };
 
-  useEffect(() => {
-    console.log("อาหารที่ตกลง", foodChoosedData);
-    console.log("allItems", allItems);
-  })
 
   useEffect(() => {
     const newItem: recipesInterface = {
@@ -178,8 +185,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
       recipe_name: foodChoosedData?.recipe_name || "",
       recipe_img_link: foodChoosedData?.image_url ? [foodChoosedData.image_url] : [],
       ischecked: false,
-      meal_plan_recipe_id: 123456789,
-      meal_time: 1,
+      meal_time: foodChoosedData?.meal_time || 0,
       calories: foodChoosedData?.calories || 0,
     }
 
@@ -193,14 +199,26 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   
 
   const handleDelete = (item: recipesInterface) => {
-    const updatedItems = mergeItems.filter(recipe => recipe.meal_plan_recipe_id !== item.meal_plan_recipe_id);
-    setMergeItems(updatedItems);
+    const updatedMergeItems = mergeItems.filter(recipe => recipe.meal_plan_recipe_id !== item.meal_plan_recipe_id);
+    const updatedAllItems = allItems.filter(recipe => recipe.meal_plan_recipe_id !== item.meal_plan_recipe_id);
+    const updatedEditItems = editItem.filter(recipe => recipe.meal_plan_recipe_id !== item.meal_plan_recipe_id);
 
+    setMergeItems(updatedMergeItems);
+    setAllItems(updatedAllItems);
+    setEditItem(updatedEditItems);
   };
   
+
   useEffect(() => {
-    console.log("merge", mergeItems)
-  })
+      fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/get_user_info?user_line_id=${userUid}`)
+        .then(response => response.json())
+        .then(data => {
+          setUserData(data)
+        })
+        .catch(error => {
+          console.error('Error fetching user data:', error)
+        })
+    }, [userUid])
 
 
 
@@ -220,6 +238,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
           body: JSON.stringify(dataforAPI),
       });
       const data = await response.json();
+      console.log("dataforedit",dataforAPI)
       console.log (data)
     }
     catch (error) {
@@ -233,12 +252,23 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
       ...prev,
       meal_plans: prev.meal_plans.map((mealPlan, index) =>
         index === 0 
-          ? { ...mealPlan, recipes: [...mealPlan.recipes, ...editItem] }
+          ? { 
+              ...mealPlan, 
+              recipes: [
+                ...mealPlan.recipes, 
+                ...editItem.map(item => ({
+                  ...item,
+                  meal_plan_recipe_id: item.meal_plan_recipe_id ?? 0 
+                }))
+              ] 
+            }
           : mealPlan
       )
     }));
     setIsEdit(false);
   };
+
+
 
   const renderItem = (item: recipesInterface, isEaten: boolean) => {
     if (isMedicine) {
@@ -287,9 +317,9 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
           initial="hidden"
           animate="visible"
           exit="exit"
-          className={`flex w-10/12 ${isEaten ? 'bg-grey200 border border-grey300' : 'bg-white'} min-h-24 drop-shadow-md rounded-xl mt-3`}
+          className={`flex w-10/12 ${isEaten ? 'bg-grey200 border border-grey300' : 'bg-white'} min-h-24 drop-shadow-md rounded-xl mt-3 z-1`} //มันบัคซ้อนหน้าอื่นตอน Deploy
         >
-          {!isEaten || !isEdit ? (
+          {!isEdit ? (
             <Link href={`/fooddetail/${item.recipe_id}`} className="flex w-4/12 justify-center items-center">
               <img src={`${item.recipe_img_link}`} alt="food" className="size-24 rounded-full p-2 object-cover" />
             </Link>
@@ -302,7 +332,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
             <div className="flex text-body3 text-grey300">
               {mealTypes[item.meal_time - 1 ]}
             </div>
-            {!isEaten || !isEdit ? (
+            {!isEdit ? (
               <Link href={`/fooddetail/${item.recipe_id}`}
                 className="flex text-body1 font-bold text-black py-3 line-clamp-1">
                 {item.recipe_name}
@@ -354,6 +384,13 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   },[])
 
 
+  useEffect(() => {
+    if (chooseFood) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'auto'
+    }
+  }, [chooseFood])
 
 
 
@@ -366,11 +403,13 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
       </div>
     )}
 
-
+      {/* เปิด popup detail screen */}
       {chooseFood && foodChoosed !== undefined && (
-        <div className="fixed w-screen h-screen inset-0 bg-white z-[10000]">
-          <ChooseFood id={foodChoosed} setChooseFood={setChooseFood} setFoodChoosedData={setFoodChoosedData} setIsSheetOpen={setIsSheetOpen} />
-        </div>
+        <Portal>
+          <div className="fixed w-screen h-screen inset-0 bg-white z-50 overflow-y-auto">
+            <ChooseFood id={foodChoosed} setChooseFood={setChooseFood} setFoodChoosedData={setFoodChoosedData} setIsSheetOpen={setIsSheetOpen} />
+          </div>
+        </Portal>
       )}
 
       
@@ -380,7 +419,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="flex flex-col w-full items-center"
+          className="flex flex-col w-full items-center z-1"
         >
           
           {isEdit ? 
@@ -410,67 +449,71 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
 
       {/* edit popup */}
       {isEdit && (
-        <>
+        
+          <>
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-            <SheetTrigger className="flex justify-center items-center w-10/12 bg-white min-h-24 drop-shadow-md rounded-xl mt-3 z-0">
-              <Icon icon="mdi:plus" className="text-black size-5" />
-            </SheetTrigger>
-            <SheetContent side="bottom" className="flex w-full h-10/12 flex-col overflow-y-auto max-h-[70vh]">
+          <SheetTrigger className="flex border border-grey300 justify-center items-center w-10/12 bg-white min-h-24 drop-shadow-md rounded-xl mt-3 z-1">
+            <Icon icon="mdi:plus" className="text-black size-5" />
+          </SheetTrigger>
+
+            <SheetContent side="bottom" className="h-3/4 max-h-screen justify-center items-center">
               <SheetHeader>
-                <SheetTitle>ค้นหาเมนูอาหาร</SheetTitle>
+                <SheetTitle className="flex pb-4 justify-center items-center">ค้นหาเมนูอาหาร</SheetTitle>
               </SheetHeader>
 
+              <SearchBox
+                onSearch={handleSearch}
+                foodData={foodData}
+                setFilteredFoodData={setFilteredFoodData} />
 
-              <div className="flex flex-col w-full">
-                <SearchBox
-                  onSearch={handleSearch}
-                  foodData={foodData}
-                  setFilteredFoodData={setFilteredFoodData}
-                />
-                {filteredFoodData.length > 0 ? (
-                  filteredFoodData.map((food, index) => (
-                    <motion.div
-                      key={food.id}
-                      variants={itemVariants}
-                      initial="hidden"
-                      animate="visible"
-                      custom={index}
-                      className='flex w-full h-full justify-center my-1'
-                    >
-                      <SearchFoodBox key={food.id} food={food} isEdit={isEdit} setChooseFood={handleChooseFood} />
-                    </motion.div>
-                  ))
-                ) : (
-                  <div className="text-center text-gray-500 mt-8">
-                    <PuffLoader />
-                  </div>
-                )}
+              <div className="flex flex-col w-screen justify-start items-center h-full pt-4 pb-24 pr-4">
+
+                <div className="flex flex-col w-full h-full overflow-y-auto gap-4 pb-8">
+                  {filteredFoodData.length > 0 ? (
+                    filteredFoodData.map((food, index) => (
+                      <motion.div
+                        key={food.id}
+                        variants={itemVariants}
+                        initial="hidden"
+                        animate="visible"
+                        custom={index}
+                        className='flex w-full h-full justify-start '
+                      >
+                        <SearchFoodBox key={food.id} food={food} isEdit={isEdit} setChooseFood={handleChooseFood} />
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="text-center w-full text-gray-500">
+                      <img src="Nofoodsearch.png" width={300} height={300} className=" mt-16" />
+                      <div className="text-heading3">ไม่พบเมนูอาหาร</div>
+                    </div>
+                  )}
+                </div>
+
               </div>
+
+
             </SheetContent>
-          </Sheet>
 
-
-          <button
-            onClick={() => {
-              handleSaveMealPlan_Edit()
-              setEditItem([])
-            }}
-            className="flex bottom-24 w-10/12 justify-center items-center my-4 bg-orange300 text-white py-4 rounded-xl text-body1 font-bold"
-          >
+        </Sheet><button
+          onClick={() => {
+            handleSaveMealPlan_Edit();
+            setEditItem([]);
+          } }
+          className="flex bottom-24 w-10/12 justify-center items-center my-4 bg-orange300 text-white py-4 rounded-xl text-body1 font-bold"
+        >
             บันทึก
-          </button>
-
-          <button
+          </button><button
             onClick={() => {
-              setIsEdit(false)
-              setEditItem([])
-              setMergeItems([...allItems])
-            }}
+              setIsEdit(false);
+              setEditItem([]);
+              setMergeItems([...allItems]);
+            } }
             className="flex bottom-24 w-10/12 justify-center items-center border border-orange300 text-orange300 py-4 rounded-xl text-body1 font-bold"
           >
             ยกเลิก
           </button>
-        </>
+          </>
       )}
 
 
@@ -484,7 +527,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
             <div>{desc}ที่รับประทานแล้ว</div>
             <div className="flex text-body3">
               <div className="font-bold">{totalCalories}</div>
-              <div className="font-bold text-grey300"> &nbsp;/ 2785 แคลอรี่ </div>
+              <div className="font-bold text-grey300"> &nbsp;/ {userData?.calories_limit} แคลอรี่ </div>
             </div>
           </div>
         )

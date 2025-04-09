@@ -14,6 +14,7 @@ export default function SearchFood() {
   const [foodData, setFoodData] = useState<FoodInterface[]>([]);
   const [filteredFoodData, setFilteredFoodData] = useState<FoodInterface[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false)
   const itemsPerPage = 12;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -86,16 +87,23 @@ export default function SearchFood() {
   
 
   useEffect(() => {
+    setIsLoading(true)
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/food_cards`)
       .then(response => response.json())
       .then(data => {
         setFoodData(data)
         setFilteredFoodData(data);
+        setIsLoading(false)
       })
       .catch(error => {
         console.error('Error fetching user data:', error)
-      })
+      } 
+    )
   }, [])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  },[filteredFoodData])
 
   const handleSearch = (searchTerm: string) => {
     if (foodData) {
@@ -122,7 +130,7 @@ export default function SearchFood() {
     }),
   };
 
-  // if(!foodData) return <div className='flex w-screen h-screen justify-center items-center'> <PuffLoader /> </div>
+  if(isLoading) return <div className='flex w-screen h-screen justify-center items-center'> <PuffLoader /> </div>
 
   return (
     <>
@@ -148,8 +156,9 @@ export default function SearchFood() {
             </motion.div>
           ))
         ) : (
-          <div className="text-center text-gray-500 mt-8">
-            <PuffLoader />
+          <div className="text-center text-gray-500">
+            <img src="Nofoodsearch.png" width={300} height={300} className=" mt-16" />
+            <div className="text-heading3">ไม่พบเมนูอาหาร</div>
           </div>
         )}
 

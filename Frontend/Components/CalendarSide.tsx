@@ -57,6 +57,9 @@ export default function CalendarSide({ onDateSelect }: CalendarSideProps) {
     const prevDate = new Date(selectDate);
     prevDate.setDate(selectDate.getDate() - 1);
     setSelectDate(prevDate);
+    if (onDateSelect) {
+      onDateSelect(prevDate);
+    }
   };
 
   const handleNext = () => {
@@ -64,6 +67,9 @@ export default function CalendarSide({ onDateSelect }: CalendarSideProps) {
     const nextDate = new Date(selectDate);
     nextDate.setDate(selectDate.getDate() + 1);
     setSelectDate(nextDate);
+    if (onDateSelect) {
+      onDateSelect(nextDate);
+    }
   };
   
   

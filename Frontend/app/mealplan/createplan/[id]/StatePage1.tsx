@@ -39,11 +39,9 @@ const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPl
           }
         } catch (error) {
             console.error('Error:', error);
-            console.log("mealplan", mealPlan)
         } finally {
             setLoading(false)
-            console.log("mealplan", mealPlan)
-            // router.push('/mealplan');
+            router.push('/mealplan');
         }
       }
     if (loading) 
@@ -54,7 +52,7 @@ const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPl
         )
     return (
     <>
-        <div className="flex w-full h-full flex-col items-center pb-10  bg-sec">
+        <div className="flex w-full h-screen flex-col items-center overflow-y-auto bg-sec pb-8">
             <TitleBarStatePage title="รายการอาหารของคุณ" statePage={statePage} setStatePage={setStatePage}/>
             <img
                 src="/Untitled-3.jpg"
@@ -63,29 +61,47 @@ const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPl
             
             <div className="flex w-full px-6 pt-6 text-heading4 font-bold">แผนอาหารทั้งหมด {selectedValue} วัน</div>
             <div className="flex w-full px-6 pt-2 text-body2 text-grey300">สามารถดูและปรับแต่งเมนูในแต่ละวันได้</div>
-            {mealPlan?.mealplans.map((data,index) => (
+            {mealPlan?.mealplans?.map((data,index) => (
+                
+                mealPlan?.mealplans?.length == 30 ? 
+                
+                <div
+                  key={index} 
+                  onClick={() => {
+                    setStatePage(2)
+                    setDayIndex(index)
+                  }}
+                  className="flex w-11/12 h-14 rounded-xl drop-shadow-xl bg-white mt-6 px-4"> 
+                  <div className="flex w-11/12 justify-start items-center text-body1 font-bold min-h-12"> 
+                      วันที่ {index+1}
+                  </div>
+                  <div className="flex w-1/12 justify-center items-center">
+                      <Icon icon="weui:arrow-filled" height="24px"/>
+                  </div>
+              </div>
+                :
                 <motion.div 
-                    variants={itemVariants} 
-                    initial="hidden" 
-                    animate="visible" 
-                    custom={index}
-                    key={index} 
-                    onClick={() => {
-                      setStatePage(2)
-                      setDayIndex(index)
-                    }}
-                    className="flex w-11/12 h-14 rounded-xl drop-shadow-xl bg-white mt-6 px-4"> 
-                    <div className="flex w-11/12 justify-start items-center text-body1 font-bold min-h-12"> 
-                        วันที่ {index+1}
-                    </div>
-                    <div className="flex w-1/12 justify-center items-center">
-                        <Icon icon="weui:arrow-filled" height="24px"/>
-                    </div>
-                </motion.div>
+                  variants={itemVariants} 
+                  initial="hidden" 
+                  animate="visible" 
+                  custom={index}
+                  key={index} 
+                  onClick={() => {
+                    setStatePage(2)
+                    setDayIndex(index)
+                  }}
+                  className="flex w-11/12 h-14 rounded-xl drop-shadow-xl bg-white mt-6 px-4"> 
+                  <div className="flex w-11/12 justify-start items-center text-body1 py-2 font-bold min-h-12"> 
+                      วันที่ {index+1}
+                  </div>
+                  <div className="flex w-1/12 justify-center items-center">
+                      <Icon icon="weui:arrow-filled" height="24px"/>
+                  </div>
+              </motion.div>
             ))}
             
             {/* loading component */}
-            <div className="flex w-11/12 h-14 rounded-xl drop-shadow-xl bg-white mt-6 px-4 "> 
+            {/* <div className="flex w-11/12 h-14 rounded-xl drop-shadow-xl bg-white mt-6 px-4 "> 
                 <div className="flex w-11/12 animate-pulse justify-start items-center text-body1 font-bold"> 
                     
                 <div className="flex bg-slate-300 rounded-full size-8 mr-4"/>
@@ -95,11 +111,11 @@ const StatePage1 : React.FC<StatePage1Props> = ({setStatePage, statePage, mealPl
                 <div className="flex w-1/12 animate-pulse justify-center items-center">
                     <Icon icon="weui:arrow-filled" height="24px"/>
                 </div>
-            </div>
+            </div> */}
 
             <button
                 onClick={() => handleCreateNewMealplans()}
-                className="flex bottom-24 w-10/12 justify-center items-center my-4 bg-orange300 text-white py-4 rounded-xl text-body1 font-bold"
+                className="flex bottom-24 w-10/12 justify-center items-center my-4 mt-8 bg-orange300 text-white py-4 rounded-xl text-body1 font-bold"
             >
             บันทึก
             </button>
