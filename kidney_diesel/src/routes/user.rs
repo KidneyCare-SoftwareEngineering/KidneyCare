@@ -127,9 +127,9 @@ pub async fn sum_nutrients_by_date(
         .inner_join(recipes_nutrients::table.on(meal_plan_recipes::recipe_id.eq(recipes_nutrients::recipe_id)))
         .filter(meal_plans::user_id.eq(user_id_value))
         .filter(meal_plans::date.eq(params.date.date()))
+        .filter(meal_plan_recipes::ischecked.eq(true)) // Only include checked meal plan recipes
         .group_by(recipes_nutrients::nutrient_id)
         .select((recipes_nutrients::nutrient_id, diesel::dsl::sum(recipes_nutrients::quantity)))
-        .group_by(recipes_nutrients::nutrient_id)
         .load::<(i32, Option<f64>)>(&mut conn)
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 

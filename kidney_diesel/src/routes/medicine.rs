@@ -165,10 +165,18 @@ pub async fn take_medicine(
             )
         })?;
 
-    
-    // 2. Parse the date string
+    // Log the incoming payload
+    eprintln!(
+        "Processing take_medicine request: user_medicine_id = {}, user_take_medicine_time = {}, is_medicine_taken = {:?}",
+        payload.user_medicine_id,
+        payload.user_take_medicine_time,
+        payload.is_medicine_taken
+    );
+
+    // Parse the date string
     let take_medicine_date = chrono::NaiveDate::parse_from_str(&payload.user_take_medicine_time, "%Y-%m-%d")
         .map_err(|_| {
+            eprintln!("Invalid date format: {}", payload.user_take_medicine_time);
             (
                 StatusCode::BAD_REQUEST,
                 Json(ErrorResponse {
@@ -177,25 +185,88 @@ pub async fn take_medicine(
             )
         })?;
 
-    // 3. Insert into user_take_medicines
-    diesel::insert_into(user_take_medicines::table)
-        .values((
-            user_take_medicines::user_medicine_id.eq(payload.user_medicine_id),
-            user_take_medicines::user_take_medicine_time.eq(Some(take_medicine_date)),
-            user_take_medicines::is_medicine_taken.eq(payload.is_medicine_taken.unwrap_or(false)), // Default to false
-        ))
-        .execute(&mut conn)
+    // Log the parsed date
+    eprintln!("Parsed take_medicine_date: {}", take_medicine_date);
+
+    // Check if the record exists
+    let existing_record = user_take_medicines::table
+        .filter(
+            user_take_medicines::user_medicine_id
+                .eq(payload.user_medicine_id)
+                .and(user_take_medicines::user_take_medicine_time.eq(Some(take_medicine_date))),
+        )
+        .first::<UserTakeMedicine>(&mut conn)
+        .optional()
         .map_err(|err| {
-            eprintln!("Database error inserting medicine taken record: {}", err);
+            eprintln!(
+                "Database error checking existing record: user_medicine_id = {}, user_take_medicine_time = {}, error = {}",
+                payload.user_medicine_id, take_medicine_date, err
+            );
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ErrorResponse {
-                    error: "Error adding medicine taken record".to_string(),
+                    error: "Error checking existing medicine record".to_string(),
                 }),
             )
         })?;
 
+    if let Some(_) = existing_record {
+        // Update the existing record
+        diesel::update(
+            user_take_medicines::table.filter(
+                user_take_medicines::user_medicine_id
+                    .eq(payload.user_medicine_id)
+                    .and(user_take_medicines::user_take_medicine_time.eq(Some(take_medicine_date))),
+            ),
+        )
+        .set(user_take_medicines::is_medicine_taken.eq(payload.is_medicine_taken.unwrap_or(false))) // Default to false
+        .execute(&mut conn)
+        .map_err(|err| {
+            eprintln!(
+                "Database error updating medicine taken record: user_medicine_id = {}, user_take_medicine_time = {}, error = {}",
+                payload.user_medicine_id, take_medicine_date, err
+            );
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ErrorResponse {
+                    error: "Error updating medicine taken record".to_string(),
+                }),
+            )
+        })?;
+
+        eprintln!(
+            "Successfully updated medicine taken record: user_medicine_id = {}, user_take_medicine_time = {}",
+            payload.user_medicine_id, take_medicine_date
+        );
+    } else {
+        // Insert a new record
+        diesel::insert_into(user_take_medicines::table)
+            .values((
+                user_take_medicines::user_medicine_id.eq(payload.user_medicine_id),
+                user_take_medicines::user_take_medicine_time.eq(Some(take_medicine_date)),
+                user_take_medicines::is_medicine_taken.eq(payload.is_medicine_taken.unwrap_or(false)), // Default to false
+            ))
+            .execute(&mut conn)
+            .map_err(|err| {
+                eprintln!(
+                    "Database error inserting new medicine taken record: user_medicine_id = {}, user_take_medicine_time = {}, error = {}",
+                    payload.user_medicine_id, take_medicine_date, err
+                );
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(ErrorResponse {
+                        error: "Error inserting new medicine taken record".to_string(),
+                    }),
+                )
+            })?;
+
+        eprintln!(
+            "Successfully inserted new medicine taken record: user_medicine_id = {}, user_take_medicine_time = {}",
+            payload.user_medicine_id, take_medicine_date
+        );
+    }
+
     Ok(Json(TakeMedicineResponse {
-        message: "Medicine taken record added successfully".to_string(),
+        message: "Medicine taken record processed successfully".to_string(),
     }))
 }
