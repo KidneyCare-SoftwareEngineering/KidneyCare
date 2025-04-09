@@ -24,19 +24,22 @@ pub struct GetMedicineResponse {
 pub struct MedicineInfo {
     pub user_medicine_id: i32,
     pub user_id: i32,
-    pub medicine_schedule: Vec<String>,
-    pub medicine_amount: Option<i32>,
     pub medicine_per_times: f64,
-    pub user_medicine_img_link: Option<Vec<String>>,
+    pub user_medicine_img_link: Option<Vec<Option<String>>>,
     pub medicine_unit: Option<String>,
     pub medicine_name: Option<String>,
     pub medicine_note: Option<String>,
+    pub medicine_schedule: Option<Vec<Option<chrono::NaiveDateTime>>>,
+    pub medicine_amount: Option<i32>,
 }
 
 #[derive(Serialize, Queryable, Selectable)]
 #[diesel(table_name = user_take_medicines)]
 pub struct UserTakeMedicine {
-    pub is_medicine_taken: Option<bool>,
+    pub user_take_medicines_id: i32,
+    pub user_medicine_id: Option<i32>,                // Matches Nullable<Int4>
+    pub user_take_medicine_time: Option<chrono::NaiveDate>, // Matches Nullable<Date>
+    pub is_medicine_taken: Option<bool>,             // Matches Nullable<Bool>
 }
 
 #[derive(Serialize)]
@@ -46,6 +49,44 @@ pub struct Medicine {
 }
 
 type MedicineRow = (MedicineInfo, UserTakeMedicine);
+
+#[axum::debug_handler]
+pub async fn get_all_user_medicines(
+    Extension(db_pool): Extension<Arc<DbPool>>,
+) -> Result<Json<Vec<MedicineInfo>>, StatusCode> {
+    let mut conn = db_pool
+        .get()
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    let results = user_medicines::table
+        .select(MedicineInfo::as_select())
+        .load::<MedicineInfo>(&mut conn)
+        .map_err(|err| {
+            eprintln!("Failed to fetch user medicines: {}", err);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    Ok(Json(results))
+}
+
+#[axum::debug_handler]
+pub async fn get_all_user_take_medicines(
+    Extension(db_pool): Extension<Arc<DbPool>>,
+) -> Result<Json<Vec<UserTakeMedicine>>, StatusCode> {
+    let mut conn = db_pool
+        .get()
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    let results = user_take_medicines::table
+        .select(UserTakeMedicine::as_select())
+        .load::<UserTakeMedicine>(&mut conn)
+        .map_err(|err| {
+            eprintln!("Failed to fetch user take medicines: {}", err);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    Ok(Json(results))
+}
 
 // #[axum::debug_handler]
 // pub async fn get_medicine(
