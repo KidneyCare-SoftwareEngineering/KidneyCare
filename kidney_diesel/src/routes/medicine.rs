@@ -1,6 +1,7 @@
 use crate::schema::{user_medicines, user_take_medicines, users};
 use axum::http::StatusCode;
 use axum::{Extension, Json};
+use axum::extract::Query;
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool};
 use serde::{Deserialize, Serialize};
@@ -12,6 +13,39 @@ pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 pub struct GetMedicineRequest {
     pub user_line_id: String,
     pub date: String,
+}
+
+#[derive(Deserialize)]
+pub struct GetUserMedicinesRequest {
+    pub user_line_id: String,
+}
+
+#[derive(Deserialize)]
+pub struct GetUserMedicinesQuery {
+    pub user_line_id: String,
+}
+
+#[derive(Deserialize)]
+pub struct GetUserTakeMedicinesQuery {
+    pub user_line_id: String,
+}
+
+#[derive(Deserialize)]
+pub struct TakeMedicineRequest {
+    pub user_line_id: String,
+    pub user_medicine_id: i32,
+    pub user_take_medicine_time: String,
+    pub is_medicine_taken: Option<bool>, // Optional field
+}
+
+#[derive(Serialize)]
+pub struct TakeMedicineResponse {
+    pub message: String,
+}
+
+#[derive(Serialize)]
+pub struct ErrorResponse {
+    pub error: String,
 }
 
 #[derive(Serialize)]
@@ -53,12 +87,25 @@ type MedicineRow = (MedicineInfo, UserTakeMedicine);
 #[axum::debug_handler]
 pub async fn get_all_user_medicines(
     Extension(db_pool): Extension<Arc<DbPool>>,
+    Query(query): Query<GetUserMedicinesQuery>,
 ) -> Result<Json<Vec<MedicineInfo>>, StatusCode> {
     let mut conn = db_pool
         .get()
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
+    // Fetch user_id from user_line_id
+    let user_id: i32 = users::table
+        .filter(users::user_line_id.eq(&query.user_line_id))
+        .select(users::user_id)
+        .first(&mut conn)
+        .map_err(|_| {
+            eprintln!("User not found for user_line_id: {}", query.user_line_id);
+            StatusCode::NOT_FOUND
+        })?;
+
+    // Fetch medicines for the user
     let results = user_medicines::table
+        .filter(user_medicines::user_id.eq(user_id))
         .select(MedicineInfo::as_select())
         .load::<MedicineInfo>(&mut conn)
         .map_err(|err| {
@@ -72,12 +119,26 @@ pub async fn get_all_user_medicines(
 #[axum::debug_handler]
 pub async fn get_all_user_take_medicines(
     Extension(db_pool): Extension<Arc<DbPool>>,
+    Query(query): Query<GetUserTakeMedicinesQuery>,
 ) -> Result<Json<Vec<UserTakeMedicine>>, StatusCode> {
     let mut conn = db_pool
         .get()
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
+    // Fetch user_id from user_line_id
+    let user_id: i32 = users::table
+        .filter(users::user_line_id.eq(&query.user_line_id))
+        .select(users::user_id)
+        .first(&mut conn)
+        .map_err(|_| {
+            eprintln!("User not found for user_line_id: {}", query.user_line_id);
+            StatusCode::NOT_FOUND
+        })?;
+
+    // Fetch user_take_medicines by joining with user_medicines using user_id
     let results = user_take_medicines::table
+        .inner_join(user_medicines::table.on(user_take_medicines::user_medicine_id.eq(user_medicines::user_medicine_id.nullable())))
+        .filter(user_medicines::user_id.eq(user_id))
         .select(UserTakeMedicine::as_select())
         .load::<UserTakeMedicine>(&mut conn)
         .map_err(|err| {
@@ -88,65 +149,66 @@ pub async fn get_all_user_take_medicines(
     Ok(Json(results))
 }
 
-// #[axum::debug_handler]
-// pub async fn get_medicine(
-//     Extension(db_pool): Extension<Arc<DbPool>>,
-//     Json(payload): Json<GetMedicineRequest>,
-// ) -> Result<Json<GetMedicineResponse>, (StatusCode, Json<serde_json::Value>)> {
-//     let mut conn = db_pool.get().map_err(|err| {
-//         eprintln!("Failed to connect to the database: {}", err);
-//         (
-//             StatusCode::INTERNAL_SERVER_ERROR,
-//             Json(serde_json::json!({ "error": "Failed to connect to the database" })),
-//         )
-//     })?;
+#[axum::debug_handler]
+pub async fn take_medicine(
+    Extension(db_pool): Extension<Arc<DbPool>>,
+    Json(payload): Json<TakeMedicineRequest>,
+) -> Result<Json<TakeMedicineResponse>, (StatusCode, Json<ErrorResponse>)> {
+    let mut conn = db_pool
+        .get()
+        .map_err(|_| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ErrorResponse {
+                    error: "Failed to connect to the database".to_string(),
+                }),
+            )
+        })?;
 
-//     // 1. Fetch user_id from user_line_id
-//     let user_id: i32 = users::table
-//         .filter(users::user_line_id.eq(&payload.user_line_id))
-//         .select(users::user_id)
-//         .first(&mut conn)
-//         .map_err(|_| {
-//             (
-//                 StatusCode::NOT_FOUND,
-//                 Json(serde_json::json!({ "error": "User not found" })),
-//             )
-//         })?;
+    // 1. Find user_id from user_line_id
+    let user_id: i32 = users::table
+        .filter(users::user_line_id.eq(&payload.user_line_id))
+        .select(users::user_id)
+        .first(&mut conn)
+        .map_err(|_| {
+            (
+                StatusCode::NOT_FOUND,
+                Json(ErrorResponse {
+                    error: "User not found".to_string(),
+                }),
+            )
+        })?;
 
-//     // 2. Parse the date
-//     let date = chrono::NaiveDate::parse_from_str(&payload.date, "%Y-%m-%d").map_err(|_| {
-//         (
-//             StatusCode::BAD_REQUEST,
-//             Json(serde_json::json!({ "error": "Invalid date format. Use YYYY-MM-DD" })),
-//         )
-//     })?;
+    // 2. Parse the date string
+    let take_medicine_date = chrono::NaiveDate::parse_from_str(&payload.user_take_medicine_time, "%Y-%m-%d")
+        .map_err(|_| {
+            (
+                StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: "Invalid date format. Use YYYY-MM-DD".to_string(),
+                }),
+            )
+        })?;
 
-//     // 3. Fetch user medicines and join with user_take_medicines
-//     let results = user_medicines::table
-//         .left_join(
-//             user_take_medicines::table.on(user_medicines::user_medicine_id
-//                 .nullable()
-//                 .eq(user_take_medicines::user_medicine_id)
-//                 .and(user_take_medicines::user_take_medicine_time.eq(Some(date)))),
-//         )
-//         .filter(user_medicines::user_id.eq(user_id))
-//         .select((MedicineInfo::as_select(), UserTakeMedicine::as_select()))
-//         .load::<MedicineRow>(&mut conn)
-//         .map_err(|err| {
-//             eprintln!("Database error fetching medicines: {}", err);
-//             (
-//                 StatusCode::INTERNAL_SERVER_ERROR,
-//                 Json(serde_json::json!({ "error": "Error fetching medicines" })),
-//             )
-//         })?;
+    // 3. Insert into user_take_medicines
+    diesel::insert_into(user_take_medicines::table)
+        .values((
+            user_take_medicines::user_medicine_id.eq(payload.user_medicine_id),
+            user_take_medicines::user_take_medicine_time.eq(Some(take_medicine_date)),
+            user_take_medicines::is_medicine_taken.eq(payload.is_medicine_taken.unwrap_or(false)), // Default to false
+        ))
+        .execute(&mut conn)
+        .map_err(|err| {
+            eprintln!("Database error inserting medicine taken record: {}", err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ErrorResponse {
+                    error: "Error adding medicine taken record".to_string(),
+                }),
+            )
+        })?;
 
-//     let medicines: Vec<Medicine> = results
-//         .into_iter()
-//         .map(|row| Medicine {
-//             info: row.info,
-//             taken: row.taken,
-//         })
-//         .collect();
-
-//     Ok(Json(GetMedicineResponse { medicines }))
-// }
+    Ok(Json(TakeMedicineResponse {
+        message: "Medicine taken record added successfully".to_string(),
+    }))
+}

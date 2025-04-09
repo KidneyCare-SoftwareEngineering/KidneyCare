@@ -17,7 +17,7 @@ use routes::ingredient::{get_ingredients, create_ingredient, update_ingredient, 
 use routes::recipe::{update_recipe, delete_recipe};
 use routes::mealplan::{create_meal_plan, get_meal_plan, user_already_eat, edit_meal_plan, ai_meal_plan, update_meal_plan}; // Import edit_meal_plan
 use routes::user::get_user_info;
-use routes::medicine::{get_all_user_medicines, get_all_user_take_medicines}; // Import get_all_user_medicines
+use routes::medicine::{get_all_user_medicines, get_all_user_take_medicines, take_medicine}; // Import get_all_user_medicines
 
 use std::env;
 
@@ -88,6 +88,7 @@ async fn main() {
         // .route("/get_medicine", get(get_medicine)) // Add route for get_medicine
         .route("/get_all_user_medicines", get(get_all_user_medicines)) // Add route for get_all_user_medicines
         .route("/get_all_user_take_medicines", get(get_all_user_take_medicines)) // Add route for get_all_user_medicines_by_user_line_id
+        .route("/take_medicine", post(take_medicine)) // Add route for take_medicine
         .fallback(fallback_handler) // Add a fallback route
         .layer(Extension(db_pool))
         .layer(cors);
