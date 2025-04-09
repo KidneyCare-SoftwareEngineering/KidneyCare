@@ -69,7 +69,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   useEffect(() => {
     setLocalMealPlans(MealPlans)
   }, [MealPlans])
-  
+
   useEffect(() => {
     console.log("allitems",allItems)
   },[allItems])
@@ -89,7 +89,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   }, [eatenItems, isMedicine]);
 
   useEffect(() => {
-    if (!isMedicine)
+    if (isMedicine) return;
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/food_cards`)
       .then(response => response.json())
       .then(data => {
@@ -331,14 +331,14 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
           exit="exit"
           className={`flex w-10/12 ${isEaten ? 'bg-grey200 border border-grey300' : 'bg-white'} min-h-24 drop-shadow-md rounded-xl mt-3`}
         >
-          <Link href={`/PillReminder/${isEaten ? 'pildetail' : 'pilldetail'}/${item.user_medicine_id}`} className="flex w-4/12 justify-center items-center">
+          <Link href={`/PillReminder/${isEaten ? 'pilldetail' : 'pilldetail'}/${item.user_medicine_id}`} className="flex w-4/12 justify-center items-center">
             <img src={item?.user_medicine_img_link?.[0]} className="size-24 rounded-full p-2" alt="Medicine" />
           </Link>
           <div className="flex w-6/12 p-2 justify-center flex-col">
             <div className="flex text-body3 text-grey300">
               เวลา {item.medicine_schedule?.[0]?.split("T")[1]?.slice(0, 5) || ""} น.
             </div>
-            <Link href={`/PillReminder/${isEaten ? 'pildetail' : 'pilldetail'}/${item.user_medicine_id}`}
+            <Link href={`/PillReminder/${isEaten ? 'pilldetail' : 'pilldetail'}/${item.user_medicine_id}`}
               className="flex text-body1 font-bold text-black py-3">
               {item.medicine_name}
             </Link>
@@ -576,7 +576,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
           <div className="flex bg-white w-10/12 justify-between items-center rounded-xl drop-shadow-xl mt-6 py-3 px-5 text-body2 font-bold">
             <div>{desc}ที่รับประทานแล้ว</div>
             <div className="flex text-body3">
-              <div className="font-bold">{totalCalories}</div>
+              <div className="font-bold">{Math.floor(totalCalories)}</div>
               <div className="font-bold text-grey300"> &nbsp;/ {userData?.calories_limit} แคลอรี่ </div>
             </div>
           </div>

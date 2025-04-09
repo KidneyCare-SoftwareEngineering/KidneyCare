@@ -82,34 +82,7 @@ export default function PillReminder() {
     //     }, []);
     // ---------------------------------
     
-    
-    // useEffect(() => {
-    //     fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/get_all_user_medicines?user_line_id=${userUid}`)
-    //         .then(response => response.json())
-    //         .then(data => {
-    //         setPill(data);
-    //         console.log("all_user",data)
-    //         })
-    //         .catch(error => {
-    //         console.error('Error fetching user data:', error)
-    //         })
-    //     }, [formattedDate, userUid])
-    
-    // useEffect(() => {
-    //     fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/get_all_take_user_medicines?user_line_id=${userUid}`)
-    //         .then(response => response.json())
-    //         .then(data => {
-    //         setPillTaken(data);
-    //         console.log("all_user",data)
-    //         })
-    //         .catch(error => {
-    //         console.error('Error fetching user data:', error)
-    //         })
-    //     }, [formattedDate, userUid])
-
-
-
-    
+   
 
     
     return (
@@ -124,7 +97,11 @@ export default function PillReminder() {
                         <div className="text-heading3 mt-8">ยังไม่มีการบันทึกยา</div>
                     </>
                 ) : (
-                    <ChooseEat dateSelected={dateSelected} desc="ยา" MealPlans={mapPill}/>
+                    <ChooseEat dateSelected={dateSelected} desc="ยา" MealPlans={{ ...mapPill, userUid }} isEdit={false} setIsEdit={function (value: React.SetStateAction<boolean>): void {
+                            throw new Error("Function not implemented.");
+                        } } userUid={""} setIsLoading={function (value: boolean): void {
+                            throw new Error("Function not implemented.");
+                        } }/>
                 )}
 
                 <Link

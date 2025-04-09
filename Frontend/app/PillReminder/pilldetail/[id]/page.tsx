@@ -25,29 +25,22 @@ export default function PillDetail() {
     const { id } = useParams();
 
     useEffect(() => {
-        const pill: MedicineInterface = {
-            user_medicine_id: 2,
-            medicine_schedule: ["1990-01-01T08:00:00", "1990-01-01T12:00:00", "1990-01-01T15:00:00"],
-            medicine_amount: 50,
-            medicine_per_times: 1,
-            user_medicine_img_link: [
-                "https://www.vzipbag.com/vzipbag_com_zip444.jpg",
-                "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/a7524e22-3209-4470-91e2-49a8957483e6.webp",
-                "https://tnkoeqhohpakpspbbwgr.supabase.co/storage/v1/object/public/KidneyCare/pills/c29e88f8-7bcb-47f5-a4bc-a849579a263c.png",
-            ],
-            medicine_unit: "เม็ด",
-            medicine_name: "ยาขับปัสสาวะ",
-            medicine_note: "เป็นกลุ่มยาที่ช่วยเพิ่มการขับน้ำและเกลือแร่ส่วนเกินออกจากร่างกายทางปัสสาวะ...",
-        };
+        if (!id) return;
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/food_details/${id}`)
+            .then(response => response.json())
+            .then(data => {
+                // setMedicine(data)
+            })
+            .catch(error => {
+                console.error('Error fetching user data:', error)
 
-        setMedicine(pill);
+            })
     }, [id]);
-
     if (!medicine) return <div className="text-center text-gray-500 mt-10">ไม่มียา</div>;
 
     return (
         <>
-            <TitleBar title={medicine.medicine_name} href="/pillreminder" />
+            <TitleBar title={medicine.medicine_name} href="/PillReminder" />
             <div className="flex justify-center flex-col items-center pb-10">
 
                 {/* แสดงภาพด้วย Swiper */}

@@ -103,3 +103,12 @@ export interface recipesInterface2 {
     calories: number;
     
 }
+
+export interface nutrient {
+    protein:number;
+    carbs:number;
+    fat:number;
+    phosphorus:number;
+    potassium:number;
+    sodium:number;
+}

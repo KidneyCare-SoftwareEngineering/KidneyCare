@@ -39,7 +39,6 @@ pub struct ErrorResponse {
 #[derive(Serialize, Debug, Default, Clone, Deserialize)]
 pub struct RecipeIngredient {
     pub ingredient_id: i32,
-    #[serde(skip_serializing)]
     pub ingredient_name: Option<String>,
     pub amount: i32,
     pub ingredient_unit: String,

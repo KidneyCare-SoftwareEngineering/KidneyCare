@@ -26,15 +26,16 @@ const ChooseEat: React.FC<{ dateSelected?: Date, desc: string, MealPlans: Meal_p
           setIsEdit={setIsEdit}
           userUid={userUid}
           setIsLoading={setIsLoading}
-          dateSelected={dateSelected}/>
+          dateSelected={dateSelected ?? new Date()}/>
 
       ): (
         <ChooseBar MealPlans={MealPlans as Meal_planInterface}
-          desc={desc} 
+          desc={desc}
           isEdit={isEdit}
           setIsEdit={setIsEdit}
           userUid={userUid}
-          setIsLoading={setIsLoading}/>
+          setIsLoading={setIsLoading} 
+          dateSelected={dateSelected ?? new Date()}/>
       )}
     </div>
 

@@ -2,17 +2,16 @@ import CalendarSide from "./CalendarSide";
 import { Chart, ArcElement } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import React, { useEffect, useState } from "react";
-import { Meal_planInterface } from "@/Interfaces/Meal_PillInterface";
+import { Meal_planInterface, nutrient } from "@/Interfaces/Meal_PillInterface";
 import { UserInformation } from "@/Interfaces/UserInformation";
 
 Chart.register(ArcElement);
 
-const SumCalorie: React.FC<{userUid: string; userData: UserInformation; setSelectedDate: (value: Date) => void; selectedDate: Date; mealPlans: Meal_planInterface}> = ({userUid, userData, setSelectedDate, selectedDate, mealPlans}) => {
+const SumCalorie: React.FC<{userUid: string; userData: UserInformation; setSelectedDate: (value: Date) => void; selectedDate: Date; mealPlans: Meal_planInterface; sumNutrients: nutrient;}> = ({userUid, userData, setSelectedDate, selectedDate, mealPlans, sumNutrients}) => {
 
   
   const [totalCalories, setTotalCalories] = useState<number>(0);
   const remainingCalories = userData.calories_limit - totalCalories;
-  console.log("meal", mealPlans)
 
   useEffect(() => {
     if (mealPlans.length === 0 || !mealPlans.meal_plans) return;
@@ -25,6 +24,7 @@ const SumCalorie: React.FC<{userUid: string; userData: UserInformation; setSelec
     setTotalCalories(total);
     }, [mealPlans]);
 
+    console.log(sumNutrients)
   
   
 
@@ -43,7 +43,7 @@ const SumCalorie: React.FC<{userUid: string; userData: UserInformation; setSelec
     maintainAspectRatio: false,
   };
 
-
+  if (!sumNutrients) return <></>
   return (
     <div className="flex flex-col items-center w-full px-4 drop-shadow-lg rounded-lg relative">
       {/* ปฏิทิน */}
@@ -86,10 +86,10 @@ const SumCalorie: React.FC<{userUid: string; userData: UserInformation; setSelec
               <p>โซเดียม</p>
             </div>
             <div className="flex flex-col text-right">
-              <p>xx / {Math.floor(userData.nutrients_limit.protein)} กรัม</p>
-              <p>150 กรัม</p>
-              <p>25 กรัม</p>
-              <p>6 / {Math.floor(userData.nutrients_limit.sodium)} มิลกรัม</p>
+              <p>{Math.floor(sumNutrients.protein)} / {Math.floor(userData.nutrients_limit.protein)} กรัม</p>
+              <p>{Math.floor(sumNutrients.carbs)} กรัม</p>
+              <p>{Math.floor(sumNutrients.fat)}  กรัม</p>
+              <p>{Math.floor(sumNutrients.sodium)}  / {Math.floor(userData.nutrients_limit.sodium)} มิลกรัม</p>
             </div>
           </div>
         </div>
