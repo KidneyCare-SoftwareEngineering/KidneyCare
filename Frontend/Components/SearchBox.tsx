@@ -91,7 +91,7 @@ const SearchBox: React.FC<handleSearch> = ({ onSearch, foodData, setFilteredFood
         Swal.fire({
           title: 'ตรวจไม่พบวัตถุดิบ',
           text: 'กรุณาลองถ่ายใหม่อีกครั้ง',
-          imageUrl: '/NoFood.png',  
+          imageUrl: '/Cry.png',  
           imageWidth: 200,
           imageHeight: 200,
           confirmButtonColor: '#FF7E2E',
