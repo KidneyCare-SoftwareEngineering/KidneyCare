@@ -212,6 +212,8 @@ export default function CreatePill() {
 		return null; // ผ่านการตรวจสอบ
 	};
 
+
+
 	const pillData = {
 		pill_name,
 		pill_amount: Number(pill_amount),
@@ -233,6 +235,7 @@ export default function CreatePill() {
 
 		const formattedPillReminderTime = pill_reminder_time.map(time => `${getCurrentDate()}T${time}:00`);
 
+		
 		
 	
 		
@@ -256,6 +259,7 @@ export default function CreatePill() {
 				body: formData,
 			  });
 			  const data = await response.json();
+			  console.log(formData)
 
 			  if (!response.ok) {
 				throw new Error(data.message || 'เกิดข้อผิดพลาดบางอย่าง');

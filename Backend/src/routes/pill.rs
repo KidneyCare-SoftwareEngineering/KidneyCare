@@ -53,7 +53,7 @@ pub struct MedicineEntry {
 }
 
 const MAX_IMAGE_SIZE: usize = 30 * 1024 * 1024;
-const UPLOAD_URL: &str = "http://localhost:3002/image";
+const UPLOAD_URL: &str = "https://supabase-uploader.fly.dev/image";
 
 fn parse_schedule_to_timestamps(schedule: Vec<String>) -> Result<Vec<NaiveDateTime>, ParseError> {
     schedule
