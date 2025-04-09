@@ -115,7 +115,7 @@ const Register2: React.FC<Register2Interface> = (data_) => {
           <header className="mb-6">
             <h1 className="text-heading3 font-bold text-gray-800">ระบุข้อมูลสุขภาพของคุณ</h1>
             <h1 className="text-body1 font-bold text-orange400 mt-4">โรคหรืออาการที่เป็นอยู่</h1>
-            <h1 className="text-body3 text-grey300">หากไม่มีโรคหรืออาการอื่นๆสามารถเว้นว่างได้</h1>
+            <h1 className="text-body2 mt-2 text-grey300">หากไม่มีโรคหรืออาการอื่นๆสามารถเว้นว่างได้</h1>
           </header>
 
               <form>
@@ -173,7 +173,7 @@ const Register2: React.FC<Register2Interface> = (data_) => {
 
                 <div className="mb-6">
                   <h1 className="text-body1 font-bold text-orange400 mt-4">อาหารหรือของกินที่แพ้</h1>
-                  <h1 className="text-body3 text-grey300">หากไม่มีอาหารที่แพ้สามารถเว้นว่างได้</h1>
+                  <h1 className="text-body2 mt-2 text-grey300">หากไม่มีอาหารที่แพ้สามารถเว้นว่างได้</h1>
                 </div>
 
                 <div className="flex w-full justify-start items-center text-body2">
@@ -217,13 +217,6 @@ const Register2: React.FC<Register2Interface> = (data_) => {
                     checked={selectedAllergies.includes(6)}
                     onChange={(e) => handleCheckboxChange2(e, 6)}
                   /> อาหารทะเล
-                </div>
-                <div className="flex w-full justify-start items-center text-body2">
-                  <Checkbox
-                    color="success"
-                    checked={selectedAllergies.includes(7)}
-                    onChange={(e) => handleCheckboxChange2(e, 7)}
-                  /> โรคเก๊าท์
                 </div>
 
                 {/* ปุ่มบันทึก */}

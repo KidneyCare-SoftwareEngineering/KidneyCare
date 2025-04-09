@@ -154,12 +154,12 @@ export default function Register() {
                                     <option value={0} >
                                     เลือกระดับโรคไต
                                     </option>
-                                    <option value={1}>ไม่เป็นโรคไต</option>
-                                    <option value={1}>ระยะที่ 1</option>
-                                    <option value={2}>ระยะที่ 2</option>
-                                    <option value={3}>ระยะที่ 3</option>
-                                    <option value={4}>ระยะที่ 4</option>
-                                    <option value={5}>ระยะที่ 5</option>
+                                    <option value={1}>ไม่เป็นโรคไต</option> 
+                                    <option value={1}>ระยะที่ 1 | eGFR {"≥"} 90% </option>
+                                    <option value={2}>ระยะที่ 2 | eGFR {"="} 60-89% </option>
+                                    <option value={3}>ระยะที่ 3 | eGFR {"="} 30-59% </option>
+                                    <option value={4}>ระยะที่ 4 | eGFR {"="} 15-29% </option>
+                                    <option value={5}>ระยะที่ 5 | eGFR {"<"} 15% </option>
                                 </select>
                                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                     
