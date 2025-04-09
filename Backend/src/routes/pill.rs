@@ -504,10 +504,9 @@ pub struct GetTakeMedicineResponse {
 //     // 3. Insert into user_take_medicines
 //     let insert_result = sqlx::query!(
 //         r#"
-//         INSERT INTO user_take_medicines (user_id, user_medicine_id, user_take_medicine_time)
+//         INSERT INTO user_take_medicines (user_medicine_id, user_take_medicine_time)
 //         VALUES ($1, $2, $3)
 //         "#,
-//         user_id,
 //         payload.user_medicine_id,
 //         take_medicine_date
 //     )

@@ -13,7 +13,7 @@ mod schema;
 mod models;
 mod routes; // Declare the routes module
 
-use routes::ingredient::{get_ingredients, create_ingredient}; // Import create_ingredient
+use routes::ingredient::{get_ingredients, create_ingredient, update_ingredient, delete_ingredient}; // Import create_ingredient
 use routes::recipe::{update_recipe, delete_recipe};
 use routes::mealplan::{create_meal_plan, get_meal_plan, user_already_eat, edit_meal_plan, ai_meal_plan, update_meal_plan}; // Import edit_meal_plan
 use routes::user::get_user_info;
@@ -73,6 +73,8 @@ async fn main() {
         .route("/", get(|| async { "Hello, World!" }))
         .route("/ingredients", get(get_ingredients))
         .route("/create_ingredient", post(create_ingredient)) // Add route for create_ingredient
+        .route("/update_ingredient/{id}", patch(update_ingredient)) // Add route for update_ingredient
+        .route("/delete_ingredient/{id}", delete(delete_ingredient)) // Add route for delete_ingredient
         .route("/update_recipe/{r_id}", patch(update_recipe))
         .route("/delete_recipe/{r_id}", delete(delete_recipe))
         .route("/create_meal_plan", post(create_meal_plan))
@@ -82,7 +84,7 @@ async fn main() {
         .route("/ai_meal_plan", post(ai_meal_plan))
         .route("/update_meal_plan", post(update_meal_plan))
         .route("/get_user_info", get(get_user_info))
-        .route("/get_medicine", get(routes::medicine::get_medicine)) // Add route for get_medicine
+        // .route("/get_medicine", get(routes::medicine::get_medicine)) // Add route for get_medicine
         .fallback(fallback_handler) // Add a fallback route
         .layer(Extension(db_pool))
         .layer(cors);
