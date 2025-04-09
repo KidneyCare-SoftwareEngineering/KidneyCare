@@ -1,10 +1,11 @@
 use axum::{Extension, Json, extract::Path};
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::f64;
 use std::sync::Arc;
 use serde_json::json;
+use crate::schema::{recipes, recipes_ingredients, recipes_nutrients};
 use crate::schema::recipes::dsl::*;
 
 #[derive(Deserialize)]
@@ -16,6 +17,56 @@ pub struct UpdateRecipe {
     pub recipe_img_link: Option<Vec<Option<String>>>,
     pub food_category: Option<Vec<Option<String>>>,
     pub dish_type: Option<Vec<Option<String>>>,
+}
+
+#[derive(Serialize)]
+pub struct RecipeDetailResponse {
+    pub recipes: Vec<RecipeDetail>,
+}
+
+#[derive(Serialize)]
+pub struct RecipeDetail {
+    pub recipe_id: Option<i32>,
+    pub recipe_name: Option<String>,
+    pub recipe_method: Option<Vec<Option<String>>>,
+    pub calories: Option<f64>,
+    pub calories_unit: Option<String>,
+    pub food_category: Option<Vec<Option<String>>>,
+    pub dish_type: Option<Vec<Option<String>>>,
+    pub ingredients: Vec<RecipeIngredient>,
+    pub nutrients: Vec<RecipeNutrient>,
+}
+
+#[derive(Serialize, Queryable, Selectable)]
+#[diesel(table_name = recipes)]
+pub struct Recipe {
+    pub recipe_id: i32,
+    pub recipe_name: Option<String>,
+    pub recipe_method: Option<Vec<Option<String>>>,
+    pub calories: Option<f64>,
+    pub calories_unit: Option<String>,
+    pub recipe_img_link: Option<Vec<Option<String>>>,
+    pub food_category: Option<Vec<Option<String>>>,
+    pub dish_type: Option<Vec<Option<String>>>,
+}
+
+#[derive(Serialize, Queryable, Selectable)]
+#[diesel(table_name = recipes_ingredients)]
+pub struct RecipeIngredient {
+    pub recipes_ingredients_id: i32, // Added to match schema
+    pub recipe_id: i32,
+    pub ingredient_id: i32,
+    pub amount: i32,
+    pub ingredient_unit: String,
+}
+
+#[derive(Serialize, Queryable, Selectable)]
+#[diesel(table_name = recipes_nutrients)]
+pub struct RecipeNutrient {
+    pub recipe_nutrient_id: i32, // Added to match schema
+    pub recipe_id: i32,
+    pub nutrient_id: i32,
+    pub quantity: f64,
 }
 
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;

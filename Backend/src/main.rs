@@ -57,6 +57,7 @@ async fn main() {
         .route("/chatbot/{user_id}", get(get_user_by_id))
         .route("/get_recipes", get(get_recipes))
         .route("/get_recipe", get(get_recipe))
+        .route("/get_recipe_by_id/{recipe_id}", get(get_recipe_by_id))
         .route("/create_recipe", post(create_recipe))
         .route("/get_recipe_by_id/{recipe_id}", get(get_recipe_by_id))
         // .route("/update_recipe/{recipe_id}", patch(update_recipe))
