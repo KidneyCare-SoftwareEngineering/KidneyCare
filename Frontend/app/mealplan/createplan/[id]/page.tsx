@@ -8,7 +8,6 @@ import Dropdown from '@/Components/Dropdown'
 import StatePage2 from './StatePage2'
 import { MealplanInterface } from '@/Interfaces/Meal_PillInterface'
 import PuffLoader from "react-spinners/PuffLoader";
-import { ScatterBoxLoader } from "react-awesome-loaders";
 
 
 
@@ -59,13 +58,10 @@ export default function CreatePlan() {
         <div className="flex w-screen h-screen flex-col justify-center items-center bg-sec"> 
             {/* <PuffLoader size={60} color="#FF5733" /> */}
             {/* <p className="mt-4 text-lg font-bold text-orange300 animate-pulse">กำลังสร้างแผนมื้ออาหาร</p> */}
-            {/* <PuffLoader
+            <PuffLoader
               size={60}
-            /> */}
-            <ScatterBoxLoader
-            primaryColor={"#FF7E2E"}
-            background={"#FAF5EF"}
-      />
+            />
+
         </div>
       )
   
