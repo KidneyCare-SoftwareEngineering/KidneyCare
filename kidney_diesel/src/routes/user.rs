@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use chrono::{NaiveDateTime, Utc, Datelike};
 use crate::schema::users::dsl::*;
-use crate::schema::{users_nutrients_limit_per_day, nutrients};
+use crate::schema::{users_nutrients_limit_per_day, nutrients, meal_plans, meal_plan_recipes, recipes_nutrients};
 use diesel::associations::HasTable; // Import HasTable to resolve `.table()`
 
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
@@ -94,5 +94,58 @@ pub async fn get_user_info(
         nutrients_limit,
     };
 
+    Ok(Json(response))
+}
+
+#[derive(Deserialize)]
+pub struct SumNutrientsByDateParams {
+    pub user_line_id: String,
+    pub date: NaiveDateTime,
+}
+
+#[derive(Serialize)]
+pub struct NutrientsSummaryResponse {
+    pub nutrients_summary: std::collections::HashMap<String, f64>,
+}
+
+pub async fn sum_nutrients_by_date(
+    Extension(db_pool): Extension<Arc<DbPool>>,
+    Json(params): Json<SumNutrientsByDateParams>,
+) -> Result<Json<NutrientsSummaryResponse>, StatusCode> {
+    let mut conn = db_pool.get().map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    // Get user_id from user_line_id
+    let user_id_value: i32 = users
+        .filter(user_line_id.eq(Some(params.user_line_id.clone())))
+        .select(user_id)
+        .first::<i32>(&mut conn)
+        .map_err(|_| StatusCode::NOT_FOUND)?;
+
+    // Join meal_plans, meal_plan_recipes, and recipes_nutrients to calculate nutrient sums
+    let nutrient_sums = meal_plans::table
+        .inner_join(meal_plan_recipes::table.on(meal_plans::meal_plan_id.eq(meal_plan_recipes::meal_plan_id)))
+        .inner_join(recipes_nutrients::table.on(meal_plan_recipes::recipe_id.eq(recipes_nutrients::recipe_id)))
+        .filter(meal_plans::user_id.eq(user_id_value))
+        .filter(meal_plans::date.eq(params.date.date()))
+        .group_by(recipes_nutrients::nutrient_id)
+        .select((recipes_nutrients::nutrient_id, diesel::dsl::sum(recipes_nutrients::quantity)))
+        .group_by(recipes_nutrients::nutrient_id)
+        .load::<(i32, Option<f64>)>(&mut conn)
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    // Map nutrient IDs to their names and build the response
+    let mut nutrients_summary = std::collections::HashMap::new();
+    for (nutrient_id, sum) in nutrient_sums {
+        if let Some(sum_value) = sum {
+            let nutrient_name: String = nutrients::table
+                .filter(nutrients::nutrient_id.eq(nutrient_id))
+                .select(nutrients::name)
+                .first::<String>(&mut conn)
+                .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+            nutrients_summary.insert(nutrient_name, sum_value);
+        }
+    }
+
+    let response = NutrientsSummaryResponse { nutrients_summary };
     Ok(Json(response))
 }

@@ -32,7 +32,6 @@ pub struct GetUserTakeMedicinesQuery {
 
 #[derive(Deserialize)]
 pub struct TakeMedicineRequest {
-    pub user_line_id: String,
     pub user_medicine_id: i32,
     pub user_take_medicine_time: String,
     pub is_medicine_taken: Option<bool>, // Optional field
@@ -135,10 +134,11 @@ pub async fn get_all_user_take_medicines(
             StatusCode::NOT_FOUND
         })?;
 
-    // Fetch user_take_medicines by joining with user_medicines using user_id
+    // Fetch user_take_medicines by joining with user_medicines using user_id and filtering is_medicine_taken = true
     let results = user_take_medicines::table
         .inner_join(user_medicines::table.on(user_take_medicines::user_medicine_id.eq(user_medicines::user_medicine_id.nullable())))
         .filter(user_medicines::user_id.eq(user_id))
+        .filter(user_take_medicines::is_medicine_taken.eq(Some(true))) // Filter only taken medicines
         .select(UserTakeMedicine::as_select())
         .load::<UserTakeMedicine>(&mut conn)
         .map_err(|err| {
@@ -165,20 +165,7 @@ pub async fn take_medicine(
             )
         })?;
 
-    // 1. Find user_id from user_line_id
-    let user_id: i32 = users::table
-        .filter(users::user_line_id.eq(&payload.user_line_id))
-        .select(users::user_id)
-        .first(&mut conn)
-        .map_err(|_| {
-            (
-                StatusCode::NOT_FOUND,
-                Json(ErrorResponse {
-                    error: "User not found".to_string(),
-                }),
-            )
-        })?;
-
+    
     // 2. Parse the date string
     let take_medicine_date = chrono::NaiveDate::parse_from_str(&payload.user_take_medicine_time, "%Y-%m-%d")
         .map_err(|_| {
