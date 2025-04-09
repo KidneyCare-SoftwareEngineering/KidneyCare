@@ -42,8 +42,8 @@ export interface MealplanInterface {
 }
 
 export interface Meal_planInterface {
-    length: number
-    meal_plans: Array<{
+    length?: number
+    meal_plans?: Array<{
         meal_plan_id: number;
         user_id: number;
         name: string;
@@ -78,6 +78,7 @@ interface Medicine {
   
 export interface MedicineData extends MealplanInterface{
     medicines?: Medicine[];
+    user_medicine_id?: number;
 }
 
 

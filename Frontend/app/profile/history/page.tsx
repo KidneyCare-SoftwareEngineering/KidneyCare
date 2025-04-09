@@ -146,12 +146,12 @@ export default function History() {
             <SheetHeader>
               <SheetTitle>บันทึกการรับประทานอาหาร</SheetTitle>
             </SheetHeader>
-            {mealPlans?.meal_plans[0]?.recipes
+            {mealPlans?.meal_plans?.[0]?.recipes
                 ?.filter((data) => !data.ischecked) == undefined ? (
               <div className="flex w-screen justify-start items-start text-body1 font-bold ml-8 mt-8">แผนอาหารของฉัน</div>
                 ):(<></>)}
               
-              {mealPlans?.meal_plans[0]?.recipes
+              {mealPlans?.meal_plans?.[0]?.recipes
                 ?.filter((data) => !data.ischecked) == undefined ? (
                 <div className="flex flex-col justify-center items-center font-body1 pt-12">
                   <p className="mb-6">ไม่พบมื้ออาหาร กรุณาสร้างมื้ออาหาร</p>

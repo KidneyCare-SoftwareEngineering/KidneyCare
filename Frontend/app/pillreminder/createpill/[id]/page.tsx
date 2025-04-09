@@ -7,10 +7,13 @@ import { FiPlus, FiMinus, FiTrash, FiX } from "react-icons/fi";
 import TimeInputPopup from "@/Components/Popup/TimeInputPopup";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import PuffLoader from "react-spinners/PuffLoader";
 
 export default function CreatePill() {
 	const { id } = useParams();
 	const userUid = id;
+	const router = useRouter()
 	const [showPopup, setShowPopup] = useState<boolean>(false);
 	const [pill_name, setpill_name] = useState<string>("");
 	const [pill_amount, setpill_amount] = useState<string>("");
@@ -18,7 +21,9 @@ export default function CreatePill() {
 	const [pill_reminder_time, setpill_reminder_time] = useState<string[]>([]);
 	const [pill_img_link, setpill_img_link] = useState<File[]>([]);
 	const [pill_note, setpill_note] = useState<string>("");
+	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [newTime, setNewTime] = useState<string>("");
+
 	useEffect (() => {
 		console.log("id", userUid)
 	})
@@ -244,7 +249,7 @@ export default function CreatePill() {
 			formData.append("image", file);
 		});
 
-
+		setIsLoading(true)
 		try {	
 			const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/add_pill`, {
 				method: 'POST',
@@ -260,10 +265,15 @@ export default function CreatePill() {
 
 			} catch (error) {
 				console.error('Error:', error);
-			} 
+			} finally {
+				setIsLoading(false)
+				router.push('/PillReminder')
+			}
 
 		
 	};
+
+	if (isLoading) return <div className='flex w-screen h-screen justify-center items-center bg-sec'> <PuffLoader /> </div>
 
 	return (
 		<div className="flex flex-col items-center w-full min-h-screen bg-sec">
@@ -407,12 +417,16 @@ export default function CreatePill() {
 			</div>
 
 			{/* ปุ่มบันทึกข้อมูล */}
+
+
 			<div
-				onClick={() => handleSavePill()}
-				className="mt-5 mb-5 flex w-10/12 h-14 bottom-24 bg-orange300 font-bold text-body1 text-white rounded-xl justify-center items-center"
+			onClick={() => handleSavePill()}
+			className="mt-5 mb-5 flex w-10/12 h-14 bottom-24 bg-orange300 font-bold text-body1 text-white rounded-xl justify-center items-center"
 			>
 				บันทึกข้อมูล
 			</div>
+
+			
 
 			{/* Popup สำหรับเพิ่มเวลา */}
 			{showPopup && (

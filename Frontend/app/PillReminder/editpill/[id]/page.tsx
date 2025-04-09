@@ -6,8 +6,11 @@ import Swal from "sweetalert2";
 import { FiPlus, FiMinus, FiTrash, FiX } from "react-icons/fi";
 import TimeInputPopup from "@/Components/Popup/TimeInputPopup";
 import { Icon } from "@iconify/react/dist/iconify.js";
+import { useParams } from "next/navigation";
 
 export default function CreatePill() {
+    const id = useParams()
+    const PillId = id
     const [showPopup, setShowPopup] = useState<boolean>(false);
     const [pill_name, setpill_name] = useState<string>("");
     const [pill_amount, setpill_amount] = useState<string>("");
@@ -169,7 +172,7 @@ export default function CreatePill() {
 
     return (
         <div className="flex flex-col items-center w-full min-h-screen bg-sec">
-            <TitleBar title="แก้ไขรายละเอียดยา" href="/pillreminder" />
+            <TitleBar title="แก้ไขรายละเอียดยา" href="/PillReminder" />
 
             {/* ชื่อยา */}
             <div className="w-10/12 mt-10">
