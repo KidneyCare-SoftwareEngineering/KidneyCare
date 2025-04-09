@@ -25,7 +25,7 @@ export default function Navbar() {
 
                 <Link href={`/PillReminder`} className={`flex flex-col justify-center items-center text-body3 gap-1 ${
                     pathname === "/PillReminder" ? "text-black" : "text-grey300" }`}>
-                    <Icon icon="fluent:pill-24-regular" height="32" className={` ${pathname === "/pillreminder" ? "text-orange300" : "text-grey300"}`}/>
+                    <Icon icon="fluent:pill-24-regular" height="32" className={` ${pathname === "/PillReminder" ? "text-orange300" : "text-grey300"}`}/>
                     แจ้งเตือนทานยา
                 </Link>
 

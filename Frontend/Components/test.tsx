@@ -415,7 +415,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
             <SheetTrigger className="flex justify-center items-center w-10/12 bg-white min-h-24 drop-shadow-md rounded-xl mt-3 z-0">
               <Icon icon="mdi:plus" className="text-black size-5" />
             </SheetTrigger>
-            <SheetContent side="bottom" className="flex w-full h-10/12 flex-col overflow-y-auto max-h-[70vh]">
+            <SheetContent side="bottom" className="flex w-full h-10/12 flex-col overflow-y-auto max-h-[70vh] rounded-t-xl">
               <SheetHeader>
                 <SheetTitle>ค้นหาเมนูอาหาร</SheetTitle>
               </SheetHeader>
