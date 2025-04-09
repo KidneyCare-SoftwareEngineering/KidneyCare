@@ -43,7 +43,7 @@ const SumCalorie: React.FC<{userUid: string; userData: UserInformation; setSelec
     maintainAspectRatio: false,
   };
 
-  if (!sumNutrients) return <></>
+  
   return (
     <div className="flex flex-col items-center w-full px-4 drop-shadow-lg rounded-lg relative">
       {/* ปฏิทิน */}
@@ -86,10 +86,24 @@ const SumCalorie: React.FC<{userUid: string; userData: UserInformation; setSelec
               <p>โซเดียม</p>
             </div>
             <div className="flex flex-col text-right">
-              <p>{Math.floor(sumNutrients.protein)} / {Math.floor(userData.nutrients_limit.protein)} กรัม</p>
-              <p>{Math.floor(sumNutrients.carbs)} กรัม</p>
-              <p>{Math.floor(sumNutrients.fat)}  กรัม</p>
-              <p>{Math.floor(sumNutrients.sodium)}  / {Math.floor(userData.nutrients_limit.sodium)} มิลกรัม</p>
+
+
+              {!sumNutrients || Object.keys(sumNutrients).length === 0 ? (
+                <>
+                  <p>0 / {Math.floor(userData.nutrients_limit.protein)} กรัม</p>
+                  <p>0 กรัม</p>
+                  <p>0  กรัม</p>
+                  <p>0 / {Math.floor(userData.nutrients_limit.sodium)} มิลกรัม</p>
+                </>
+              ) : (
+                <>
+                  <p>{Math.floor(sumNutrients.protein)} / {Math.floor(userData.nutrients_limit.protein)} กรัม</p>
+                  <p>{Math.floor(sumNutrients.carbs)} กรัม</p>
+                  <p>{Math.floor(sumNutrients.fat)}  กรัม</p>
+                  <p>{Math.floor(sumNutrients.sodium)}  / {Math.floor(userData.nutrients_limit.sodium)} มิลกรัม</p>
+                </>
+              )}
+              
             </div>
           </div>
         </div>

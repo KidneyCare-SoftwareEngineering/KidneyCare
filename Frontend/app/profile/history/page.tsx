@@ -196,8 +196,7 @@ export default function History() {
                   ?.filter((data) => data.ischecked === false)
                   .sort((a, b) => a.meal_time - b.meal_time)
                   .map((data, index) => (
-                    <>
-                    
+
                     <motion.div
                       layout
                       variants={itemVariants}
@@ -231,7 +230,6 @@ export default function History() {
                         </div>
                       </div>
                     </motion.div>
-                  </>
                 )))}
 
             
