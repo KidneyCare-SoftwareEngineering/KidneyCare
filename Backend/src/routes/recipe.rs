@@ -73,7 +73,7 @@ pub struct RecipeDetailResponse {
 }
 
 const MAX_IMAGE_SIZE: usize = 30 * 1024 * 1024;
-const UPLOAD_URL: &str = "https://backend-billowing-waterfall-4640.fly.dev/image";
+const UPLOAD_URL: &str = "https://supabase-uploader.fly.dev/image";
 
 pub async fn get_recipes(
     Extension(db_pool): Extension<PgPool>,
