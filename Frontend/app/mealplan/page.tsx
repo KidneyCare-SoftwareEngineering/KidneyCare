@@ -118,12 +118,21 @@ export default function MealPlan() {
             {userUid !== "" && !isEdit ? (
             <>
                 { !userUid || !mealPlans?.meal_plans || mealPlans.meal_plans.length === 0 ? (
-                    <Link 
-                    href={`mealplan/createplan/${userUid}`} 
-                    className="fixed size-12 bg-orange300 rounded-full right-3 bottom-6 flex justify-center items-center"
-                    >
-                        <Icon icon="ic:baseline-plus" height="32" className="text-white"/>
-                    </Link>
+                    <>
+                        <div className='flex fixed right-16 bottom-12 justify-end'>
+                            <p className='mb-2'>
+                                กดเพื่อสร้างแผนมื้ออาหาร
+                            </p> 
+                                <img src="Arrow.png" className='mt-3 ml-2'/>
+                            
+                        </div>
+                        <Link 
+                        href={`mealplan/createplan/${userUid}`} 
+                        className="fixed size-12 bg-orange300 rounded-full right-3 bottom-6 flex justify-center items-center"
+                        >
+                            <Icon icon="ic:baseline-plus" height="32" className="text-white"/>
+                        </Link>
+                    </>
                 ) : 
                 (
                 <AnimatePresence>
