@@ -15,6 +15,7 @@ use tower_http::cors::{Any, CorsLayer};
 use tokio::net::TcpListener;
 use backend::routes::recipe::*;
 use backend::routes::ingredient::*;
+use backend::routes::lineapi::*;
 
 use std::env;
 
@@ -57,6 +58,7 @@ async fn main() {
         .route("/chatbot/{user_id}", get(get_user_by_id))
         .route("/get_recipes", get(get_recipes))
         .route("/get_recipe", get(get_recipe))
+        .route("/lineapi", post(link_richmenu))
         .route("/get_recipe_by_id/{recipe_id}", get(get_recipe_by_id))
         .route("/create_recipe", post(create_recipe))
         // .route("/update_recipe/{recipe_id}", patch(update_recipe))
