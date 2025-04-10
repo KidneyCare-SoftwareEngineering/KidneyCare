@@ -22,6 +22,7 @@ pub struct RecipeQuery {
 
 #[derive(Serialize, FromRow)]
 pub struct Recipe {
+    pub recipe_id: i32,
     pub recipe_name: String,
     pub recipe_img_link: Vec<String>,
 }
@@ -79,7 +80,7 @@ pub async fn get_recipes(
     Extension(db_pool): Extension<PgPool>,
     Query(params): Query<RecipeQuery>,
 ) -> Result<Json<RecipeResponse>, (StatusCode, Json<ErrorResponse>)> {
-    let mut query = "SELECT recipe_name, recipe_img_link FROM recipes".to_string();
+    let mut query = "SELECT recipe_id, recipe_name, recipe_img_link FROM recipes".to_string();
     let mut conditions = Vec::new();
 
     if let Some(recipe_name) = params.recipe_name {
