@@ -270,3 +270,74 @@ pub async fn take_medicine(
         message: "Medicine taken record processed successfully".to_string(),
     }))
 }
+
+#[derive(Deserialize)]
+pub struct GetMedicineByIdQuery {
+    pub user_medicine_id: i32,
+}
+
+#[axum::debug_handler]
+pub async fn get_medicine_by_id(
+    Extension(db_pool): Extension<Arc<DbPool>>,
+    Query(query): Query<GetMedicineByIdQuery>,
+) -> Result<Json<MedicineInfo>, StatusCode> {
+    let mut conn = db_pool
+        .get()
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    // Fetch the medicine by user_medicine_id
+    let medicine = user_medicines::table
+        .filter(user_medicines::user_medicine_id.eq(query.user_medicine_id))
+        .select(MedicineInfo::as_select())
+        .first::<MedicineInfo>(&mut conn)
+        .map_err(|err| {
+            eprintln!(
+                "Failed to fetch medicine for user_medicine_id = {}: {}",
+                query.user_medicine_id, err
+            );
+            StatusCode::NOT_FOUND
+        })?;
+
+    Ok(Json(medicine))
+}
+
+#[derive(Deserialize)]
+pub struct DeleteMedicineQuery {
+    pub user_medicine_id: i32,
+}
+
+#[axum::debug_handler]
+pub async fn delete_medicine(
+    Extension(db_pool): Extension<Arc<DbPool>>,
+    Query(query): Query<DeleteMedicineQuery>,
+) -> Result<Json<TakeMedicineResponse>, (StatusCode, Json<ErrorResponse>)> {
+    let mut conn = db_pool
+        .get()
+        .map_err(|_| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ErrorResponse {
+                    error: "Failed to connect to the database".to_string(),
+                }),
+            )
+        })?;
+
+    diesel::delete(user_medicines::table.filter(user_medicines::user_medicine_id.eq(query.user_medicine_id)))
+        .execute(&mut conn)
+        .map_err(|err| {
+            eprintln!(
+                "Failed to delete medicine with user_medicine_id = {}: {}",
+                query.user_medicine_id, err
+            );
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ErrorResponse {
+                    error: "Failed to delete medicine".to_string(),
+                }),
+            )
+        })?;
+
+    Ok(Json(TakeMedicineResponse {
+        message: "Medicine deleted successfully".to_string(),
+    }))
+}
