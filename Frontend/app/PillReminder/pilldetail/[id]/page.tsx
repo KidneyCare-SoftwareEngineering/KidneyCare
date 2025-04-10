@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import TitleBar from "@/Components/TitleBar";
+import TitleBar from "@/Components/TitleBar_Trash";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination, Autoplay } from "swiper/modules";
+
 
 
 interface MedicineInterface {
@@ -21,26 +22,27 @@ interface MedicineInterface {
 }
 
 export default function PillDetail() {
+    
     const [medicine, setMedicine] = useState<MedicineInterface | null>(null);
     const { id } = useParams();
 
     useEffect(() => {
         if (!id) return;
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/food_details/${id}`)
+        fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/get_medicine_by_id?user_medicine_id=${id}`)
             .then(response => response.json())
             .then(data => {
-                // setMedicine(data)
+                setMedicine(data)
             })
             .catch(error => {
                 console.error('Error fetching user data:', error)
-
             })
+
     }, [id]);
     if (!medicine) return <div className="text-center text-gray-500 mt-10">ไม่มียา</div>;
 
     return (
         <>
-            <TitleBar title={medicine.medicine_name} href="/PillReminder" />
+            <TitleBar title={medicine.medicine_name} href="/PillReminder" id={medicine.user_medicine_id}/>
             <div className="flex justify-center flex-col items-center pb-10">
 
                 {/* แสดงภาพด้วย Swiper */}
