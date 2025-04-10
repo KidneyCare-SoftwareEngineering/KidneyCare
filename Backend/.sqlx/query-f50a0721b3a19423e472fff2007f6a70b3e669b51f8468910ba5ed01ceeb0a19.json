@@ -1,0 +1,86 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT \n        r.recipe_id AS id,\n        r.recipe_name,\n        r.calories,\n        r.recipe_img_link AS image_url,\n        COALESCE(\n            json_agg(\n                json_build_object(\n                    'ingredient_amount', ri.amount,\n                    'ingredient_name', i.ingredient_name,\n                    'ingredient_unit', ri.ingredient_unit\n                )\n            ) FILTER (WHERE i.ingredient_id IS NOT NULL), '[]'::json\n        ) AS ingredient,\n        r.recipe_method,\n        COALESCE((SELECT SUM(rn.quantity) FROM recipes_nutrients rn\n            JOIN nutrients n ON rn.nutrient_id = n.nutrient_id\n            WHERE rn.recipe_id = r.recipe_id AND n.name = 'protein'), 0) AS protein,\n        COALESCE((SELECT SUM(rn.quantity) FROM recipes_nutrients rn\n            JOIN nutrients n ON rn.nutrient_id = n.nutrient_id\n            WHERE rn.recipe_id = r.recipe_id AND n.name = 'carbs'), 0) AS carbs,\n        COALESCE((SELECT SUM(rn.quantity) FROM recipes_nutrients rn\n            JOIN nutrients n ON rn.nutrient_id = n.nutrient_id\n            WHERE rn.recipe_id = r.recipe_id AND n.name = 'fat'), 0) AS fat,\n        COALESCE((SELECT SUM(rn.quantity) FROM recipes_nutrients rn\n            JOIN nutrients n ON rn.nutrient_id = n.nutrient_id\n            WHERE rn.recipe_id = r.recipe_id AND n.name = 'sodium'), 0) AS sodium,\n        COALESCE((SELECT SUM(rn.quantity) FROM recipes_nutrients rn\n            JOIN nutrients n ON rn.nutrient_id = n.nutrient_id\n            WHERE rn.recipe_id = r.recipe_id AND n.name = 'phosphorus'), 0) AS phosphorus,\n        COALESCE((SELECT SUM(rn.quantity) FROM recipes_nutrients rn\n            JOIN nutrients n ON rn.nutrient_id = n.nutrient_id\n            WHERE rn.recipe_id = r.recipe_id AND n.name = 'potassium'), 0) AS potassium\n    FROM recipes r\n    LEFT JOIN recipes_ingredients ri ON r.recipe_id = ri.recipe_id\n    LEFT JOIN ingredients i ON ri.ingredient_id = i.ingredient_id\n    GROUP BY r.recipe_id;",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "recipe_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "calories",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 3,
+        "name": "image_url",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 4,
+        "name": "ingredient",
+        "type_info": "Json"
+      },
+      {
+        "ordinal": 5,
+        "name": "recipe_method",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 6,
+        "name": "protein",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "carbs",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 8,
+        "name": "fat",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 9,
+        "name": "sodium",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 10,
+        "name": "phosphorus",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 11,
+        "name": "potassium",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      null,
+      true,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "f50a0721b3a19423e472fff2007f6a70b3e669b51f8468910ba5ed01ceeb0a19"
+}

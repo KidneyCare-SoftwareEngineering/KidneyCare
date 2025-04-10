@@ -37,7 +37,7 @@ const DonutGraph: React.FC<{food: FoodInterface}> = ( { food } ) =>  {
         </p>
 
         <div className="flex w-full h-fit bg-white mt-2 px-3 justify-center items-center">
-            <div className="flex relative w-40 h-40">
+            <div className="flex relative w-32 h-32">
                 <Doughnut data={data} options={options} />
                 <div className="absolute top-1/2 left-1/2  transform -translate-x-1/2 -translate-y-1/2 text-center animate-fadeIn ">
                     <p className="m-0 text-body1 font-bold">{food.calories}</p>

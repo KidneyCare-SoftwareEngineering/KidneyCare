@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO users_ingredient_allergies (user_id, ingredient_allergy_id) VALUES ($1, $2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4af6b861809e71bd41dd56664f4f1bd4cf34369b423771612d1b25afa1315383"
+}

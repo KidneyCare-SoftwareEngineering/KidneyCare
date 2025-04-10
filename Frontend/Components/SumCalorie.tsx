@@ -1,18 +1,37 @@
 import CalendarSide from "./CalendarSide";
 import { Chart, ArcElement } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
+import React, { useEffect, useState } from "react";
+import { Meal_planInterface, nutrient } from "@/Interfaces/Meal_PillInterface";
+import { UserInformation } from "@/Interfaces/UserInformation";
 
 Chart.register(ArcElement);
 
-const SumCalorie: React.FC = () => {
-  const totalCalories = 2000;
-  const consumedCalories = 200;
-  const remainingCalories = totalCalories - consumedCalories;
+const SumCalorie: React.FC<{userUid: string; userData: UserInformation; setSelectedDate: (value: Date) => void; selectedDate: Date; mealPlans: Meal_planInterface; sumNutrients: nutrient;}> = ({userUid, userData, setSelectedDate, selectedDate, mealPlans, sumNutrients}) => {
+
+  
+  const [totalCalories, setTotalCalories] = useState<number>(0);
+  const remainingCalories = userData.calories_limit - totalCalories;
+
+  useEffect(() => {
+    if (mealPlans.length === 0 || !mealPlans.meal_plans) return;
+
+    const total = mealPlans.meal_plans
+      .flatMap((mealPlan) => mealPlan.recipes)
+      .filter((recipe) => recipe.ischecked)
+      .reduce((sum, recipe) => sum + recipe.calories, 0);
+
+    setTotalCalories(total);
+    }, [mealPlans]);
+
+    console.log(sumNutrients)
+  
+  
 
   const data = {
     datasets: [
       {
-        data: [remainingCalories, consumedCalories],
+        data: [remainingCalories, totalCalories],
         backgroundColor: ["#FF7E2E", "#FAF5EF"],
       },
     ],
@@ -24,12 +43,13 @@ const SumCalorie: React.FC = () => {
     maintainAspectRatio: false,
   };
 
+  
   return (
     <div className="flex flex-col items-center w-full px-4 drop-shadow-lg rounded-lg relative">
       {/* ปฏิทิน */}
       <div className="w-full max-w-3xl mt-4 p-4 bg-white rounded-lg shadow-md">
         <div className="w-full mb-4">
-          <CalendarSide />
+          <CalendarSide onDateSelect={setSelectedDate} />
         </div>
 
         {/* แคลอรี่ข้อมูล */}
@@ -41,7 +61,7 @@ const SumCalorie: React.FC = () => {
               style={{ width: "140px" }}
             >
               <p className="text-lg">แคลอรี่ที่ได้รับ</p>
-              <p className="text-3xl font-bold">{consumedCalories}</p>
+              <p className="text-3xl font-bold">{totalCalories}</p>
               <p className="text-lg">แคลอรี่</p>
             </div>
 
@@ -63,13 +83,27 @@ const SumCalorie: React.FC = () => {
               <p>โปรตีน</p>
               <p>คาร์โบไฮเดรต</p>
               <p>ไขมัน</p>
-              <p>เกลือแร่</p>
+              <p>โซเดียม</p>
             </div>
             <div className="flex flex-col text-right">
-              <p>35 / 75 กรัม</p>
-              <p>150 / 350 กรัม</p>
-              <p>25 / 44 กรัม</p>
-              <p>6 / 10 มิลกรัม</p>
+
+
+              {!sumNutrients || Object.keys(sumNutrients).length === 0 ? (
+                <>
+                  <p>0 / {Math.floor(userData.nutrients_limit.protein)} กรัม</p>
+                  <p>0 กรัม</p>
+                  <p>0  กรัม</p>
+                  <p>0 / {Math.floor(userData.nutrients_limit.sodium)} มิลกรัม</p>
+                </>
+              ) : (
+                <>
+                  <p>{Math.floor(sumNutrients.protein)} / {Math.floor(userData.nutrients_limit.protein)} กรัม</p>
+                  <p>{Math.floor(sumNutrients.carbs)} กรัม</p>
+                  <p>{Math.floor(sumNutrients.fat)}  กรัม</p>
+                  <p>{Math.floor(sumNutrients.sodium)}  / {Math.floor(userData.nutrients_limit.sodium)} มิลกรัม</p>
+                </>
+              )}
+              
             </div>
           </div>
         </div>

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO users_nutrients_limit_per_day (user_id, nutrient_id, nutrient_limit) VALUES ($1, $2, $3)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Float8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c39a10dec851f411d42f6549e39c552cba8c358a212f99b1fc88dde1eaf07899"
+}

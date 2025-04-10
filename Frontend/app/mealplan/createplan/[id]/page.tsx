@@ -61,6 +61,7 @@ export default function CreatePlan() {
             <PuffLoader
               size={60}
             />
+
         </div>
       )
   

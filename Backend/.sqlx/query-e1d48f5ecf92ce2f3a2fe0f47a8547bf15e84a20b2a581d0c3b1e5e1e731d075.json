@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO recipes_ingredients (recipe_id, ingredient_id, amount, ingredient_unit)\n            VALUES ($1, $2, $3, $4)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Int4",
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e1d48f5ecf92ce2f3a2fe0f47a8547bf15e84a20b2a581d0c3b1e5e1e731d075"
+}

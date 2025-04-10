@@ -1,4 +1,6 @@
 export interface FoodInterface {
+    food_category: any
+    ingredients: any
     id: number
     recipe_name: string
     calories: number
@@ -10,6 +12,7 @@ export interface FoodInterface {
     potassium: number
     image_url: string
     recipe_method: []
+    meal_time?: number
     ingredient: {
         ingredient_amount: number
         ingredient_name: string
@@ -20,7 +23,7 @@ export interface FoodInterface {
 }
 
 export interface MealplanInterface {
-    mealplans: Array<Array<{
+    mealplans?: Array<Array<{
         name: string;
         nutrition: {
             calories: number;
@@ -39,7 +42,8 @@ export interface MealplanInterface {
 }
 
 export interface Meal_planInterface {
-    meal_plans: Array<{
+    length?: number
+    meal_plans?: Array<{
         meal_plan_id: number;
         user_id: number;
         name: string;
@@ -60,27 +64,6 @@ export interface Meal_planInterface {
     setIsEdit?: React.Dispatch<React.SetStateAction<boolean>>
 
 }
-// export interface Meal_planInterface {
-//     meal_plans: Array<Array<{
-//         name: string;
-//         nutrition: {
-//             calories: number;
-//             carbs: number;
-//             fat: number;
-//             phosphorus: number;
-//             potassium: number;
-//             protein: number;
-//             sodium: number;
-//         };
-//         recipe_id: string;
-//         recipe_img_link: string;
-//     }>>;
-//     userUid: string;
-//     medicines?: Array<any>
-//     isEdit?: boolean
-//     setIsEdit?: React.Dispatch<React.SetStateAction<boolean>>
-
-// }
 
 interface Medicine {
     user_medicine_id?: number;
@@ -95,6 +78,7 @@ interface Medicine {
   
 export interface MedicineData extends MealplanInterface{
     medicines?: Medicine[];
+    user_medicine_id?: number;
 }
 
 
@@ -103,8 +87,28 @@ export interface recipesInterface extends Medicine{
     recipe_name : string;
     recipe_img_link : string[];
     ischecked: boolean;
-    meal_plan_recipe_id: number;
+    meal_plan_recipe_id?: number; 
     meal_time: number;
     calories: number;
     
+}
+
+export interface recipesInterface2 {
+    recipe_id : number;
+    recipe_name : string;
+    recipe_img_link : string[];
+    ischecked: boolean;
+    meal_plan_recipe_id: number; 
+    meal_time: number;
+    calories: number;
+    
+}
+
+export interface nutrient {
+    protein:number;
+    carbs:number;
+    fat:number;
+    phosphorus:number;
+    potassium:number;
+    sodium:number;
 }

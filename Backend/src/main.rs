@@ -15,12 +15,13 @@ use tower_http::cors::{Any, CorsLayer};
 use tokio::net::TcpListener;
 use backend::routes::recipe::*;
 use backend::routes::ingredient::*;
+use backend::routes::lineapi::*;
 
 use std::env;
 
 #[tokio::main]
 async fn main() {
-    dotenvy::dotenv().expect("Failed to load .env file");
+    dotenvy::dotenv().ok();
 
     let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let server_address = format!("0.0.0.0:{}", port);
@@ -57,6 +58,8 @@ async fn main() {
         .route("/chatbot/{user_id}", get(get_user_by_id))
         .route("/get_recipes", get(get_recipes))
         .route("/get_recipe", get(get_recipe))
+        .route("/lineapi", post(link_richmenu))
+        .route("/get_recipe_by_id/{recipe_id}", get(get_recipe_by_id))
         .route("/create_recipe", post(create_recipe))
         // .route("/update_recipe/{recipe_id}", patch(update_recipe))
         .route("/delete_recipe/{recipe_id}", delete(delete_recipe))
@@ -66,7 +69,7 @@ async fn main() {
         .route("/delete_ingredient/{ingredient_id}", delete(delete_ingredient))
         .route("/get_medicine", post(get_medicine))
         .route("/get_meal_plan", post(get_meal_plan))
-        .route("/take_medicine", post(take_medicine))
+        // .route("/take_medicine", post(take_medicine))
         // .route("/get_pills", get(get_pill_by_user_line_id)) // Change to GET and use query
         .layer(Extension(db_pool.clone()))
         .layer(cors);

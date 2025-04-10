@@ -1,29 +1,26 @@
 'use client';
 import { useState } from "react";
-import { Calendar } from "lucide-react";
 import { Icon } from "@iconify/react/dist/iconify.js";
-import { StatePage1 } from "@/app/mealplan/createplan/StatePage1";
+import SendData from "@/Interfaces/SendData";
 
-const Dropdown = () => {
+
+const Dropdown : React.FC<SendData> = ({selectedOption, setSelectedOption, setSelectedValue}) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState("เลือกระยะเวลา");
-  const [isCustom, setIsCustom] = useState(false);
-
+  
   const options = [
-    "กำหนดเอง",
-    "ระยะเวลา 1 วัน",
-    "ระยะเวลา 7 วัน",
-    "ระยะเวลา 30 วัน",
+    { text: "ระยะเวลา 1 วัน", value: 1 },
+    { text: "ระยะเวลา 7 วัน", value: 7 },
+    { text: "ระยะเวลา 30 วัน", value: 30 }
   ];
 
-  const handleOptionClick = (option: string) => {
-    setSelectedOption(option);
-    setIsCustom(option === "กำหนดเอง");
+  const handleOptionClick = (option: { text: string, value: number }) => {
+    setSelectedOption(option.text);
     setIsOpen(false);
+    setSelectedValue(option.value);
   };
 
   return (
-    <div className="relative w-10/12 mt-8">
+    <div className="relative w-10/12 mt-4">
 
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -32,7 +29,7 @@ const Dropdown = () => {
         {selectedOption} <br/>
         {selectedOption === "เลือกระยะเวลา" ? 
             <>
-                เช่น 1 วัน, 7 วัน, 30 วัน หรือกำหนดเอง
+                เช่น 1 วัน, 7 วัน, 30 วัน
             </> 
         : null}
         <Icon icon="akar-icons:chevron-down" className="ml-auto" />
@@ -44,28 +41,16 @@ const Dropdown = () => {
         <ul className="absolute left-0 z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
           {options.map((option) => (
             <li
-              key={option}
+              key={option.value}
               onClick={() => handleOptionClick(option)}
-              className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+              className="px-4 py-2 cursor-pointer hover:bg-gray-100 border-b-2"
             >
-              {option}
+              {option.text}
             </li>
           ))}
         </ul>
       )}
 
-      {isCustom && (
-        <div className="mt-4 flex justify-between gap-4">
-          <div className="flex items-center w-1/2 px-4 py-2 bg-gray-100 border border-gray-300 rounded-md">
-            <span className="mr-2 text-gray-500">วันที่เริ่มต้น</span>
-            <Calendar size={20} className="text-gray-500" />
-          </div>
-          <div className="flex items-center w-1/2 px-4 py-2 bg-gray-100 border border-gray-300 rounded-md">
-            <span className="mr-2 text-gray-500">วันสุดท้าย</span>
-            <Calendar size={20} className="text-gray-500" />
-          </div>
-        </div>
-      )}
     </div>
 
     

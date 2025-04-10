@@ -6,13 +6,54 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import ChooseEat from "@/Components/ChooseEat/ChooseEat";
 import liff from "@line/liff";
-import { MedicineData } from "@/Interfaces/Meal_PillInterface";
+import { Meal_planInterface, MedicineData } from "@/Interfaces/Meal_PillInterface";
+
 
 export default function PillReminder() {
+    
     const [dateSelected, setDateSelected] = useState<Date>();
     const formattedDate = dateSelected?.toISOString().split("T")[0] + "T12:00:00";
     const [pill, setPill] = useState<MedicineData>();
+    const [pillTaken, setPillTaken] = useState<MedicineData>();
     const [userUid, setUserUid] = useState("");
+    const [mapPill, setMapPill] = useState<{ medicines: MedicineData[] }>();
+
+    useEffect(() => {
+        const fetchMedicineData = async () => {
+          try {
+            const res1 = await fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/get_all_user_medicines?user_line_id=${userUid}`);
+            const allMedicines = await res1.json();
+      
+            const res2 = await fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/get_all_user_take_medicines?user_line_id=${userUid}`);
+            const takenMedicines = await res2.json();
+      
+            const targetDate = formattedDate?.split("T")[0];
+      
+            const mergedData = allMedicines.map((medicine: MedicineData) => {
+              const taken = takenMedicines.find(
+                (take: any) =>
+                  take.user_medicine_id === medicine.user_medicine_id &&
+                  take.user_take_medicine_time === targetDate
+              );
+      
+              return {
+                ...medicine,
+                ischecked: taken ? taken.is_medicine_taken : false,
+              };
+            });
+      
+            
+            setMapPill({ medicines: mergedData });
+      
+          } catch (error) {
+            console.error('Error fetching user data:', error);
+          }
+        };
+      
+        fetchMedicineData();
+      }, [formattedDate, userUid])
+
+      
 
     // Line LIFF
     useEffect(() => {
@@ -41,31 +82,8 @@ export default function PillReminder() {
         }, []);
     // ---------------------------------
     
-    useEffect(() => {
-        const handlegetMedicine = async () => {
-            try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_medicine`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ 
-                        user_line_id: userUid,
-                        date: formattedDate 
-                    }),
-                });
-                const data = await response.json();
-                console.log("data", data);
-                setPill(data);
-            }
-            catch (error) {
-                console.log("error", error);
-            }
-        }
-        handlegetMedicine();
-    },[formattedDate]);
+   
 
-    console.log("date", formattedDate);
     
     return (
         <>
@@ -73,18 +91,21 @@ export default function PillReminder() {
                 <Navbar />
                 <DateSlider onDateSelect={(date) => setDateSelected(date)} />
 
-                {!pill || !pill.medicines || pill.medicines.length === 0 ? (
+                {!mapPill || mapPill.medicines.length === 0 ? (
                     <>
-                        <img src="NoFood.png" className="size-48 mt-32" />
+                        <img src="Nopill.png" width={300} height={300} className=" mt-16" />
                         <div className="text-heading3 mt-8">ยังไม่มีการบันทึกยา</div>
                     </>
                 ) : (
-                    // <ChooseEat dateSelected={dateSelected} desc="ยา" MealPlans={pill} />
-                    <></>
+                    <ChooseEat dateSelected={dateSelected} desc="ยา" MealPlans={{ ...mapPill, userUid }} isEdit={false} setIsEdit={function (value: React.SetStateAction<boolean>): void {
+                            throw new Error("Function not implemented.");
+                        } } userUid={""} setIsLoading={function (value: boolean): void {
+                            throw new Error("Function not implemented.");
+                        } }/>
                 )}
 
                 <Link
-                    href="/pillreminder/createpill"
+                    href={`/PillReminder/Createpill/${userUid}`}
                     className="fixed size-12 bg-orange300 rounded-full right-3 bottom-6 flex justify-center items-center"
                 >
                     <Icon icon="ic:baseline-plus" height="32" className="text-white" />
