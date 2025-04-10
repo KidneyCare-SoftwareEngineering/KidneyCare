@@ -177,8 +177,7 @@ export default function Register() {
 
 
 
-                        {/* ฟอกไต */}
-                        {kidneyLevel !== 1 && (
+                        {/* ฟอกไต */} && (
                             <>
                                 <div className="flex text-[#BD4B04] font-bold text-body1 mb-1">เคยฟอกไตหรือไม่</div>
                                 <div className="flex relative w-full flex-col mb-20">
@@ -200,7 +199,6 @@ export default function Register() {
                                     </div>
                                 </div>
                             </>
-                        )}
 
 
                         {/* วันเดือนปีเกิด */}
