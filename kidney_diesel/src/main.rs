@@ -32,7 +32,7 @@ struct Ingredient {
 async fn main() {
     dotenv().ok();
 
-    let port = env::var("PORT").unwrap_or_else(|_| "8081".to_string());
+    let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let server_address = format!("0.0.0.0:{}", port);
 
     let database_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| {
