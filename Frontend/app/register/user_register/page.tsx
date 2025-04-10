@@ -154,7 +154,6 @@ export default function Register() {
                                     <option value={0} >
                                     เลือกระดับโรคไต
                                     </option>
-                                    <option value={1}>ไม่เป็นโรคไต</option> 
                                     <option value={1}>ระยะที่ 1 | eGFR {"≥"} 90% </option>
                                     <option value={2}>ระยะที่ 2 | eGFR {"="} 60-89% </option>
                                     <option value={3}>ระยะที่ 3 | eGFR {"="} 30-59% </option>
@@ -179,7 +178,6 @@ export default function Register() {
 
 
                         {/* ฟอกไต */}
-                        {kidneyLevel !== 1 && (
                             <>
                                 <div className="flex text-[#BD4B04] font-bold text-body1 mb-1">เคยฟอกไตหรือไม่</div>
                                 <div className="flex relative w-full flex-col mb-20">
@@ -201,7 +199,6 @@ export default function Register() {
                                     </div>
                                 </div>
                             </>
-                        )}
 
 
                         {/* วันเดือนปีเกิด */}

@@ -25,6 +25,7 @@ export default function History() {
   const [userData, setUserData] = useState<UserInformation>();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [mealPlans, setMealPlans] = useState<Meal_planInterface>();
+  const [sumNutrient, setSumNutrient] = useState<any>();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const mealTypes = ["อาหารเช้า", "อาหารกลางวัน", "อาหารเย็น", "มื้ออาหารเพิ่มเติม"];
 
@@ -32,6 +33,7 @@ export default function History() {
     user_line_id: userUid,
     date: selectedDate.toISOString().split("T")[0]  
   }
+
   const transition = { type: "spring", stiffness: 200, damping: 20 };
 
   const itemVariants = {
@@ -71,6 +73,7 @@ export default function History() {
 
 
       useEffect(() => {
+        if (!userUid) return;
         fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/get_user_info?user_line_id=${userUid}`)
           .then(response => response.json())
           .then(data => {
@@ -86,8 +89,10 @@ export default function History() {
       
       
       useEffect(() => {
+        if (!userUid) return;
         const get_meal_plan = async () => {
           // setIsLoading(true)
+          if (!userUid) return;
           try {
               const response = await fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/get_meal_plan`, {
                   method: 'POST',
@@ -106,6 +111,30 @@ export default function History() {
           
         }; 
         get_meal_plan()
+      }, [userUid, selectedDate]);
+
+      useEffect(() => {
+        if (!userUid) return;
+        const get_user_nutrient = async () => {
+          // setIsLoading(true)
+          try {
+              const response = await fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/sum_nutrients_by_date`, {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(datatoback),
+                  });
+                  const data = await response.json();
+                  setSumNutrient(data.nutrients_summary);
+          } catch (error) {
+              console.log("error", error)
+          } finally{
+              // setIsLoading(false)
+          }
+          
+        }; 
+        get_user_nutrient()
       }, [userUid, selectedDate]);
 
   
@@ -146,12 +175,12 @@ export default function History() {
             <SheetHeader>
               <SheetTitle>บันทึกการรับประทานอาหาร</SheetTitle>
             </SheetHeader>
-            {mealPlans?.meal_plans[0]?.recipes
+            {mealPlans?.meal_plans?.[0]?.recipes
                 ?.filter((data) => !data.ischecked) == undefined ? (
               <div className="flex w-screen justify-start items-start text-body1 font-bold ml-8 mt-8">แผนอาหารของฉัน</div>
                 ):(<></>)}
               
-              {mealPlans?.meal_plans[0]?.recipes
+              {mealPlans?.meal_plans?.[0]?.recipes
                 ?.filter((data) => !data.ischecked) == undefined ? (
                 <div className="flex flex-col justify-center items-center font-body1 pt-12">
                   <p className="mb-6">ไม่พบมื้ออาหาร กรุณาสร้างมื้ออาหาร</p>
@@ -167,8 +196,7 @@ export default function History() {
                   ?.filter((data) => data.ischecked === false)
                   .sort((a, b) => a.meal_time - b.meal_time)
                   .map((data, index) => (
-                    <>
-                    
+
                     <motion.div
                       layout
                       variants={itemVariants}
@@ -202,7 +230,6 @@ export default function History() {
                         </div>
                       </div>
                     </motion.div>
-                  </>
                 )))}
 
             
@@ -221,6 +248,7 @@ export default function History() {
       <SumCalorie 
         userUid={userUid}
         userData={userData}
+        sumNutrients={sumNutrient}
         setSelectedDate={setSelectedDate}
         selectedDate={selectedDate}
         mealPlans={mealPlans || {} as Meal_planInterface}

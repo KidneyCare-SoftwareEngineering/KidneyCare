@@ -73,7 +73,7 @@ pub struct RecipeDetailResponse {
 }
 
 const MAX_IMAGE_SIZE: usize = 30 * 1024 * 1024;
-const UPLOAD_URL: &str = "http://localhost:3000/image";
+const UPLOAD_URL: &str = "https://supabase-uploader.fly.dev/image";
 
 pub async fn get_recipes(
     Extension(db_pool): Extension<PgPool>,
@@ -215,46 +215,43 @@ pub async fn get_recipe(
     Ok(Json(RecipeDetailResponse { recipes }))
 }
 
-
-
-
 pub async fn get_recipe_by_id(
     Extension(db_pool): Extension<PgPool>,
     Path(recipe_id): Path<i32>,
 ) -> Result<Json<RecipeDetailResponse>, (StatusCode, Json<ErrorResponse>)> {
     let query = r#"
-    SELECT
-        recipes.recipe_id,
-        recipes.recipe_name,
-        recipes.recipe_method,
-        recipes.calories,
-        recipes.calories_unit,
-        recipes.recipe_img_link,
-        recipes.food_category,
-        recipes.dish_type,
-        ingredients.ingredient_id,
-        ingredients.ingredient_name,
-        recipes_ingredients.amount,
-        recipes_ingredients.ingredient_unit,
-        nutrients.nutrient_id,
-        nutrients.name as nutrient_name,
-        recipes_nutrients.quantity,
-        nutrients.unit
-    FROM
-        recipes
-    INNER JOIN
-        recipes_ingredients ON recipes.recipe_id = recipes_ingredients.recipe_id
-    INNER JOIN
-        ingredients ON recipes_ingredients.ingredient_id = ingredients.ingredient_id
-    INNER JOIN
-        recipes_nutrients ON recipes.recipe_id = recipes_nutrients.recipe_id
-    INNER JOIN
-        nutrients ON recipes_nutrients.nutrient_id = nutrients.nutrient_id
-    WHERE
-        recipes.recipe_id = $1
+        SELECT
+            recipes.recipe_id,
+            recipes.recipe_name,
+            recipes.recipe_method,
+            recipes.calories,
+            recipes.calories_unit,
+            recipes.recipe_img_link,
+            recipes.food_category,
+            recipes.dish_type,
+            ingredients.ingredient_id,
+            ingredients.ingredient_name,
+            recipes_ingredients.amount,
+            recipes_ingredients.ingredient_unit,
+            nutrients.nutrient_id,
+            nutrients.name as nutrient_name,
+            recipes_nutrients.quantity,
+            nutrients.unit
+        FROM
+            recipes
+        INNER JOIN
+            recipes_ingredients ON recipes.recipe_id = recipes_ingredients.recipe_id
+        INNER JOIN
+            ingredients ON recipes_ingredients.ingredient_id = ingredients.ingredient_id
+        INNER JOIN
+            recipes_nutrients ON recipes.recipe_id = recipes_nutrients.recipe_id
+        INNER JOIN
+            nutrients ON recipes_nutrients.nutrient_id = nutrients.nutrient_id
+        WHERE
+            recipes.recipe_id = $1
     "#;
 
-    let rows = sqlx::query(query)
+    let rows = sqlx::query(&query)
         .bind(recipe_id)
         .fetch_all(&db_pool)
         .await
@@ -267,59 +264,57 @@ pub async fn get_recipe_by_id(
             )
         })?;
 
-    if rows.is_empty() {
-        return Err((
-            StatusCode::NOT_FOUND,
-            Json(ErrorResponse {
-                error: format!("Recipe with ID {} not found", recipe_id),
-            }),
-        ));
-    }
-
-    let mut recipe = RecipeDetail {
-        recipe_id: Some(rows[0].get("recipe_id")),
-        recipe_name: rows[0].get("recipe_name"),
-        recipe_method: rows[0].get("recipe_method"),
-        calories: rows[0].get("calories"),
-        calories_unit: rows[0].get("calories_unit"),
-        food_category: rows[0].get("food_category"),
-        dish_type: rows[0].get("dish_type"),
-        ingredients: Vec::new(),
-        nutrients: Vec::new(),
-    };
-
-    let mut ingredient_map: HashMap<i32, RecipeIngredient> = HashMap::new();
-    let mut nutrient_map: HashMap<i32, RecipeNutrient> = HashMap::new();
+    let mut recipes_map: HashMap<i32, RecipeDetail> = HashMap::new();
 
     for row in rows {
+        let recipe_id: i32 = row.get("recipe_id");
+        let recipe = recipes_map.entry(recipe_id).or_insert_with(|| {
+            RecipeDetail {
+                recipe_id: Some(row.get("recipe_id")),
+                recipe_name: row.get("recipe_name"),
+                recipe_method: row.get("recipe_method"),
+                calories: row.get("calories"),
+                calories_unit: row.get("calories_unit"),
+                food_category: row.get("food_category"),
+                dish_type: row.get("dish_type"),
+                ingredients: Vec::new(),
+                nutrients: Vec::new(),
+            }
+        });
+
         let ingredient_id: i32 = row.get("ingredient_id");
         let ingredient = RecipeIngredient {
-            ingredient_id,
+            ingredient_id: ingredient_id,
             ingredient_name: Some(row.get("ingredient_name")),
             amount: row.get("amount"),
             ingredient_unit: row.get("ingredient_unit"),
         };
-        ingredient_map.entry(ingredient_id).or_insert(ingredient);
+        let mut ingredient_map: HashMap<i32, RecipeIngredient> = HashMap::new();
+        for item in &recipe.ingredients {
+            ingredient_map.insert(item.ingredient_id, (*item).clone());
+        }
+        ingredient_map.entry(ingredient_id).or_insert(ingredient.clone());
+        recipe.ingredients = ingredient_map.into_values().collect();
 
         let nutrient_id: i32 = row.get("nutrient_id");
         let nutrient = RecipeNutrient {
-            nutrient_id,
+            nutrient_id: nutrient_id,
             name: Some(row.get("nutrient_name")),
             quantity: row.get("quantity"),
             unit: Some(row.get("unit")),
         };
-        nutrient_map.entry(nutrient_id).or_insert(nutrient);
+        let mut nutrient_map: HashMap<i32, RecipeNutrient> = HashMap::new();
+        for item in &recipe.nutrients {
+            nutrient_map.insert(item.nutrient_id, (*item).clone());
+        }
+        nutrient_map.entry(nutrient_id).or_insert(nutrient.clone());
+        recipe.nutrients = nutrient_map.into_values().collect();
     }
 
-    recipe.ingredients = ingredient_map.into_values().collect();
-    recipe.nutrients = nutrient_map.into_values().collect();
+    let recipes: Vec<RecipeDetail> = recipes_map.into_values().collect();
 
-    Ok(Json(RecipeDetailResponse { recipes: vec![recipe] }))
+    Ok(Json(RecipeDetailResponse { recipes }))
 }
-
-
-
-
 
 pub async fn upload_image_to_supabase(
     image_data: Vec<u8>,
@@ -605,114 +600,6 @@ pub async fn create_recipe(
         json!({ "message": "Recipe created successfully", "recipe_id": recipe_id }),
     ))
 }
-
-// Updated Rust Code for update_recipe function
-
-// #[axum::debug_handler]
-// pub async fn update_recipe(
-//     Extension(db_pool): Extension<PgPool>,
-//     Path(recipe_id): Path<i32>,
-//     mut multipart: Multipart,
-// ) -> Result<Json<Value>, (StatusCode, Json<ErrorResponse>)> {
-//     let mut payload: RecipeDetail = Default::default();
-//     let mut image_urls = Vec::new();
-
-//     // Extract recipe details from multipart form data
-//     while let Some(field) = multipart.next_field().await.unwrap() {
-//         match field.name() {
-//             Some("recipe_detail") => {
-//                 payload = serde_json::from_str(&field.text().await.unwrap()).unwrap_or_default();
-//             }
-//             Some("image") => {
-//                 if let Ok(url) = field.text().await {
-//                     image_urls.push(url);
-//                 }
-//             }
-//             _ => {}
-//         }
-//     }
-
-//     // Collect the fields to update
-//     let mut updates = Vec::new();
-//     let mut values = Vec::new();
-
-//     if !payload.recipe_name.is_empty() {
-//         updates.push("recipe_name = ?");
-//         values.push(payload.recipe_name.clone());
-//     }
-//     if !payload.recipe_method.is_empty() {
-//         updates.push("recipe_method = ?");
-//         values.push(payload.recipe_method.clone());
-//     }
-//     if payload.calories > 0.0 {  
-//         updates.push("calories = ?");
-//         values.push(payload.calories);
-//     }
-//     if !payload.calories_unit.is_empty() {
-//         updates.push("calories_unit = ?");
-//         values.push(payload.calories_unit.clone());
-//     }
-//     if !image_urls.is_empty() {
-//         updates.push("recipe_img_link = ?");
-//         values.push(image_urls);
-//     }
-//     if !payload.food_category.is_empty() {
-//         updates.push("food_category = ?");
-//         values.push(payload.food_category.clone());
-//     }
-//     if let Some(dish_type) = &payload.dish_type {
-//         updates.push("dish_type = ?");
-//         values.push(dish_type.clone());
-//     }
-
-//     if updates.is_empty() {
-//         return Err((
-//             StatusCode::BAD_REQUEST,
-//             Json(ErrorResponse {
-//                 error: "No fields to update".to_string(),
-//             }),
-//         ));
-//     }
-
-//     // Build the SQL query
-//     let query = format!(
-//         "UPDATE recipes SET {} WHERE recipe_id = ?",
-//         updates.join(", ")
-//     );
-
-//     // Start a database transaction
-//     let mut tx = db_pool.begin().await.map_err(|_| (
-//         StatusCode::INTERNAL_SERVER_ERROR,
-//         Json(ErrorResponse {
-//             error: "Failed to begin transaction".to_string(),
-//         }),
-//     ))?;
-
-//     // Execute the dynamically built query
-//     sqlx::query_with(&query, values)
-//         .execute(&mut *tx)
-//         .await
-//         .map_err(|_| (
-//             StatusCode::INTERNAL_SERVER_ERROR,
-//             Json(ErrorResponse {
-//                 error: "Failed to update recipe".to_string(),
-//             }),
-//         ))?;
-
-//     // Commit the transaction
-//     tx.commit().await.map_err(|_| (
-//         StatusCode::INTERNAL_SERVER_ERROR,
-//         Json(ErrorResponse {
-//             error: "Failed to commit transaction".to_string(),
-//         }),
-//     ))?;
-
-//     Ok(Json(json!({ "message": "Recipe updated successfully", "recipe_id": recipe_id })))
-// }
-
-
-
-
 
 // ... (other struct)
 #[axum::debug_handler]

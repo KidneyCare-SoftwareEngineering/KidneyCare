@@ -43,7 +43,7 @@ const Dropdown : React.FC<SendData> = ({selectedOption, setSelectedOption, setSe
             <li
               key={option.value}
               onClick={() => handleOptionClick(option)}
-              className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+              className="px-4 py-2 cursor-pointer hover:bg-gray-100 border-b-2"
             >
               {option.text}
             </li>

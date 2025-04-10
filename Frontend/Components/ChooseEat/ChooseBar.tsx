@@ -19,7 +19,7 @@ import { UserInformation } from "@/Interfaces/UserInformation";
 import Portal from "./Portal";
 
 
-const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: boolean, setIsEdit: React.Dispatch<React.SetStateAction<boolean>>; userUid: string; setIsLoading: (value: boolean) => void}> = ({ MealPlans, desc, isEdit, setIsEdit, userUid, setIsLoading}) => {
+const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: boolean, setIsEdit: React.Dispatch<React.SetStateAction<boolean>>; userUid: string; setIsLoading: (value: boolean) => void; dateSelected: Date;}> = ({ MealPlans, desc, isEdit, setIsEdit, userUid, setIsLoading, dateSelected}) => {
   const [foodData, setFoodData] = useState<FoodInterface[]>([]);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [filteredFoodData, setFilteredFoodData] = useState<FoodInterface[]>([]);
@@ -32,6 +32,8 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   const [mergeItems, setMergeItems] = useState<recipesInterface[]>([]);
   const [userData, setUserData] = useState<UserInformation>()
 
+
+  
   // Aniamtion
   const transition = { type: "spring", stiffness: 200, damping: 20 };
   const containerVariants = {
@@ -46,16 +48,16 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
 
   // Food|Pill Check and status
   const isMedicine = desc === "ยา";
-  const [allItems, setAllItems] = useState<recipesInterface[]>(() => 
+   const [allItems, setAllItems] = useState<recipesInterface[]>(() => 
     isMedicine 
       ? localMealPlans.medicines || [] 
-      : localMealPlans.meal_plans[0].recipes || []
+      : localMealPlans?.meal_plans?.[0].recipes || []
   );
   useEffect(() => {
       setAllItems(isMedicine 
         ? localMealPlans.medicines || [] 
-        : localMealPlans.meal_plans[0].recipes || []);
-    }, [localMealPlans, isMedicine]);
+        : localMealPlans?.meal_plans?.[0].recipes || []);
+    }, [localMealPlans, isMedicine, MealPlans]);
   const eatenItems = isMedicine 
     ? allItems.filter(item => item.ischecked) 
     : allItems.filter(item => item.ischecked);
@@ -64,7 +66,21 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
     : allItems.filter(item => !item.ischecked);
   const mealTypes = ["อาหารเช้า", "อาหารกลางวัน", "อาหารเย็น", "มื้ออาหารเพิ่มเติม"];
 
+  useEffect(() => {
+    setLocalMealPlans(MealPlans)
+  }, [MealPlans])
 
+  useEffect(() => {
+    console.log("allitems",allItems)
+  },[allItems])
+
+  useEffect(() => {
+    console.log('localMealPlans', localMealPlans)
+    console.log('allItems', allItems)
+    console.log('eatenItems', eatenItems)
+    console.log("mealplan22",MealPlans)
+  });
+  
   useEffect(() => {
     if (!isMedicine) {
       const total = eatenItems.reduce((sum, food) => sum + food.calories, 0);
@@ -73,6 +89,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   }, [eatenItems, isMedicine]);
 
   useEffect(() => {
+    if (isMedicine) return;
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/food_cards`)
       .then(response => response.json())
       .then(data => {
@@ -89,33 +106,50 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   // ทำเครื่องหมายว่ากินแล้ว
   const handleEaten = async (item: recipesInterface) => {
     try {
-      const updatedMealPlans = {...localMealPlans};
-    
+      const updatedMealPlans = { ...localMealPlans };
+  
       if (isMedicine && updatedMealPlans.medicines) {
-        updatedMealPlans.medicines = updatedMealPlans.medicines.map(med => 
-          med.user_medicine_id === item.user_medicine_id ? {...med, ischecked: true} : med
+        updatedMealPlans.medicines = updatedMealPlans.medicines.map(med =>
+          med.user_medicine_id === item.user_medicine_id ? { ...med, ischecked: true } : med
         );
-      } else if (!isMedicine && updatedMealPlans.meal_plans[0].recipes) {
-        updatedMealPlans.meal_plans[0].recipes = updatedMealPlans.meal_plans[0].recipes.map(recipe => 
-          recipe.meal_plan_recipe_id === item.meal_plan_recipe_id ? {...recipe, ischecked: true} : recipe
+  
+        setLocalMealPlans(updatedMealPlans);
+  
+        await fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/take_medicine`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_medicine_id: item.user_medicine_id,
+            user_take_medicine_time: dateSelected?.toISOString().split("T")[0],
+            is_medicine_taken: true,
+          }),
+        });
+  
+      } else if (!isMedicine && updatedMealPlans.meal_plans?.[0].recipes) {
+        updatedMealPlans.meal_plans[0].recipes = updatedMealPlans.meal_plans[0].recipes.map(recipe =>
+          recipe.meal_plan_recipe_id === item.meal_plan_recipe_id ? { ...recipe, ischecked: true } : recipe
         );
+  
+        setLocalMealPlans(updatedMealPlans);
+  
+        await fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/user_already_eat`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            meal_plan_recipe_id: item.meal_plan_recipe_id,
+            ischecked: true,
+          }),
+        });
       }
-      
-      setLocalMealPlans(updatedMealPlans);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/user_already_eat`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          meal_plan_recipe_id: item.meal_plan_recipe_id,
-          ischecked: true,
-        }),
-      });
+  
     } catch (error) {
       console.log("Error marking item as eaten:", error);
       setLocalMealPlans(MealPlans);
-    } 
+    }
   };
 
 
@@ -125,35 +159,50 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   // ทำเครื่องหมายว่ายังไม่กิน
   const handleNotEaten = async (item: recipesInterface) => {
     try {
-      const updatedMealPlans = {...localMealPlans};
-    
+      const updatedMealPlans = { ...localMealPlans };
+  
       if (isMedicine && updatedMealPlans.medicines) {
-        updatedMealPlans.medicines = updatedMealPlans.medicines.map(med => 
-          med.user_medicine_id === item.user_medicine_id ? {...med, ischecked: false} : med
+        updatedMealPlans.medicines = updatedMealPlans.medicines.map(med =>
+          med.user_medicine_id === item.user_medicine_id ? { ...med, ischecked: false } : med
         );
-      } else if (!isMedicine && updatedMealPlans.meal_plans[0].recipes) {
-        updatedMealPlans.meal_plans[0].recipes = updatedMealPlans.meal_plans[0].recipes.map(recipe => 
-          recipe.meal_plan_recipe_id === item.meal_plan_recipe_id ? {...recipe, ischecked: false} : recipe
+  
+        setLocalMealPlans(updatedMealPlans);
+  
+        await fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/take_medicine`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_medicine_id: item.user_medicine_id,
+            ischecked: false,
+            user_take_medicine_time: dateSelected?.toISOString().split("T")[0],
+          }),
+        });
+  
+      } else if (!isMedicine && updatedMealPlans.meal_plans?.[0].recipes) {
+        updatedMealPlans.meal_plans[0].recipes = updatedMealPlans.meal_plans[0].recipes.map(recipe =>
+          recipe.meal_plan_recipe_id === item.meal_plan_recipe_id ? { ...recipe, ischecked: false } : recipe
         );
+  
+        setLocalMealPlans(updatedMealPlans);
+  
+        await fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/user_already_eat`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            meal_plan_recipe_id: item.meal_plan_recipe_id,
+            ischecked: false,
+          }),
+        });
       }
-      
-      setLocalMealPlans(updatedMealPlans);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/user_already_eat`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          meal_plan_recipe_id: item.meal_plan_recipe_id,
-          ischecked: false,
-        }),
-        
-      });
-    
+  
     } catch (error) {
       console.log("Error marking item as not eaten:", error);
       setLocalMealPlans(MealPlans);
-    } 
+    }
   };
 
   
@@ -210,6 +259,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
   
 
   useEffect(() => {
+    if (desc != "ยา")
       fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/get_user_info?user_line_id=${userUid}`)
         .then(response => response.json())
         .then(data => {
@@ -227,7 +277,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
       setIsLoading(true)
       const dataforAPI = {
         user_line_id: userUid,
-        date: MealPlans.meal_plans[0].date,
+        date: MealPlans?.meal_plans?.[0].date,
         recipes: mergeItems
       }
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_DIESEL_URL}/edit_meal_plan`, {
@@ -250,7 +300,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
 
     setLocalMealPlans(prev => ({
       ...prev,
-      meal_plans: prev.meal_plans.map((mealPlan, index) =>
+      meal_plans: prev.meal_plans?.map((mealPlan, index) =>
         index === 0 
           ? { 
               ...mealPlan, 
@@ -281,14 +331,14 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
           exit="exit"
           className={`flex w-10/12 ${isEaten ? 'bg-grey200 border border-grey300' : 'bg-white'} min-h-24 drop-shadow-md rounded-xl mt-3`}
         >
-          <Link href={`/pillreminder/${isEaten ? 'pildetail' : 'pilldetail'}/${item.user_medicine_id}`} className="flex w-4/12 justify-center items-center">
-            <img src="https://picsum.photos/200/300" className="size-24 rounded-full p-2" alt="Medicine" />
+          <Link href={`/PillReminder/${isEaten ? 'pilldetail' : 'pilldetail'}/${item.user_medicine_id}`} className="flex w-4/12 justify-center items-center">
+            <img src={item?.user_medicine_img_link?.[0]} className="size-24 rounded-full p-2" alt="Medicine" />
           </Link>
           <div className="flex w-6/12 p-2 justify-center flex-col">
             <div className="flex text-body3 text-grey300">
               เวลา {item.medicine_schedule?.[0]?.split("T")[1]?.slice(0, 5) || ""} น.
             </div>
-            <Link href={`/pillreminder/${isEaten ? 'pildetail' : 'pilldetail'}/${item.user_medicine_id}`}
+            <Link href={`/PillReminder/${isEaten ? 'pilldetail' : 'pilldetail'}/${item.user_medicine_id}`}
               className="flex text-body1 font-bold text-black py-3">
               {item.medicine_name}
             </Link>
@@ -456,7 +506,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
             <Icon icon="mdi:plus" className="text-black size-5" />
           </SheetTrigger>
 
-            <SheetContent side="bottom" className="h-3/4 max-h-screen justify-center items-center">
+            <SheetContent side="bottom" className="h-3/4 max-h-screen justify-center items-center rounded-t-xl">
               <SheetHeader>
                 <SheetTitle className="flex pb-4 justify-center items-center">ค้นหาเมนูอาหาร</SheetTitle>
               </SheetHeader>
@@ -526,7 +576,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
           <div className="flex bg-white w-10/12 justify-between items-center rounded-xl drop-shadow-xl mt-6 py-3 px-5 text-body2 font-bold">
             <div>{desc}ที่รับประทานแล้ว</div>
             <div className="flex text-body3">
-              <div className="font-bold">{totalCalories}</div>
+              <div className="font-bold">{Math.floor(totalCalories)}</div>
               <div className="font-bold text-grey300"> &nbsp;/ {userData?.calories_limit} แคลอรี่ </div>
             </div>
           </div>
@@ -543,9 +593,7 @@ const ChooseBar: React.FC<{MealPlans: Meal_planInterface, desc: string, isEdit: 
           className="flex flex-col w-full items-center"
         >
           
-          
-          
-          {!isEdit && eatenItems
+          {!isEdit && eatenItems 
             .sort((a, b) => a.meal_time - b.meal_time)
             .map((item, index) => (
             <React.Fragment key={index}>

@@ -42,8 +42,8 @@ export interface MealplanInterface {
 }
 
 export interface Meal_planInterface {
-    length: number
-    meal_plans: Array<{
+    length?: number
+    meal_plans?: Array<{
         meal_plan_id: number;
         user_id: number;
         name: string;
@@ -78,6 +78,7 @@ interface Medicine {
   
 export interface MedicineData extends MealplanInterface{
     medicines?: Medicine[];
+    user_medicine_id?: number;
 }
 
 
@@ -101,4 +102,13 @@ export interface recipesInterface2 {
     meal_time: number;
     calories: number;
     
+}
+
+export interface nutrient {
+    protein:number;
+    carbs:number;
+    fat:number;
+    phosphorus:number;
+    potassium:number;
+    sodium:number;
 }
