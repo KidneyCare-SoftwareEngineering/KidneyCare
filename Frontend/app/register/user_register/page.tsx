@@ -177,7 +177,7 @@ export default function Register() {
 
 
 
-                        {/* ฟอกไต */} && (
+                        {/* ฟอกไต */}
                             <>
                                 <div className="flex text-[#BD4B04] font-bold text-body1 mb-1">เคยฟอกไตหรือไม่</div>
                                 <div className="flex relative w-full flex-col mb-20">
